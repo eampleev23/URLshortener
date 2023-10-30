@@ -16,7 +16,7 @@ func postShortLink(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte("http://localhost:8080/EwHXdJfB"))
 
 	} else {
-		// установить статус 201
+		// установить статус метод не поддерживается
 		res.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
