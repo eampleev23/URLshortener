@@ -16,14 +16,34 @@ func postShortLink(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte("http://localhost:8080/EwHXdJfB"))
 
 	} else {
-		// установить статус метод не поддерживается
-		res.WriteHeader(http.StatusMethodNotAllowed)
+
+		// установить статус StatusBadRequest
+		res.WriteHeader(http.StatusBadRequest)
+	}
+
+}
+
+func getLongLink(res http.ResponseWriter, req *http.Request) {
+
+	if req.Method == http.MethodGet {
+
+		// Эндпоинт с методом GET и путём /{id}, где id — идентификатор сокращённого URL (например, /EwHXdJfB).
+		//В случае успешной обработки запроса сервер возвращает ответ с кодом 307
+		//и оригинальным URL в HTTP-заголовке Location.
+		res.WriteHeader(307)
+		res.Header().Set("Location", "https://practicum.yandex.ru/")
+
+	} else {
+
+		// установить статус StatusBadRequest
+		res.WriteHeader(http.StatusBadRequest)
 	}
 
 }
 
 func main() {
 	http.HandleFunc(`/`, postShortLink)
+	http.HandleFunc(`/EwHXdJfB`, getLongLink)
 
 	err := http.ListenAndServe(`:8080`, nil)
 	if err != nil {
