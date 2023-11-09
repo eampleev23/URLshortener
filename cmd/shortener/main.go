@@ -1,6 +1,8 @@
 package main
 
-import "net/http"
+import (
+	"net/http"
+)
 
 func postShortLink(res http.ResponseWriter, req *http.Request) {
 
@@ -13,7 +15,7 @@ func postShortLink(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("content-type", "text/plain")
 
 		// добавить в качестве ответа сокращенный урл
-		res.Write([]byte("http://localhost:8080/EwHXdJfB"))
+		res.Write([]byte("/EwHXdJfB"))
 
 	} else {
 
@@ -32,6 +34,8 @@ func getLongLink(res http.ResponseWriter, req *http.Request) {
 		//и оригинальным URL в HTTP-заголовке Location.
 		res.WriteHeader(307)
 		res.Header().Set("Location", "https://practicum.yandex.ru/")
+		//fmt.Println(req.URL)
+		//fmt.Println(res.Header().Get("Location"))
 
 	} else {
 

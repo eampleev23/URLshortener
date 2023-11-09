@@ -9,7 +9,7 @@ import (
 
 func TestPostShortLink(t *testing.T) {
 	// описываем ожидаемое тело ответа при успешном запросе
-	successBody := "http://localhost:8080/EwHXdJfB"
+	successBody := "/EwHXdJfB"
 
 	testCases := []struct {
 		method       string
@@ -42,5 +42,31 @@ func TestPostShortLink(t *testing.T) {
 }
 
 func TestGetLongLink(t *testing.T) {
-	// здесь тест для второго хэндлера
+
+	testCases := []struct {
+		method           string
+		expectedCode     int
+		expectedUrl      string
+		expectedLocation string
+	}{
+		{method: http.MethodGet, expectedCode: 307, expectedUrl: "/EwHXdJfB", expectedLocation: "https://practicum.yandex.ru/"},
+		{method: http.MethodPost, expectedCode: 400, expectedUrl: "/EwHXdJfB", expectedLocation: ""},
+		{method: http.MethodPut, expectedCode: 400, expectedUrl: "/EwHXdJfB", expectedLocation: ""},
+		{method: http.MethodDelete, expectedCode: 400, expectedUrl: "/EwHXdJfB", expectedLocation: ""},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.method, func(t *testing.T) {
+			r := httptest.NewRequest(tc.method, "/EwHXdJfB", nil)
+			w := httptest.NewRecorder()
+
+			// вызываем хэндлер как обычную функцию без запуска сервера
+			getLongLink(w, r)
+
+			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
+			assert.Equal(t, tc.expectedUrl, r.URL.String(), "Урл не совпадает с ожидаемым")
+			assert.Equal(t, tc.expectedLocation, w.Header().Get("Location"), "Заголовок Location не совпадает с ожидаемым")
+
+		})
+	}
 }
