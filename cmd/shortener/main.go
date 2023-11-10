@@ -46,6 +46,7 @@ func createShortLink(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("content-type", "text/plain")
 
 		// добавить в качестве ответа сокращенный урл
+		linksCouples[body] = "http://localhost:8080/" + linksCouples[body]
 		res.Write([]byte(linksCouples[body]))
 
 	} else {
