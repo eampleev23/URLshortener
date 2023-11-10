@@ -82,6 +82,6 @@ func clientUseUrl() {
 }
 
 func main() {
-	//clientGenerateUrl()
-	clientUseUrl()
+	clientGenerateUrl()
+	//clientUseUrl()
 }

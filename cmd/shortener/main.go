@@ -46,7 +46,7 @@ func createShortLink(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("content-type", "text/plain")
 
 		// добавить в качестве ответа сокращенный урл
-		res.Write([]byte("/"))
+		res.Write([]byte(linksCouples[body]))
 
 	} else {
 
