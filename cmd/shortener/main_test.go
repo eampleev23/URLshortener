@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestPostShortLink(t *testing.T) {
+func TestGetShortLink(t *testing.T) {
 	// описываем ожидаемое тело ответа при успешном запросе
 	successBody := "/EwHXdJfB"
 
@@ -29,7 +29,7 @@ func TestPostShortLink(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Вызовем хэндлер как обычную функцию без запуска сервера
-			postShortLink(w, r)
+			createShortLink(w, r)
 
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 
@@ -41,7 +41,7 @@ func TestPostShortLink(t *testing.T) {
 	}
 }
 
-func TestGetLongLink(t *testing.T) {
+func TestUseLongLink(t *testing.T) {
 
 	testCases := []struct {
 		method           string
@@ -61,7 +61,7 @@ func TestGetLongLink(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// вызываем хэндлер как обычную функцию без запуска сервера
-			getLongLink(w, r)
+			useShortLink(w, r)
 
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 			assert.Equal(t, tc.expectedUrl, r.URL.String(), "Урл не совпадает с ожидаемым")
