@@ -10,32 +10,35 @@ import (
 	"time"
 )
 
-var linksCouples = map[string]string{
-	"EwHXdJfB": "https://practicum.yandex.ru/",
-	"AwHXzJsN": "ampleev.com",
-	"pzfkq5d":  "test.com",
-}
+var linksCouples = map[string]string{}
 
 func createShortLink(res http.ResponseWriter, req *http.Request) {
 	log.Printf("запустили createShortLink")
+	// Сначала необходимо убедиться, что запрос корректный (в теле должна быть строка как text/plain в виде урл
+	// а вернуть должен код 201 и сокращенный урл как text/plain
+
+	// заводим строкову переменную чтобы хранить в ней значение длинной ссылки
 	var longLink string
 	if b, err := io.ReadAll(req.Body); err == nil {
 		longLink = string(b)
 	}
 	log.Printf("longLink = %s", longLink)
+
+	// Генерируем короткую ссылку для переданной длинной
 	shortLink := generateUniqShortLink()
 	log.Printf("shortLink = %s", shortLink)
+
+	// Записываем в бд // В качестве индекса мапы используем короткую ссылку чтобы можно было быстро найти
 	linksCouples[shortLink] = longLink
-	log.Printf("After party: %s", linksCouples[shortLink])
 	log.Printf("linksCouples = %s", linksCouples)
 
-	// установить статус 201
+	// Устанавливаем статус 201
 	res.WriteHeader(201)
 
-	// установить тип контента text/plain
+	// Устаннавливаем тип контента text/plain
 	res.Header().Set("content-type", "text/plain")
 
-	// добавить в качестве ответа сокращенный урл
+	// В качестве ответа возвращаем сокращенный урл с именем домена
 	shortLinkWithPrefix := "http://localhost:8080/" + shortLink
 	res.Write([]byte(shortLinkWithPrefix))
 }
@@ -71,8 +74,8 @@ func searchShortLink(shortLink string) string {
 // Вспомогательная функция для генерации уникальной короткой ссылки
 func generateUniqShortLink() string {
 	rand.Seed(time.Now().UnixNano())
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
-		"abcdefghijklmnopqrstuvwxyzåäö" +
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXY" +
+		"abcdefghijklmnopqrstuvwxy" +
 		"0123456789")
 	length := 8
 	var b strings.Builder
