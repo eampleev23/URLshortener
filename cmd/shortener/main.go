@@ -62,7 +62,7 @@ func useShortLink(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	} else { // иначе это успех, есть совпадение, ставим 307 и в заголовок ответа локейшн отправляем длинную ссылку
 		res.WriteHeader(307)
-		res.Header().Set("location", linksCouples[shortLink])
+		res.Header().Add("location", linksCouples[shortLink])
 		log.Printf("Header location `%s`", res.Header().Get("location"))
 	}
 	res.Write([]byte(""))
