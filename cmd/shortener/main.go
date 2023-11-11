@@ -71,7 +71,6 @@ func searchShortLink(shortLink string) string {
 	log.Printf("start searchShortLink..")
 	log.Printf("shortLink get is %s", shortLink)
 	log.Printf("linksCouples[%s] = %s", shortLink, linksCouples[shortLink])
-	log.Printf("linksCouples[%s] = %s", "EwHXdJfB", linksCouples["EwHXdJfB"])
 	if c, ok := linksCouples[shortLink]; ok {
 		return c
 	}
