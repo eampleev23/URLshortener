@@ -9,7 +9,7 @@ import (
 
 func TestGetShortLink(t *testing.T) {
 	// описываем ожидаемое тело ответа при успешном запросе
-	successBody := "/EwHXdJfB"
+	successBody := "http://localhost:8080/" + generateUniqShortLink()
 
 	testCases := []struct {
 		method       string
@@ -30,7 +30,6 @@ func TestGetShortLink(t *testing.T) {
 
 			// Вызовем хэндлер как обычную функцию без запуска сервера
 			createShortLink(w, r)
-
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 
 			// Проверим корректность полученного ответа если мы его ожидаем
@@ -41,7 +40,7 @@ func TestGetShortLink(t *testing.T) {
 	}
 }
 
-func TestUseLongLink(t *testing.T) {
+func TestUseShortLink(t *testing.T) {
 
 	testCases := []struct {
 		method           string
@@ -49,15 +48,15 @@ func TestUseLongLink(t *testing.T) {
 		expectedUrl      string
 		expectedLocation string
 	}{
-		{method: http.MethodGet, expectedCode: 307, expectedUrl: "/EwHXdJfB", expectedLocation: "https://practicum.yandex.ru/"},
-		{method: http.MethodPost, expectedCode: 400, expectedUrl: "/EwHXdJfB", expectedLocation: ""},
-		{method: http.MethodPut, expectedCode: 400, expectedUrl: "/EwHXdJfB", expectedLocation: ""},
-		{method: http.MethodDelete, expectedCode: 400, expectedUrl: "/EwHXdJfB", expectedLocation: ""},
+		{method: http.MethodGet, expectedCode: 307, expectedUrl: "http://localhost:8080/shortlink", expectedLocation: "longlink"},
+		{method: http.MethodPost, expectedCode: 400, expectedUrl: "http://localhost:8080/shortlink", expectedLocation: ""},
+		{method: http.MethodPut, expectedCode: 400, expectedUrl: "http://localhost:8080/shortlink", expectedLocation: ""},
+		{method: http.MethodDelete, expectedCode: 400, expectedUrl: "http://localhost:8080/shortlink", expectedLocation: ""},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.method, func(t *testing.T) {
-			r := httptest.NewRequest(tc.method, "/EwHXdJfB", nil)
+			r := httptest.NewRequest(tc.method, "http://localhost:8080/shortlink", nil)
 			w := httptest.NewRecorder()
 
 			// вызываем хэндлер как обычную функцию без запуска сервера
