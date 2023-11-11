@@ -1,113 +1,85 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"io"
+	"log"
 	"math/rand"
 	"net/http"
-	"reflect"
 	"strings"
+	"time"
 )
 
 var linksCouples = map[string]string{
-	"https://practicum.yandex.ru/": "EwHXdJfB",
-	"ampleev.com":                  "AwHXzJsN",
+	"EwHXdJfB": "https://practicum.yandex.ru/",
+	"AwHXzJsN": "ampleev.com",
+	"pzfkq5d":  "test.com",
 }
 
 func createShortLink(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("вызвался createShortLink")
-
-	if req.Method == http.MethodPost {
-
-		fmt.Println("подтвердился метод POST")
-		fmt.Println("тип req.Body", reflect.TypeOf(req.Body).Kind())
-		fmt.Println("req.Body", req.Body)
-		// теперь необходимо создать новую пару длинная короткая ссылка
-		// body переформатируем в строку
-		var body string
-		if b, err := io.ReadAll(req.Body); err == nil {
-			body = string(b)
-		}
-		fmt.Println("тип body после io.ReadAll", reflect.TypeOf(body).Kind())
-		fmt.Println("Содержание: ", body)
-
-		body = strings.Trim(body, "url=")
-
-		linksCouples[body] = generateUniqLink()
-		fmt.Println("linksCouples:", linksCouples)
-		fmt.Println("linksCouples[body]: ", linksCouples[body])
-
-		// установить статус 201
-		res.WriteHeader(201)
-
-		// установить тип контента text/plain
-		res.Header().Set("content-type", "text/plain")
-
-		// добавить в качестве ответа сокращенный урл
-		linksCouples[body] = "http://localhost:8080/" + linksCouples[body]
-		res.Write([]byte(linksCouples[body]))
-
-	} else {
-
-		// установить статус StatusBadRequest
-		res.WriteHeader(http.StatusBadRequest)
+	log.Printf("запустили createShortLink")
+	var longLink string
+	if b, err := io.ReadAll(req.Body); err == nil {
+		longLink = string(b)
 	}
+	log.Printf("longLink = %s", longLink)
+	shortLink := generateUniqShortLink()
+	log.Printf("shortLink = %s", shortLink)
+	linksCouples[shortLink] = longLink
+	log.Printf("After party: %s", linksCouples[shortLink])
+	log.Printf("linksCouples = %s", linksCouples)
 
+	// установить статус 201
+	res.WriteHeader(201)
+
+	// установить тип контента text/plain
+	res.Header().Set("content-type", "text/plain")
+
+	// добавить в качестве ответа сокращенный урл
+	shortLinkWithPrefix := "http://localhost:8080/" + shortLink
+	res.Write([]byte(shortLinkWithPrefix))
 }
 
 func useShortLink(res http.ResponseWriter, req *http.Request) {
-	fmt.Println("Зашли в хэндлер useShortLink")
-	if req.Method == http.MethodGet {
-		fmt.Println("Метод GET определился корректно")
-		fmt.Println("req.URL: ", req.URL)
-		// Дальше проверяем есть ли такой урл в базе, но вычитаем слеш в начале
-		//fmt.Println("тип req.Url: ", reflect.TypeOf(req.URL.Query().Get("url")).Kind())
-		fmt.Println("chi.URLParam(req, \"id\"): ", chi.URLParam(req, "id"))
-
-		var url string
-		url = chi.URLParam(req, "id")
-		result := searchUrl(url)
-		fmt.Println("result: ", result)
-		if result == "" {
-			res.WriteHeader(http.StatusBadRequest)
-		} else {
-			res.WriteHeader(307)
-			res.Header().Set("Location", "https://practicum.yandex.ru/")
-		}
-
-	} else {
-
-		// установить статус StatusBadRequest
+	// Дальше проверяем есть ли такой урл в базе
+	log.Printf("Запустили useShortLink")
+	var shortLink string
+	shortLink = chi.URLParam(req, "id")
+	log.Printf("shortLink = %s", shortLink)
+	result := searchShortLink(shortLink)
+	log.Printf("result =`%s`, shortlik = `%s`, linksCouples = `%s`", result, shortLink, linksCouples)
+	if result == "no match" {
 		res.WriteHeader(http.StatusBadRequest)
+	} else {
+		res.WriteHeader(307)
+		res.Header().Set("Location", linksCouples[shortLink])
 	}
-
 }
 
 // Вспомогательная функция для поиска совпадений по урлам в базе
-func searchUrl(url string) string {
-	if c, ok := linksCouples[url]; ok {
+func searchShortLink(shortLink string) string {
+	log.Printf("start searchShortLink..")
+	log.Printf("shortLink get is %s", shortLink)
+	log.Printf("linksCouples[%s] = %s", shortLink, linksCouples[shortLink])
+	log.Printf("linksCouples[%s] = %s", "EwHXdJfB", linksCouples["EwHXdJfB"])
+	if c, ok := linksCouples[shortLink]; ok {
 		return c
 	}
-	return ""
+	return "no match"
 }
 
 // Вспомогательная функция для генерации уникальной короткой ссылки
-func generateUniqLink() string {
-	//rand.Seed(time.Now().UnixNano())
-	digits := "0123456789"
-	all := "abcdefghijklmnopqrstuvwxyz" + digits
+func generateUniqShortLink() string {
+	rand.Seed(time.Now().UnixNano())
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ" +
+		"abcdefghijklmnopqrstuvwxyzåäö" +
+		"0123456789")
 	length := 8
-	buf := make([]byte, length)
-	buf[0] = digits[rand.Intn(len(digits))]
-	for i := 2; i < length; i++ {
-		buf[i] = all[rand.Intn(len(all))]
+	var b strings.Builder
+	for i := 0; i < length; i++ {
+		b.WriteRune(chars[rand.Intn(len(chars))])
 	}
-	rand.Shuffle(len(buf), func(i, j int) {
-		buf[i], buf[j] = buf[j], buf[i]
-	})
-	str := string(buf) // Например "3i[g0|)z"
+	str := b.String() // Например "ExcbsVQs"
 	return str
 }
 

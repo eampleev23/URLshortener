@@ -78,7 +78,6 @@ func clientUseUrl() {
 		panic(err)
 	}
 	fmt.Println("Статус-код ", request.Status)
-
 }
 
 func main() {
