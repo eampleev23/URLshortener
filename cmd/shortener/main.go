@@ -44,19 +44,26 @@ func createShortLink(res http.ResponseWriter, req *http.Request) {
 }
 
 func useShortLink(res http.ResponseWriter, req *http.Request) {
-	// Дальше проверяем есть ли такой урл в базе
 	log.Printf("Запустили useShortLink")
+
+	// Объявляем строковую переменную, в которой будем хранить урл (ожидаем, что это короткий урл из базы)
 	var shortLink string
 	shortLink = chi.URLParam(req, "id")
 	log.Printf("shortLink = %s", shortLink)
+
+	// В строковой переменной резалт храним либо longLink если есть совпадение в базе, либо "no match" если в базе такой ссылки нет
 	result := searchShortLink(shortLink)
 	log.Printf("result =`%s`, shortlik = `%s`, linksCouples = `%s`", result, shortLink, linksCouples)
+
+	// Если совпадений в бд нет, то ставим статус код бэд реквест
 	if result == "no match" {
 		res.WriteHeader(http.StatusBadRequest)
-	} else {
+	} else { // иначе это успех, есть совпадение, ставим 307 и в заголовок ответа локейшн отправляем длинную ссылку
 		res.WriteHeader(307)
 		res.Header().Set("Location", linksCouples[shortLink])
+		log.Printf("Header location `%s`", res.Header().Get("Location"))
 	}
+	res.Write([]byte(""))
 }
 
 // Вспомогательная функция для поиска совпадений по урлам в базе
