@@ -60,6 +60,8 @@ func useShortLink(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusBadRequest)
 	} else {
 		res.Header().Add("Location", linksCouples[chi.URLParam(req, "id")])
+		// добавляю для эксперимента
+		res.WriteHeader(http.StatusTemporaryRedirect)
 		// Объявляем строковую переменную, в которой будем хранить урл (ожидаем, что это короткий урл из базы)
 		var shortLink string
 		shortLink = chi.URLParam(req, "id")
