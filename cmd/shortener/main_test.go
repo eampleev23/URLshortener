@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetShortLink(t *testing.T) {
+func TestCreateShortLink(t *testing.T) {
 	// описываем ожидаемое тело ответа при успешном запросе
 	successBody := "http://localhost:8080/" + generateUniqShortLink()
 
