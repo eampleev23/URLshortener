@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/go-chi/chi/v5"
 	"io"
 	"log"
@@ -110,7 +109,7 @@ func generateUniqShortLink() string {
 }
 
 func run() error {
-	fmt.Println("running server on ", flagRunAddr)
+	log.Printf("running server on %s", flagRunAddr)
 	r := chi.NewRouter()
 	r.Post("/", createShortLink)
 	r.Get("/{id}", useShortLink)
