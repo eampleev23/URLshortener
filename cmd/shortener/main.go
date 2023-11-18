@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"io"
 	"log"
@@ -44,7 +45,8 @@ func createShortLink(res http.ResponseWriter, req *http.Request) {
 		res.Header().Set("content-type", "text/plain")
 
 		// В качестве ответа возвращаем сокращенный урл с именем домена
-		shortLinkWithPrefix := "http://localhost:8080/" + shortLink
+		//shortLinkWithPrefix := "http://localhost:8080/" + shortLink
+		shortLinkWithPrefix := baseShortUrl + shortLink
 		res.Write([]byte(shortLinkWithPrefix))
 
 	}
@@ -107,13 +109,18 @@ func generateUniqShortLink() string {
 	return str
 }
 
-func main() {
+func run() error {
+	fmt.Println("running server on ", flagRunAddr)
 	r := chi.NewRouter()
 	r.Post("/", createShortLink)
 	r.Get("/{id}", useShortLink)
+	return http.ListenAndServe(flagRunAddr, r)
+}
 
-	err := http.ListenAndServe(`:8080`, r)
-	if err != nil {
+func main() {
+	// обрабатываем флаги
+	parseFlags()
+	if err := run(); err != nil {
 		log.Fatal(err)
 	}
 }

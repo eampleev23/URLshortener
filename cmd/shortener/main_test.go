@@ -46,15 +46,15 @@ func TestUseShortLink(t *testing.T) {
 		expectedCode int
 		expectedURL  string
 	}{
-		{method: http.MethodGet, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodPost, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodPut, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodDelete, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodGet, expectedCode: 307, expectedURL: baseShortUrl + "shortlink"},
+		{method: http.MethodPost, expectedCode: 400, expectedURL: baseShortUrl + "shortlink"},
+		{method: http.MethodPut, expectedCode: 400, expectedURL: baseShortUrl + "shortlink"},
+		{method: http.MethodDelete, expectedCode: 400, expectedURL: baseShortUrl + "shortlink"},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.method, func(t *testing.T) {
-			r := httptest.NewRequest(tc.method, "http://localhost:8080/shortlink", nil)
+			r := httptest.NewRequest(tc.method, baseShortUrl+"shortlink", nil)
 			w := httptest.NewRecorder()
 
 			// вызываем хэндлер как обычную функцию без запуска сервера
