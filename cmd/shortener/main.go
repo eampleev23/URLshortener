@@ -45,7 +45,8 @@ func createShortLink(res http.ResponseWriter, req *http.Request) {
 
 		// В качестве ответа возвращаем сокращенный урл с именем домена
 		//shortLinkWithPrefix := "http://localhost:8080/" + shortLink
-		shortLinkWithPrefix := baseShortURL + shortLink
+		shortLinkWithPrefix := baseShortURL + "/" + shortLink
+		log.Printf("shortLinkWithPrefix: `%s`", shortLinkWithPrefix)
 		res.Write([]byte(shortLinkWithPrefix))
 
 	}
