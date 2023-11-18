@@ -44,12 +44,12 @@ func TestUseShortLink(t *testing.T) {
 	testCases := []struct {
 		method       string
 		expectedCode int
-		expectedUrl  string
+		expectedURL  string
 	}{
-		{method: http.MethodGet, expectedCode: 307, expectedUrl: "http://localhost:8080/shortlink"},
-		{method: http.MethodPost, expectedCode: 400, expectedUrl: "http://localhost:8080/shortlink"},
-		{method: http.MethodPut, expectedCode: 400, expectedUrl: "http://localhost:8080/shortlink"},
-		{method: http.MethodDelete, expectedCode: 400, expectedUrl: "http://localhost:8080/shortlink"},
+		{method: http.MethodGet, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodPost, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodPut, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodDelete, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 	}
 
 	for _, tc := range testCases {
@@ -61,7 +61,7 @@ func TestUseShortLink(t *testing.T) {
 			useShortLink(w, r)
 
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
-			assert.Equal(t, tc.expectedUrl, r.URL.String(), "Урл не совпадает с ожидаемым")
+			assert.Equal(t, tc.expectedURL, r.URL.String(), "Урл не совпадает с ожидаемым")
 			//assert.Equal(t, tc.expectedLocation, w.Header().Get("Location"), "Заголовок Location не совпадает с ожидаемым")
 
 		})

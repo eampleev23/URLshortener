@@ -10,7 +10,7 @@ func NewStore() *Store {
 	}
 }
 
-func (s *Store) SetShortUrl(shortUrl string, longUrl string) error {
-	s.s[shortUrl] = longUrl
+func (s *Store) SetShortURL(shortURL string, longURL string) error {
+	s.s[shortURL] = longURL
 	return nil
 }

@@ -7,7 +7,6 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
-	"time"
 )
 
 var linksCouples = map[string]string{
@@ -63,8 +62,7 @@ func useShortLink(res http.ResponseWriter, req *http.Request) {
 		// добавляю для эксперимента
 		res.WriteHeader(http.StatusTemporaryRedirect)
 		// Объявляем строковую переменную, в которой будем хранить урл (ожидаем, что это короткий урл из базы)
-		var shortLink string
-		shortLink = chi.URLParam(req, "id")
+		shortLink := chi.URLParam(req, "id")
 		log.Printf("shortLink = %s", shortLink)
 
 		// В строковой переменной резалт храним либо longLink если есть совпадение в базе, либо "no match" если в базе такой ссылки нет
@@ -97,7 +95,6 @@ func searchShortLink(shortLink string) string {
 
 // Вспомогательная функция для генерации уникальной короткой ссылки
 func generateUniqShortLink() string {
-	rand.Seed(time.Now().UnixNano())
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXY" +
 		"abcdefghijklmnopqrstuvwxy" +
 		"0123456789")
