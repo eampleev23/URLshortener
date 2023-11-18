@@ -22,8 +22,8 @@ var baseShortURL string // localhost:8888
 func parseFlags() {
 	// регистрируем переменную flagRunAddr как аргумент -a со значением по умолчанию :8080
 	flag.StringVar(&flagRunAddr, "a", ":8080", "address and port to run server")
-	// регистрируем переменную baseShortUrl как аргумент -s со значением по умолчанию http://localhost:8080/
-	flag.StringVar(&baseShortURL, "b", "http://localhost:8080/", "base prefix for the shortURL")
+	// регистрируем переменную baseShortUrl как аргумент -b со значением по умолчанию http://localhost:8080
+	flag.StringVar(&baseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 }
