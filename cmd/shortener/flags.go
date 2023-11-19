@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 )
 
 //Добавьте возможность конфигурировать сервис с помощью аргументов командной строки.
@@ -26,4 +27,13 @@ func parseFlags() {
 	flag.StringVar(&baseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
+
+	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
+		flagRunAddr = envRunAddr
+	}
+
+	if envBaseURL := os.Getenv("BASE_URL"); envBaseURL != "" {
+		baseShortURL = envBaseURL
+	}
+
 }
