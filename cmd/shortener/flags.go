@@ -5,6 +5,16 @@ import (
 	"os"
 )
 
+type AppConfig struct {
+	flagRunAddr  string
+	baseShortURL string
+}
+
+// неэкспортированная переменная flagRunAddr содержит адрес и порт для запуска сервера
+var flagRunAddr string // localhost:8888
+// неэкспортированная переменная baseShortURL содержит базовый адрес короткой ссылки
+var baseShortURL string // localhost:8888
+
 //Добавьте возможность конфигурировать сервис с помощью аргументов командной строки.
 //Создайте конфигурацию или переменные для запуска со следующими флагами:
 //Флаг -a отвечает за адрес запуска HTTP-сервера (значение может быть таким: localhost:8888).
@@ -14,13 +24,9 @@ import (
 //которая будет инициализировать поля этой структуры. По мере усложнения конфигурации вы сможете добавлять
 //необходимые поля в вашу структуру и инициализировать их.
 
-// неэкспортированная переменная flagRunAddr содержит адрес и порт для запуска сервера
-var flagRunAddr string // localhost:8888
-// неэкспортированная переменная baseShortURL содержит базовый адрес короткой ссылки
-var baseShortURL string // localhost:8888
-
 // parseFlags обраатывает аргументы командной строки и сохраняет их значения в соответствующих переменных
-func parseFlags() {
+func getAppConfig() AppConfig {
+
 	// регистрируем переменную flagRunAddr как аргумент -a со значением по умолчанию :8080
 	flag.StringVar(&flagRunAddr, "a", ":8080", "address and port to run server")
 	// регистрируем переменную baseShortUrl как аргумент -b со значением по умолчанию http://localhost:8080
@@ -35,5 +41,11 @@ func parseFlags() {
 	if envBaseURL := os.Getenv("BASE_URL"); envBaseURL != "" {
 		baseShortURL = envBaseURL
 	}
+
+	appConfig := AppConfig{
+		flagRunAddr:  flagRunAddr,
+		baseShortURL: baseShortURL,
+	}
+	return appConfig
 
 }
