@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -20,7 +21,10 @@ func createShortLink(res http.ResponseWriter, req *http.Request) {
 			longLink = string(b)
 		}
 		// Генерируем короткую ссылку для переданной длинной
-		shortLink := generateUniqShortLink()
+		shortLink, err := generateUniqShortLink()
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		// Записываем в бд // В качестве индекса мапы используем короткую ссылку чтобы можно было быстро найти
 		linksCouples[shortLink] = longLink

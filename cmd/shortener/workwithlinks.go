@@ -6,7 +6,7 @@ import (
 )
 
 // Вспомогательная функция для генерации уникальной короткой ссылки
-func generateUniqShortLink() string {
+func generateUniqShortLink() (string, error) {
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXY" +
 		"abcdefghijklmnopqrstuvwxy" +
 		"0123456789")
@@ -16,7 +16,11 @@ func generateUniqShortLink() string {
 		b.WriteRune(chars[rand.Intn(len(chars))])
 	}
 	str := b.String() // Например "ExcbsVQs"
-	return str
+
+	if _, ok := linksCouples[str]; ok {
+		return generateUniqShortLink()
+	}
+	return str, nil
 }
 
 // Вспомогательная функция для поиска совпадений по урлам в базе
