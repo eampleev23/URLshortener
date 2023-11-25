@@ -1,35 +1,39 @@
 package main
 
 import (
+	"github.com/eampleev23/URLshortener/internal/handlers"
 	"github.com/eampleev23/URLshortener/internal/logger"
+	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
 )
 
-var linksCouples = map[string]string{
-	"shortlink": "longlink",
+func main() {
+	err := run()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
-func run(appConfig AppConfig) error {
+func run() error {
+	s := store.NewStore()
+	h := handlers.NewHandlers(s)
 
-	if err := logger.Initialize(appConfig.flagLogLevel); err != nil {
+	if err := logger.Initialize("info"); err != nil {
 		return err
 	}
-	logger.Log.Info("Running server", zap.String("address", appConfig.flagRunAddr))
+	logger.Log.Info("Running server", zap.String("address", ":8080"))
 
 	r := chi.NewRouter()
 	r.Use(logger.RequestLogger)
-	r.Post("/", createShortLink)
-	r.Get("/{id}", useShortLink)
-	return http.ListenAndServe(appConfig.flagRunAddr, r)
-}
+	r.Post("/", h.CreateShortLink)
+	r.Get("/{id}", h.UseShortLink)
 
-func main() {
-	// обрабатываем флаги
-	appConfig := getAppConfig()
-	if err := run(appConfig); err != nil {
+	err := http.ListenAndServe(`:8080`, r)
+	if err != nil {
 		log.Fatal(err)
 	}
+	return nil
 }

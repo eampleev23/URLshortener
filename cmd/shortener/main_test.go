@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/eampleev23/URLshortener/internal/handlers"
+	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -8,7 +10,9 @@ import (
 )
 
 func TestCreateShortLink(t *testing.T) {
-	// описываем ожидаемое тело ответа при успешном запросе
+
+	s := store.NewStore()
+	h := handlers.NewHandlers(s)
 
 	testCases := []struct {
 		method       string
@@ -27,7 +31,7 @@ func TestCreateShortLink(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Вызовем хэндлер как обычную функцию без запуска сервера
-			createShortLink(w, r)
+			h.CreateShortLink(w, r)
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 
 			// Проверим корректность полученного ответа если мы его ожидаем
@@ -40,7 +44,8 @@ func TestCreateShortLink(t *testing.T) {
 }
 
 func TestUseShortLink(t *testing.T) {
-
+	s := store.NewStore()
+	h := handlers.NewHandlers(s)
 	testCases := []struct {
 		method       string
 		expectedCode int
@@ -58,7 +63,7 @@ func TestUseShortLink(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// вызываем хэндлер как обычную функцию без запуска сервера
-			useShortLink(w, r)
+			h.UseShortLink(w, r)
 
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 			assert.Equal(t, tc.expectedURL, r.URL.String(), "Урл не совпадает с ожидаемым")
