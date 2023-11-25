@@ -38,7 +38,8 @@ func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
 
 		// Устаннавливаем тип контента text/plain
 		res.Header().Set("content-type", "text/plain")
-		shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
+		//shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
+		shortLinkWithPrefix := h.c.GetValueByIndex("runaddr") + "/" + shortLink
 		res.Write([]byte(shortLinkWithPrefix))
 	} else {
 		res.WriteHeader(http.StatusBadRequest)
@@ -49,6 +50,7 @@ func (h *Handlers) UseShortLink(res http.ResponseWriter, req *http.Request) {
 
 	if req.Method == http.MethodGet {
 		str := chi.URLParam(req, "id")
+		log.Printf("str=%s", str)
 		loc, err := h.s.GetLongLinkByShort(str)
 		if err != nil {
 			log.Print(err)
