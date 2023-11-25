@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
 	"io"
@@ -10,11 +11,13 @@ import (
 
 type Handlers struct {
 	s *store.Store
+	c *config.Config
 }
 
-func NewHandlers(s *store.Store) *Handlers {
+func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 	return &Handlers{
 		s: s,
+		c: c,
 	}
 }
 
@@ -35,7 +38,7 @@ func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
 
 		// Устаннавливаем тип контента text/plain
 		res.Header().Set("content-type", "text/plain")
-		shortLinkWithPrefix := "localhost:8080" + "/" + shortLink
+		shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
 		res.Write([]byte(shortLinkWithPrefix))
 	} else {
 		res.WriteHeader(http.StatusBadRequest)

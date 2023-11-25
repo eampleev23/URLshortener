@@ -29,6 +29,12 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	s.s[str] = longURL
 	return str, nil
 }
+
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 	return s.s[shortURL], nil
+}
+
+func (s *Store) SetDataForMyTests() error {
+	s.s["shortlink"] = "longlink"
+	return nil
 }
