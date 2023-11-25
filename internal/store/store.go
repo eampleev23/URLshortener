@@ -31,7 +31,10 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
-	return s.s[shortURL], nil
+	if c, ok := s.s[shortURL]; ok {
+		return c, nil
+	}
+	return "no match", nil
 }
 
 func (s *Store) SetDataForMyTests() error {

@@ -33,7 +33,7 @@ func (c *Config) SetValues() error {
 	var baseShortURL string // localhost:8888
 
 	// регистрируем переменную flagRunAddr как аргумент -a со значением по умолчанию :8080
-	flag.StringVar(&runAddr, "a", ":8080", "address and port to run server")
+	flag.StringVar(&runAddr, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&logLevel, "l", "info", "logger level")
 
 	// регистрируем переменную baseShortUrl как аргумент -b со значением по умолчанию http://localhost:8080
