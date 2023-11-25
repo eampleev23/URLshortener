@@ -7,11 +7,14 @@ import (
 
 type AppConfig struct {
 	flagRunAddr  string
+	flagLogLevel string
 	baseShortURL string
 }
 
 // неэкспортированная переменная flagRunAddr содержит адрес и порт для запуска сервера
-var flagRunAddr string // localhost:8888
+var flagRunAddr string  // localhost:8888
+var flagLogLevel string // localhost:8888
+
 // неэкспортированная переменная baseShortURL содержит базовый адрес короткой ссылки
 var baseShortURL string // localhost:8888
 
@@ -29,6 +32,8 @@ func getAppConfig() AppConfig {
 
 	// регистрируем переменную flagRunAddr как аргумент -a со значением по умолчанию :8080
 	flag.StringVar(&flagRunAddr, "a", ":8080", "address and port to run server")
+	flag.StringVar(&flagLogLevel, "l", "info", "logger level")
+
 	// регистрируем переменную baseShortUrl как аргумент -b со значением по умолчанию http://localhost:8080
 	flag.StringVar(&baseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
@@ -42,9 +47,14 @@ func getAppConfig() AppConfig {
 		baseShortURL = envBaseURL
 	}
 
+	if envLogLevel := os.Getenv("LOG_LEVEL"); envLogLevel != "" {
+		flagLogLevel = envLogLevel
+	}
+
 	appConfig := AppConfig{
 		flagRunAddr:  flagRunAddr,
 		baseShortURL: baseShortURL,
+		flagLogLevel: flagLogLevel,
 	}
 	return appConfig
 
