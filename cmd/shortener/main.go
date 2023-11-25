@@ -17,21 +17,13 @@ func run(appConfig AppConfig) error {
 	if err := logger.Initialize(appConfig.flagLogLevel); err != nil {
 		return err
 	}
-
 	logger.Log.Info("Running server", zap.String("address", appConfig.flagRunAddr))
+
 	r := chi.NewRouter()
-	r.Use(myMiddlewareTest)
+	r.Use(logger.RequestLogger)
 	r.Post("/", createShortLink)
 	r.Get("/{id}", useShortLink)
 	return http.ListenAndServe(appConfig.flagRunAddr, r)
-}
-
-func myMiddlewareTest(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("my middleware")
-		next.ServeHTTP(w, r)
-	}
-	return http.HandlerFunc(fn)
 }
 
 func main() {

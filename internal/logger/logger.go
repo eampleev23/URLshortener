@@ -1,9 +1,10 @@
 package logger
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"net/http"
+	"strings"
+	"time"
 )
 
 // Log будет доступен всему коду как синглтон.
@@ -33,13 +34,27 @@ func Initialize(level string) error {
 
 // RequestLogger — middleware-логер для входящих HTTP-запросов.
 func RequestLogger(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		fmt.Println("Запустился мидлвеар")
-		Log.Debug("got incoming HTTP request",
-			zap.String("method", request.Method),
-			zap.String("path", request.URL.Path),
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		duration := time.Since(start)
+		Log.Info("got incoming HTTP request",
+			zap.String("method", r.Method),
+			zap.String("path", r.URL.Path),
+			zap.String("duration", shortDur(duration)),
 		)
-		fmt.Println("Прошли Log.Debug")
-	})
-	return next
+	}
+	return http.HandlerFunc(fn)
+}
+
+// Вспомогательная функция для перевода time.Duration в строку при выводе в лог
+func shortDur(d time.Duration) string {
+	s := d.String()
+	if strings.HasSuffix(s, "m0s") {
+		s = s[:len(s)-2]
+	}
+	if strings.HasSuffix(s, "h0m") {
+		s = s[:len(s)-2]
+	}
+	return s
 }

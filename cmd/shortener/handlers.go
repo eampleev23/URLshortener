@@ -10,8 +10,6 @@ import (
 func createShortLink(res http.ResponseWriter, req *http.Request) {
 	// Сначала необходимо убедиться, что запрос корректный (в теле должна быть строка как text/plain в виде урл
 	// а вернуть должен код 201 и сокращенный урл как text/plain
-
-	log.Printf("createShortLink starting..")
 	// заводим строковую переменную чтобы хранить в ней значение длинной ссылки
 	var longLink string
 	if b, err := io.ReadAll(req.Body); err == nil {
