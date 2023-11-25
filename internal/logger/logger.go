@@ -39,6 +39,7 @@ func RequestLogger(next http.Handler) http.Handler {
 			zap.String("method", request.Method),
 			zap.String("path", request.URL.Path),
 		)
+		fmt.Println("Прошли Log.Debug")
 	})
 	return next
 }
