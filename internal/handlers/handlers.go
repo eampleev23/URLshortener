@@ -29,10 +29,12 @@ func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
 			longLink = string(b)
 		}
 		// Генерируем и сразу сохраняем короткую ссылку для переданной длинной
-		shortLink, err := h.s.SetShortURL(longLink)
-		if err != nil {
-			log.Print(err)
+		var shortLink string
+		shortLink = ""
+		for shortLink == "" {
+			shortLink, _ = h.s.SetShortURL(longLink)
 		}
+
 		// Устанавливаем статус 201
 		res.WriteHeader(201)
 

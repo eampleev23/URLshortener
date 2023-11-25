@@ -26,8 +26,11 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		b.WriteRune(chars[rand.Intn(len(chars))])
 	}
 	str := b.String() // Например "ExcbsVQs"
-	s.s[str] = longURL
-	return str, nil
+	if _, ok := s.s[str]; !ok {
+		s.s[str] = longURL
+		return str, nil
+	}
+	return "", nil //надо разобраться
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
