@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 )
@@ -29,8 +30,10 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	if _, ok := s.s[str]; !ok {
 		s.s[str] = longURL
 		return str, nil
+	} else {
+		return "", fmt.Errorf("The generated shortlink is not uniq, error: %w", ok) //надо разобраться
 	}
-	return "", nil //надо разобраться
+
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
