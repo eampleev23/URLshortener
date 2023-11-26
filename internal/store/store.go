@@ -1,9 +1,6 @@
 package store
 
-import (
-	"math/rand"
-	"strings"
-)
+import "math/rand"
 
 type Store struct {
 	s map[string]string
@@ -16,22 +13,23 @@ func NewStore() *Store {
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
-	chars := []rune(
-		"abcdefghijklmnopqrstuvwxy" +
-			"0123456789")
-	length := 8
-	var b strings.Builder
-	//b := make([]byte, length)
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
+	// заводим слайс рун возможных для сгенерированной короткой ссылки
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
+	lenLetterRunes := len(letterRunes)
+	// делаем из 2 символов
+	b := make([]rune, 2)
+
+	// генерируем случайный символ последовательно для всей длины
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(lenLetterRunes)]
 	}
-	str := b.String() // Например "ExcbsVQs"
-	if _, ok := s.s[str]; !ok {
-		s.s[str] = longURL
-		return str, nil
-	} else {
-		return "", nil
+	// в результат записываем байты преобразованные в строку
+	strResult := string(b)
+	if _, ok := s.s[strResult]; !ok {
+		s.s[strResult] = longURL
+		return strResult, nil
 	}
+	return "", nil
 
 }
 
