@@ -57,6 +57,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Log.Debug("Sending HTTP 201 response")
 	w.Header().Set("content-type", "application/json")
+	w.Header().Set("Accept", "application/json")
 	w.WriteHeader(201)
 
 }
