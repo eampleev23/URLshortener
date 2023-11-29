@@ -29,7 +29,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Десериализуем запрос в структуру модели
 	logger.Log.Debug("decoding request")
 	w.WriteHeader(201)
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("content-type", "application/json")
 
 	var req models.RequestAddShortURL
 	dec := json.NewDecoder(r.Body)
