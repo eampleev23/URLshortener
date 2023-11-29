@@ -29,6 +29,8 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Десериализуем запрос в структуру модели
 	logger.Log.Debug("decoding request")
 	w.WriteHeader(201)
+	w.Header().Set("Content-Type", "application/json")
+
 	var req models.RequestAddShortURL
 	dec := json.NewDecoder(r.Body)
 	if err := dec.Decode(&req); err != nil {
@@ -46,7 +48,6 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Заполняем модель ответа
 	resp := models.ResponseAddShortURL{ShortURL: shortURL}
-	w.Header().Set("Content-Type", "application/json")
 
 	// Сериализуем ответ сервера
 	enc := json.NewEncoder(w)
