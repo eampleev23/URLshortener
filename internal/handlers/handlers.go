@@ -51,9 +51,10 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(resp); err != nil {
 		logger.Log.Debug("error encoding response", zap.Error(err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	logger.Log.Debug("Sending HTTP 200 response")
+	logger.Log.Debug("Sending HTTP 201 response")
 	w.WriteHeader(201)
 }
 
