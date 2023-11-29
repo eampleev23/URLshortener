@@ -28,6 +28,7 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Десериализуем запрос в структуру модели
 	logger.Log.Debug("decoding request")
+	w.WriteHeader(201)
 	var req models.RequestAddShortURL
 	dec := json.NewDecoder(r.Body)
 	if err := dec.Decode(&req); err != nil {
@@ -55,7 +56,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Log.Debug("Sending HTTP 201 response")
-	w.WriteHeader(201)
+
 }
 
 func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
