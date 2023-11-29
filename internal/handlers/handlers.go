@@ -54,6 +54,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	logger.Log.Debug("Sending HTTP 200 response")
+	w.WriteHeader(201)
 }
 
 func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
