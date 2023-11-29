@@ -1,9 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 	"io"
 	"log"
 	"net/http"
@@ -19,6 +23,37 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 		s: s,
 		c: c,
 	}
+}
+
+func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
+	// Десериализуем запрос в структуру модели
+	logger.Log.Debug("decoding request")
+	var req models.RequestAddShortURL
+	dec := json.NewDecoder(r.Body)
+	if err := dec.Decode(&req); err != nil {
+		logger.Log.Debug("cannot decode request JSON body", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// создаем новую пару ссылок
+	shortURL, err := h.s.SetShortURL(req.LongURL)
+	shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
+	if err != nil {
+		logger.Log.Debug("cannot set shortURL:", zap.Error(err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
+	// Заполняем модель ответа
+	resp := models.ResponseAddShortURL{ShortURL: shortURL}
+	w.Header().Set("Content-Type", "application/json")
+
+	// Сериализуем ответ сервера
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(resp); err != nil {
+		logger.Log.Debug("error encoding response", zap.Error(err))
+		return
+	}
+	logger.Log.Debug("Sending HTTP 200 response")
 }
 
 func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
