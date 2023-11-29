@@ -27,14 +27,13 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Десериализуем запрос в структуру модели
-	logger.Log.Debug("decoding request")
-	w.WriteHeader(201)
-	w.Header().Set("content-type", "application/json")
-
+	logger.Log.Info("decoding request")
 	var req models.RequestAddShortURL
+	log.Printf("r.Body:%s", r.Body)
 	dec := json.NewDecoder(r.Body)
+
 	if err := dec.Decode(&req); err != nil {
-		logger.Log.Debug("cannot decode request JSON body", zap.Error(err))
+		logger.Log.Info("cannot decode request JSON body", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +41,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	shortURL, err := h.s.SetShortURL(req.LongURL)
 	shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
 	if err != nil {
-		logger.Log.Debug("cannot set shortURL:", zap.Error(err))
+		logger.Log.Info("cannot set shortURL:", zap.Error(err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
@@ -52,11 +51,13 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Сериализуем ответ сервера
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(resp); err != nil {
-		logger.Log.Debug("error encoding response", zap.Error(err))
+		logger.Log.Info("error encoding response", zap.Error(err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
 	logger.Log.Debug("Sending HTTP 201 response")
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(201)
 
 }
 
