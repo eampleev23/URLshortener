@@ -26,53 +26,41 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 }
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method == http.MethodPost {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(201)
-		// Десериализуем запрос в структуру модели
-		logger.Log.Info("decoding request")
 		var req models.RequestAddShortURL
 		log.Printf("r.Body:%s", r.Body)
 		dec := json.NewDecoder(r.Body)
-
 		if err := dec.Decode(&req); err != nil {
 			logger.Log.Info("cannot decode request JSON body", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		// создаем новую пару ссылок
 		shortURL, err := h.s.SetShortURL(req.LongURL)
 		shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
-		//shortURL = "http://localhost:8080" + "/" + shortURL
 		if err != nil {
 			logger.Log.Info("cannot set shortURL:", zap.Error(err))
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			return
 		}
-		// Заполняем модель ответа
 		resp := models.ResponseAddShortURL{ShortURL: shortURL}
-
-		// Сериализуем ответ сервера
 		enc := json.NewEncoder(w)
 		if err := enc.Encode(resp); err != nil {
 			logger.Log.Info("error encoding response", zap.Error(err))
 			w.WriteHeader(http.StatusUnprocessableEntity)
 			return
 		}
-		logger.Log.Debug("Sending HTTP 201 response")
-
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 	}
-
 }
 
-func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodPost {
+func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
 
 		var longLink string
-		if b, err := io.ReadAll(req.Body); err == nil {
+		if b, err := io.ReadAll(r.Body); err == nil {
 			longLink = string(b)
 		}
 		// Генерируем и сразу сохраняем короткую ссылку для переданной длинной
@@ -83,38 +71,38 @@ func (h *Handlers) CreateShortLink(res http.ResponseWriter, req *http.Request) {
 		}
 
 		// Устанавливаем статус 201
-		res.WriteHeader(201)
+		w.WriteHeader(201)
 
 		// Устаннавливаем тип контента text/plain
-		res.Header().Set("content-type", "text/plain")
+		w.Header().Set("content-type", "text/plain")
 		//shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
 		shortLinkWithPrefix := h.c.GetValueByIndex("baseshorturl") + "/" + shortLink
-		res.Write([]byte(shortLinkWithPrefix))
+		w.Write([]byte(shortLinkWithPrefix))
 	} else {
-		res.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
 
-func (h *Handlers) UseShortLink(res http.ResponseWriter, req *http.Request) {
+func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 
-	if req.Method != http.MethodGet {
-		res.WriteHeader(http.StatusBadRequest)
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		//res.Header().Add("Location", linksCouples[chi.URLParam(req, "id")])
 		loc, err := h.s.GetLongLinkByShort(chi.URLParam(req, "id"))
 		if err != nil {
 			log.Print(err)
-			res.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 		}
-		res.Header().Add("Location", loc)
+		w.Header().Add("Location", loc)
 		// добавляю для эксперимента
-		res.WriteHeader(http.StatusTemporaryRedirect)
+		w.WriteHeader(http.StatusTemporaryRedirect)
 
 		// Если совпадений в бд нет, то ставим статус код бэд реквест
 		if loc == "no match" {
-			res.WriteHeader(http.StatusBadRequest)
+			w.WriteHeader(http.StatusBadRequest)
 		} else { // иначе это успех, есть совпадение, ставим 307 и в заголовок ответа локейшн отправляем длинную ссылку
-			res.WriteHeader(http.StatusTemporaryRedirect)
+			w.WriteHeader(http.StatusTemporaryRedirect)
 		}
 
 	}
