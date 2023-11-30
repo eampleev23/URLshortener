@@ -43,8 +43,8 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// создаем новую пару ссылок
 		shortURL, err := h.s.SetShortURL(req.LongURL)
-		//shortURL = h.c.GetValueByIndex("runaddr") + "/" + shortURL
-		shortURL = "http://localhost:8080" + "/" + shortURL
+		shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
+		//shortURL = "http://localhost:8080" + "/" + shortURL
 		if err != nil {
 			logger.Log.Info("cannot set shortURL:", zap.Error(err))
 			w.WriteHeader(http.StatusUnprocessableEntity)
