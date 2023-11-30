@@ -26,8 +26,9 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 }
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
 
+	if r.Method == http.MethodPost {
+		w.WriteHeader(201)
 		// Десериализуем запрос в структуру модели
 		logger.Log.Info("decoding request")
 		var req models.RequestAddShortURL
@@ -41,7 +42,8 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// создаем новую пару ссылок
 		shortURL, err := h.s.SetShortURL(req.LongURL)
-		shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
+		//shortURL = h.c.GetValueByIndex("runaddr") + "/" + shortURL
+		shortURL = "http://localhost:8080" + "/" + shortURL
 		if err != nil {
 			logger.Log.Info("cannot set shortURL:", zap.Error(err))
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -60,8 +62,6 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		logger.Log.Debug("Sending HTTP 201 response")
 		w.Header().Set("content-type", "application/json")
 		w.Header().Set("Accept", "application/json")
-		w.WriteHeader(201)
-
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 	}
