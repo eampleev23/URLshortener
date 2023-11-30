@@ -28,8 +28,8 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
-		w.WriteHeader(201)
 		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(201)
 		// Десериализуем запрос в структуру модели
 		logger.Log.Info("decoding request")
 		var req models.RequestAddShortURL
