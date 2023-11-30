@@ -29,6 +29,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 		w.WriteHeader(201)
+		w.Header().Set("content-type", "application/json")
 		// Десериализуем запрос в структуру модели
 		logger.Log.Info("decoding request")
 		var req models.RequestAddShortURL
@@ -60,8 +61,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		logger.Log.Debug("Sending HTTP 201 response")
-		w.Header().Set("content-type", "application/json")
-		w.Header().Set("Accept", "application/json")
+
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 	}
