@@ -88,8 +88,7 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
-		//res.Header().Add("Location", linksCouples[chi.URLParam(req, "id")])
-		loc, err := h.s.GetLongLinkByShort(chi.URLParam(req, "id"))
+		loc, err := h.s.GetLongLinkByShort(chi.URLParam(r, "id"))
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
