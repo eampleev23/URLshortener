@@ -30,7 +30,6 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(201)
 		var req models.RequestAddShortURL
-		log.Printf("r.Body:%s", r.Body)
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&req); err != nil {
 			logger.Log.Info("cannot decode request JSON body", zap.Error(err))
