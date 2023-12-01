@@ -12,26 +12,13 @@ import (
 )
 
 /*
-Добавьте в код сервера новый эндпоинт POST /api/shorten, который будет принимать в теле запроса JSON-объект
-{"url":"<some_url>"} и возвращать в ответ объект {"result":"<short_url>"}.
-Запрос может иметь такой вид:
+Задание по треку «Сервис сокращения URL»
 
-POST http://localhost:8080/api/shorten HTTP/1.1
-Host: localhost:8080
-Content-Type: application/json
-{
-  "url": "https://practicum.yandex.ru"
-}
-
-Ответ может быть таким:
-
-HTTP/1.1 201 OK
-Content-Type: application/json
-Content-Length: 30
-{
- "result": "http://localhost:8080/EwHXdJfB"
-}
-
+Добавьте поддержку gzip в ваш сервис. Научите его:
+Принимать запросы в сжатом формате (с HTTP-заголовком Content-Encoding).
+Отдавать сжатый ответ клиенту, который поддерживает обработку сжатых ответов (с HTTP-заголовком Accept-Encoding).
+Функция сжатия должна работать для контента с типами application/json и text/html.
+Вспомните middleware из урока про HTTP-сервер, это может вам помочь.
 */
 
 func main() {
