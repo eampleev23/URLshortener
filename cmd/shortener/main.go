@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/eampleev23/URLshortener/internal/compression"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
 	"github.com/eampleev23/URLshortener/internal/logger"
@@ -41,6 +42,7 @@ func run() error {
 
 	r := chi.NewRouter()
 	r.Use(logger.RequestLogger)
+	r.Use(compression.GzipMiddleware)
 	r.Post("/", h.CreateShortLink)
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
