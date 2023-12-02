@@ -1,18 +1,56 @@
 package store
 
-import "math/rand"
+import (
+	"bufio"
+	"math/rand"
+	"os"
+)
+
+type LinksCouple struct {
+	Uuid        string `json:"uuid"`
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
 
 type Store struct {
-	s map[string]string
+	s  map[string]LinksCouple
+	fp *Producer
 }
 
 func NewStore() *Store {
+	file, _ := os.OpenFile("./tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	return &Store{
-		s: make(map[string]string),
+		s:  make(map[string]LinksCouple),
+		fp: &Producer{file: file, writer: bufio.NewWriter(file)},
 	}
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
+	strResult, err := generateShortUrl()
+
+	if err != nil {
+		return "", err
+	}
+
+	if _, ok := s.s[strResult]; !ok {
+		linksCouple := LinksCouple{Uuid: "1", ShortURL: strResult, OriginalURL: longURL}
+		s.s[strResult] = linksCouple
+		s.fp.WriteLinksCouple(&linksCouple)
+		return strResult, nil
+	}
+
+	return "", nil
+
+}
+
+func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
+	if c, ok := s.s[shortURL]; ok {
+		return c.OriginalURL, nil
+	}
+	return "no match", nil
+}
+
+func generateShortUrl() (string, error) {
 	// заводим слайс рун возможных для сгенерированной короткой ссылки
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 	lenLetterRunes := len(letterRunes)
@@ -25,22 +63,5 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	}
 	// в результат записываем байты преобразованные в строку
 	strResult := string(b)
-	if _, ok := s.s[strResult]; !ok {
-		s.s[strResult] = longURL
-		return strResult, nil
-	}
-	return "", nil
-
-}
-
-func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
-	if c, ok := s.s[shortURL]; ok {
-		return c, nil
-	}
-	return "no match", nil
-}
-
-func (s *Store) SetDataForMyTests() error {
-	s.s["shortlink"] = "longlink"
-	return nil
+	return strResult, nil
 }
