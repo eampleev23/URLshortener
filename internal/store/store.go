@@ -80,6 +80,9 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 	fmt.Println("c.GetValueByIndex(\"sfilepath\")=", c.GetValueByIndex("sfilepath"))
 
 	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Printf("%s", err)
+	}
 
 	dir, err := os.Getwd()
 	if err != nil {
