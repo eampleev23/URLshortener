@@ -33,7 +33,7 @@ func run() error {
 	c := config.NewConfig()
 	c.SetValues()
 	s := store.NewStore(c)
-	s.ReadStoreFromFile()
+	s.ReadStoreFromFile(c)
 	h := handlers.NewHandlers(s, c)
 
 	if err := logger.Initialize("info"); err != nil {

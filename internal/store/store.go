@@ -73,20 +73,24 @@ func generateShortURL() (string, error) {
 	strResult := string(b)
 	return strResult, nil
 }
-func (s *Store) ReadStoreFromFile() {
+func (s *Store) ReadStoreFromFile(c *config.Config) {
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile("../../tmp/"+s.c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile("../../tmp/"+c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
+
 	countLines, err := LineCounter(file)
 	if err != nil {
 		fmt.Println("!!err:", err)
 	}
+	log.Printf("%s", countLines)
+
 	file.Close()
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
-		fc, err := NewConsumer("../../tmp/" + s.c.GetValueByIndex("sfilepath"))
+		fc, err := NewConsumer("../../tmp/" + c.GetValueByIndex("sfilepath"))
 		if err != nil {
 			log.Printf("%s", err)
 		}
