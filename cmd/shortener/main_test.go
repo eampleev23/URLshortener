@@ -137,6 +137,7 @@ func TestJSONHandler(t *testing.T) {
 			// проверяем корректность полученного тела ответа, если мы его ожидаем
 			if tc.expectedBody != "" {
 				assert.JSONEq(t, tc.expectedBody, string(resp.Body()))
+				// to delete it later
 			}
 		})
 	}
