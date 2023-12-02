@@ -26,7 +26,6 @@ func NewStore(c *config.Config) *Store {
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
-	defer file.Close()
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: &Producer{file: file, writer: bufio.NewWriter(file)},
@@ -43,7 +42,8 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	if _, ok := s.s[strResult]; !ok {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
 		s.s[strResult] = linksCouple
-		s.fp.WriteLinksCouple(&linksCouple)
+		e := s.fp.WriteLinksCouple(&linksCouple)
+		fmt.Println("e=", e)
 		return strResult, nil
 	}
 
@@ -76,10 +76,12 @@ func generateShortURL() (string, error) {
 }
 func (s *Store) ReadStoreFromFile(c *config.Config) {
 	// открываем файл чтобы посчитать количество строк
+
 	fmt.Println("here in ReadStoreFromFile")
 	fmt.Println("c.GetValueByIndex(\"sfilepath\")=", c.GetValueByIndex("sfilepath"))
 
 	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+
 	if err != nil {
 		log.Printf("%s", err)
 	}
@@ -99,14 +101,13 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 		fmt.Println("!!err:", err)
 	}
 
-	file.Close()
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
 		fc, err := NewConsumer(c.GetValueByIndex("sfilepath"))
 		if err != nil {
 			log.Printf("%s", err)
 		}
-		for i := 0; i < countLines; i++ {
+		for i := 0; i < countLines+1; i++ {
 			linksCouple, err := fc.ReadLinksCouple()
 			if err != nil {
 				log.Printf("%s", err)
@@ -114,6 +115,5 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 			fmt.Println("linksCouple=", linksCouple)
 			s.s[linksCouple.ShortURL] = *linksCouple
 		}
-		fc.Close()
 	}
 }

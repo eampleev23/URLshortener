@@ -14,6 +14,16 @@ type Producer struct {
 	writer *bufio.Writer
 }
 
+func NewProducer(filename string) (*Producer, error) {
+	// открываем файл для записи в конец
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Producer{file: file}, nil
+}
+
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	data, err := json.Marshal(&linksCouple)
 	if err != nil {
