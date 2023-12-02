@@ -85,7 +85,6 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 	if err != nil {
 		fmt.Println("!!err:", err)
 	}
-	log.Printf("%s", countLines)
 
 	file.Close()
 	if countLines > 0 {
