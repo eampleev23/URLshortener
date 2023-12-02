@@ -2,6 +2,8 @@ package store
 
 import (
 	"bufio"
+	"fmt"
+	"log"
 	"math/rand"
 	"os"
 )
@@ -18,7 +20,10 @@ type Store struct {
 }
 
 func NewStore() *Store {
-	file, _ := os.OpenFile("./tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile("./tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Printf("Error open file: %s", err)
+	}
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: &Producer{file: file, writer: bufio.NewWriter(file)},
@@ -26,8 +31,8 @@ func NewStore() *Store {
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
-	strResult, err := generateShortUrl()
 
+	strResult, err := generateShortUrl()
 	if err != nil {
 		return "", err
 	}
@@ -50,6 +55,7 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 	return "no match", nil
 }
 
+// Вспомогательная функция для генерации коротких ссылок
 func generateShortUrl() (string, error) {
 	// заводим слайс рун возможных для сгенерированной короткой ссылки
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
@@ -64,4 +70,32 @@ func generateShortUrl() (string, error) {
 	// в результат записываем байты преобразованные в строку
 	strResult := string(b)
 	return strResult, nil
+}
+func (s *Store) ReadStoreFromFile() {
+	// открываем файл чтобы посчитать количество строк
+	file, err := os.OpenFile("./tmp/short-url-db.json", os.O_RDONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Printf("Error open file: %s", err)
+	}
+	countLines, err := LineCounter(file)
+	if err != nil {
+		fmt.Println("!!err:", err)
+	}
+	file.Close()
+	if countLines > 0 {
+		// добавляем каждую существующую строку в стор
+		fc, err := NewConsumer("./tmp/short-url-db.json")
+		if err != nil {
+			log.Printf("%s", err)
+		}
+		for i := 0; i < countLines; i++ {
+			linksCouple, err := fc.ReadLinksCouple()
+			if err != nil {
+				log.Printf("%s", err)
+			}
+			fmt.Println("linksCouple=", linksCouple)
+			s.s[linksCouple.ShortURL] = *linksCouple
+		}
+		fc.Close()
+	}
 }
