@@ -23,10 +23,10 @@ type Store struct {
 
 func NewStore(c *config.Config) *Store {
 	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	defer file.Close()
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
+	defer file.Close()
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: &Producer{file: file, writer: bufio.NewWriter(file)},
