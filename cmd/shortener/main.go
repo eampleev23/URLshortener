@@ -32,7 +32,7 @@ func main() {
 func run() error {
 	c := config.NewConfig()
 	c.SetValues()
-	s := store.NewStore()
+	s := store.NewStore(c)
 	s.ReadStoreFromFile()
 	h := handlers.NewHandlers(s, c)
 

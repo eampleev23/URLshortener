@@ -3,6 +3,7 @@ package store
 import (
 	"bufio"
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/config"
 	"log"
 	"math/rand"
 	"os"
@@ -17,10 +18,11 @@ type LinksCouple struct {
 type Store struct {
 	s  map[string]LinksCouple
 	fp *Producer
+	c  *config.Config
 }
 
-func NewStore() *Store {
-	file, err := os.OpenFile("../../tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+func NewStore(c *config.Config) *Store {
+	file, err := os.OpenFile("../../tmp/"+c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -73,7 +75,7 @@ func generateShortURL() (string, error) {
 }
 func (s *Store) ReadStoreFromFile() {
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile("../../tmp/short-url-db.json", os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile("../../tmp/"+s.c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -84,7 +86,7 @@ func (s *Store) ReadStoreFromFile() {
 	file.Close()
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
-		fc, err := NewConsumer("../../tmp/short-url-db.json")
+		fc, err := NewConsumer("../../tmp/" + s.c.GetValueByIndex("sfilepath"))
 		if err != nil {
 			log.Printf("%s", err)
 		}
