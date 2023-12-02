@@ -22,7 +22,8 @@ type Store struct {
 }
 
 func NewStore(c *config.Config) *Store {
-	file, err := os.OpenFile("../../tmp/"+c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	defer file.Close()
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -75,7 +76,16 @@ func generateShortURL() (string, error) {
 }
 func (s *Store) ReadStoreFromFile(c *config.Config) {
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile("../../tmp/"+c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+	fmt.Println("here in ReadStoreFromFile")
+	fmt.Println("c.GetValueByIndex(\"sfilepath\")=", c.GetValueByIndex("sfilepath"))
+
+	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("dir", dir)
 
 	if err != nil {
 		log.Printf("Error open file: %s", err)
@@ -89,7 +99,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 	file.Close()
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
-		fc, err := NewConsumer("../../tmp/" + c.GetValueByIndex("sfilepath"))
+		fc, err := NewConsumer(c.GetValueByIndex("sfilepath"))
 		if err != nil {
 			log.Printf("%s", err)
 		}

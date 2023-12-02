@@ -40,7 +40,7 @@ func (c *Config) SetValues() error {
 	// регистрируем переменную baseShortUrl как аргумент -b со значением по умолчанию http://localhost:8080
 	flag.StringVar(&baseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// принимаем путь к файлу где хранить данные
-	flag.StringVar(&sFilePath, "f", "short-url-db.json", "file database")
+	flag.StringVar(&sFilePath, "f", "/tmp/short-url-db.json", "file database")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
