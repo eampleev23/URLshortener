@@ -15,7 +15,7 @@ var c *config.Config
 
 func TestCreateShortLink(t *testing.T) {
 	c = config.NewConfig()
-	s := store.NewStore()
+	s := store.NewStore(c)
 	h := handlers.NewHandlers(s, c)
 
 	testCases := []struct {
@@ -48,7 +48,7 @@ func TestCreateShortLink(t *testing.T) {
 }
 
 func TestUseShortLink(t *testing.T) {
-	s := store.NewStore()
+	s := store.NewStore(c)
 	h := handlers.NewHandlers(s, c)
 
 	testCases := []struct {
@@ -79,7 +79,7 @@ func TestUseShortLink(t *testing.T) {
 }
 
 func TestJSONHandler(t *testing.T) {
-	s := store.NewStore()
+	s := store.NewStore(c)
 	h := handlers.NewHandlers(s, c)
 	handler := http.HandlerFunc(h.JSONHandler)
 	srv := httptest.NewServer(handler)
