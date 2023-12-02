@@ -9,7 +9,7 @@ import (
 )
 
 type LinksCouple struct {
-	Uuid        string `json:"uuid"`
+	UUID        string `json:"uuid"`
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
@@ -20,7 +20,7 @@ type Store struct {
 }
 
 func NewStore() *Store {
-	file, err := os.OpenFile("../tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile("../../tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -38,7 +38,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	}
 
 	if _, ok := s.s[strResult]; !ok {
-		linksCouple := LinksCouple{Uuid: "1", ShortURL: strResult, OriginalURL: longURL}
+		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
 		s.s[strResult] = linksCouple
 		s.fp.WriteLinksCouple(&linksCouple)
 		return strResult, nil
@@ -73,7 +73,7 @@ func generateShortURL() (string, error) {
 }
 func (s *Store) ReadStoreFromFile() {
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile("../tmp/short-url-db.json", os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile("../../tmp/short-url-db.json", os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -84,7 +84,7 @@ func (s *Store) ReadStoreFromFile() {
 	file.Close()
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
-		fc, err := NewConsumer("../tmp/short-url-db.json")
+		fc, err := NewConsumer("../../tmp/short-url-db.json")
 		if err != nil {
 			log.Printf("%s", err)
 		}
