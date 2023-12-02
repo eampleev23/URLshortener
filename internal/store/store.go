@@ -20,7 +20,7 @@ type Store struct {
 }
 
 func NewStore() *Store {
-	file, err := os.OpenFile("./tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile("../tmp/short-url-db.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -32,7 +32,7 @@ func NewStore() *Store {
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
 
-	strResult, err := generateShortUrl()
+	strResult, err := generateShortURL()
 	if err != nil {
 		return "", err
 	}
@@ -56,7 +56,7 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 }
 
 // Вспомогательная функция для генерации коротких ссылок
-func generateShortUrl() (string, error) {
+func generateShortURL() (string, error) {
 	// заводим слайс рун возможных для сгенерированной короткой ссылки
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 	lenLetterRunes := len(letterRunes)
@@ -73,7 +73,7 @@ func generateShortUrl() (string, error) {
 }
 func (s *Store) ReadStoreFromFile() {
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile("./tmp/short-url-db.json", os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile("../tmp/short-url-db.json", os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
@@ -84,7 +84,7 @@ func (s *Store) ReadStoreFromFile() {
 	file.Close()
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
-		fc, err := NewConsumer("./tmp/short-url-db.json")
+		fc, err := NewConsumer("../tmp/short-url-db.json")
 		if err != nil {
 			log.Printf("%s", err)
 		}
