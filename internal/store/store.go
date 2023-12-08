@@ -76,8 +76,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 
 	fmt.Println("here in ReadStoreFromFile")
 	fmt.Println("c.GetValueByIndex(\"sfilepath\")=", c.GetValueByIndex("sfilepath"))
-
-	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0600)
 
 	if err != nil {
 		log.Printf("%s", err)
