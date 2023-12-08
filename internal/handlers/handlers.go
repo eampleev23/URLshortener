@@ -74,7 +74,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 
 		// Устаннавливаем тип контента text/plain
 		w.Header().Set("content-type", "text/plain")
-		//shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
+		// shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
 		shortLinkWithPrefix := h.c.GetValueByIndex("baseshorturl") + "/" + shortLink
 		w.Write([]byte(shortLinkWithPrefix))
 	} else {
