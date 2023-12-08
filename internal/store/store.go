@@ -107,7 +107,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 		if err != nil {
 			log.Printf("%s", err)
 		}
-		for i := 0; i < countLines+1; i++ {
+		for i := 0; i < countLines; i++ {
 			linksCouple, err := fc.ReadLinksCouple()
 			if err != nil {
 				log.Printf("%s", err)
