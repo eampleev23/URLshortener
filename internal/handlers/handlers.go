@@ -58,7 +58,6 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-
 		var longLink string
 		if b, err := io.ReadAll(r.Body); err == nil {
 			longLink = string(b)
@@ -71,7 +70,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Устанавливаем статус 201
-		w.WriteHeader(201)
+		w.WriteHeader(http.StatusCreated)
 
 		// Устаннавливаем тип контента text/plain
 		w.Header().Set("content-type", "text/plain")
