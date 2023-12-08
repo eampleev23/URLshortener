@@ -84,9 +84,10 @@ func (c *Consumer) Close() error {
 	return c.file.Close()
 }
 
-// LineCounter - считает количество строк в файле при инициализации стора
+// LineCounter - считает количество строк в файле при инициализации стора.
 func LineCounter(r io.Reader) (int, error) {
-	buf := make([]byte, 32*1024)
+	bufSize := 32768
+	buf := make([]byte, bufSize)
 	count := 0
 	lineSep := []byte{'\n'}
 
