@@ -29,7 +29,7 @@ func (c *compressWriter) Header() http.Header {
 
 func (c *compressWriter) Write(p []byte) (int, error) {
 	result, err := c.zw.Write(p)
-	return result, err
+	return result, fmt.Errorf("%w", err)
 }
 
 func (c *compressWriter) WriteHeader(statusCode int) {
