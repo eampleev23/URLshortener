@@ -40,7 +40,7 @@ func TestCreateShortLink(t *testing.T) {
 
 			// Проверим корректность полученного ответа если мы его ожидаем
 			// // Пока закомментировал т.к. функция генерит уникальный и это по идее норм
-			//if tc.expectedBody != "" {
+			// if tc.expectedBody != "" {
 			//	assert.Equal(t, tc.expectedBody, w.Body.String(), "Тело ответа не совпадает с ожидаемым")
 			//}
 		})
@@ -72,8 +72,7 @@ func TestUseShortLink(t *testing.T) {
 
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 			assert.Equal(t, tc.expectedURL, r.URL.String(), "Урл не совпадает с ожидаемым")
-			//assert.Equal(t, tc.expectedLocation, w.Header().Get("Location"), "Заголовок Location не совпадает с ожидаемым")
-
+			// assert.Equal(t, tc.expectedLocation, w.Header().Get("Location"), "Заголовок Location не совпадает с ожидаемым").
 		})
 	}
 }
@@ -84,8 +83,7 @@ func TestJSONHandler(t *testing.T) {
 	handler := http.HandlerFunc(h.JSONHandler)
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
-	//successBody := `{"result": "http://localhost:8080/EwHXdJfB"}`
-
+	// successBody := `{"result": "http://localhost:8080/EwHXdJfB"}`
 	testCases := []struct {
 		name         string // добавляем название тестов
 		method       string
@@ -117,7 +115,7 @@ func TestJSONHandler(t *testing.T) {
 		//	body:         `{"url": "https://practicum.yandex.ru"}`,
 		//	expectedCode: 201,
 		//	expectedBody: successBody,
-		//},
+		// },
 	}
 	for _, tc := range testCases {
 		t.Run(tc.method, func(t *testing.T) {
