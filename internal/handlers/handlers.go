@@ -83,7 +83,6 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
@@ -102,7 +101,5 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 		} else { // иначе это успех, есть совпадение, ставим 307 и в заголовок ответа локейшн отправляем длинную ссылку
 			w.WriteHeader(http.StatusTemporaryRedirect)
 		}
-
 	}
-
 }
