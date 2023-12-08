@@ -2,6 +2,7 @@ package compression
 
 import (
 	"compress/gzip"
+	"fmt"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"io"
 	"net/http"
@@ -40,7 +41,7 @@ func (c *compressWriter) WriteHeader(statusCode int) {
 
 // Close закрывает gzip.Writer и досылает все данные из буфера.
 func (c *compressWriter) Close() error {
-	return c.zw.Close()
+	return fmt.Errorf("%w", c.zw.Close())
 }
 
 // compressReader реализует интерфейс io.ReadCloser и позволяет прозрачно для сервера
