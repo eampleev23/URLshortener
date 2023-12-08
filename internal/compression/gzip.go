@@ -74,9 +74,9 @@ func (c compressReader) Read(p []byte) (n int, err error) {
 
 func (c *compressReader) Close() error {
 	if err := c.r.Close(); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
-	return c.zr.Close()
+	return nil
 }
 
 func GzipMiddleware(next http.Handler) http.Handler {
