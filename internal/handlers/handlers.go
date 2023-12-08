@@ -28,7 +28,7 @@ func NewHandlers(s *store.Store, c *config.Config) *Handlers {
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(201)
+		w.WriteHeader(http.StatusCreated)
 		var req models.RequestAddShortURL
 		log.Printf("r.Body:%s", r.Body)
 		dec := json.NewDecoder(r.Body)
