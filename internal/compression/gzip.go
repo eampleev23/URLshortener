@@ -90,8 +90,8 @@ func GzipMiddleware(next http.Handler) http.Handler {
 		acceptEncoding := r.Header.Get("Accept-Encoding")
 		supportsGzip := strings.Contains(acceptEncoding, "gzip")
 		contentType := r.Header.Get("Content-Type")
-		supportContentType := strings.Contains("application/json", contentType) ||
-			strings.Contains("text/html", contentType)
+		supportContentType := strings.Contains(contentType, "application/json") ||
+			strings.Contains(contentType, "text/html")
 
 		if supportsGzip && supportContentType {
 			// оборачиваем оригинальный http.ResponseWriter новым, с поддержкой сжатия
