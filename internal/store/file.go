@@ -16,7 +16,7 @@ type Producer struct {
 
 func NewProducer(filename string) (*Producer, error) {
 	// открываем файл для записи в конец
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 	if err != nil {
 		return nil, err
 	}
