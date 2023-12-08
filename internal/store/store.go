@@ -33,12 +33,10 @@ func NewStore(c *config.Config) *Store {
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
-
 	strResult, err := generateShortURL()
 	if err != nil {
 		return "", err
 	}
-
 	if _, ok := s.s[strResult]; !ok {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
 		s.s[strResult] = linksCouple
@@ -46,9 +44,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		fmt.Println("e=", e)
 		return strResult, nil
 	}
-
 	return "", nil
-
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
@@ -58,13 +54,14 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 	return "no match", nil
 }
 
-// Вспомогательная функция для генерации коротких ссылок
+// Вспомогательная функция для генерации коротких ссылок.
 func generateShortURL() (string, error) {
 	// заводим слайс рун возможных для сгенерированной короткой ссылки
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 	lenLetterRunes := len(letterRunes)
 	// делаем из 2 символов
-	b := make([]rune, 2)
+	numberOfSimbols := 3
+	b := make([]rune, numberOfSimbols)
 
 	// генерируем случайный символ последовательно для всей длины
 	for i := range b {
