@@ -38,11 +38,6 @@ func TestCreateShortLink(t *testing.T) {
 			h.CreateShortLink(w, r)
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 
-			// Проверим корректность полученного ответа если мы его ожидаем
-			// // Пока закомментировал т.к. функция генерит уникальный и это по идее норм
-			// if tc.expectedBody != "" {
-			//	assert.Equal(t, tc.expectedBody, w.Body.String(), "Тело ответа не совпадает с ожидаемым")
-			//}
 		})
 	}
 }
@@ -109,13 +104,6 @@ func TestJSONHandler(t *testing.T) {
 			expectedCode: 400,
 			expectedBody: "",
 		},
-		//{
-		//	name:         "method_post_success",
-		//	method:       http.MethodPost,
-		//	body:         `{"url": "https://practicum.yandex.ru"}`,
-		//	expectedCode: 201,
-		//	expectedBody: successBody,
-		// },
 	}
 	for _, tc := range testCases {
 		t.Run(tc.method, func(t *testing.T) {
