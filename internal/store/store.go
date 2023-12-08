@@ -18,7 +18,7 @@ type LinksCouple struct {
 type Store struct {
 	s  map[string]LinksCouple
 	fp *Producer
-	c  *config.Config
+	//c  *config.Config
 }
 
 func NewStore(c *config.Config) *Store {
