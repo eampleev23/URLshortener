@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/eampleev23/URLshortener/internal/compression"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -12,16 +13,6 @@ import (
 	"net/http"
 )
 
-/*
-Задание по треку «Сервис сокращения URL»
-
-Добавьте поддержку gzip в ваш сервис. Научите его:
-Принимать запросы в сжатом формате (с HTTP-заголовком Content-Encoding).
-Отдавать сжатый ответ клиенту, который поддерживает обработку сжатых ответов (с HTTP-заголовком Accept-Encoding).
-Функция сжатия должна работать для контента с типами application/json и text/html.
-Вспомните middleware из урока про HTTP-сервер, это может вам помочь.
-*/
-
 func main() {
 	err := run()
 	if err != nil {
@@ -31,14 +22,18 @@ func main() {
 
 func run() error {
 	c := config.NewConfig()
-	c.SetValues()
+	err := c.SetValues()
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
 	s := store.NewStore(c)
 	s.ReadStoreFromFile(c)
 	h := handlers.NewHandlers(s, c)
 
 	if err := logger.Initialize("info"); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
+
 	logger.Log.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))
 
 	r := chi.NewRouter()
@@ -48,7 +43,7 @@ func run() error {
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
 
-	err := http.ListenAndServe(c.GetValueByIndex("runaddr"), r)
+	err = http.ListenAndServe(c.GetValueByIndex("runaddr"), r)
 	if err != nil {
 		log.Fatal(err)
 	}
