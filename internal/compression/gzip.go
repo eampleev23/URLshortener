@@ -64,7 +64,8 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 }
 
 func (c compressReader) Read(p []byte) (n int, err error) {
-	return c.zr.Read(p)
+	result, err := c.zr.Read(p)
+	return result, fmt.Errorf("%w", err)
 }
 
 func (c *compressReader) Close() error {
