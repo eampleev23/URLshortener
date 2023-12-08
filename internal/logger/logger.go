@@ -33,13 +33,13 @@ func Initialize(level string) error {
 }
 
 type (
-	// берём структуру для хранения сведений об ответе
+	// Берём структуру для хранения сведений об ответе.
 	responseData struct {
 		status int
 		size   int
 	}
 
-	// добавляем реализацию http.ResponseWriter
+	// Добавляем реализацию http.ResponseWriter.
 	loggingResponseWriter struct {
 		http.ResponseWriter // встраиваем оригинальный http.ResponseWriter
 		responseData        *responseData
@@ -89,7 +89,7 @@ func RequestLogger(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-// Вспомогательная функция для перевода time.Duration в строку при выводе в лог
+// Вспомогательная функция для перевода time.Duration в строку при выводе в лог.
 func shortDur(d time.Duration) string {
 	s := d.String()
 	if strings.HasSuffix(s, "m0s") {
