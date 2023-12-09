@@ -25,9 +25,6 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
 	s := store.NewStore(c)
 	s.ReadStoreFromFile(c)
 	h := handlers.NewHandlers(s, c)
