@@ -14,7 +14,7 @@ import (
 var c *config.Config
 
 func TestCreateShortLink(t *testing.T) {
-	c = config.NewConfig()
+	c, _ = config.NewConfig()
 	s := store.NewStore(c)
 	h := handlers.NewHandlers(s, c)
 

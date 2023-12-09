@@ -9,11 +9,15 @@ type Config struct {
 	c map[string]string
 }
 
-func NewConfig() *Config {
+func NewConfig() (*Config, error) {
 	config := &Config{
 		c: make(map[string]string),
 	}
-	return config
+	err := config.SetValues()
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 func (c *Config) SetValue(i, v string) error {

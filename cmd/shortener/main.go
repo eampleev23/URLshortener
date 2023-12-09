@@ -21,8 +21,10 @@ func main() {
 }
 
 func run() error {
-	c := config.NewConfig()
-	err := c.SetValues()
+	c, err := config.NewConfig()
+	if err != nil {
+		return err
+	}
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
