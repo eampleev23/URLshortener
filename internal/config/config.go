@@ -10,9 +10,10 @@ type Config struct {
 }
 
 func NewConfig() *Config {
-	return &Config{
+	config := &Config{
 		c: make(map[string]string),
 	}
+	return config
 }
 
 func (c *Config) SetValue(i, v string) error {

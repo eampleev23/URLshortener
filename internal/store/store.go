@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/logger"
 	"log"
 	"math/rand"
 	"os"
@@ -94,7 +95,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 
 	countLines, err := LineCounter(file)
 	if err != nil {
-		fmt.Println("!!err:", err)
+		logger.Log.Info("Файл бд пустой")
 	}
 
 	if countLines > 0 {
