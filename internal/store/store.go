@@ -40,9 +40,14 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
 		s.s[strResult] = linksCouple
 		err := s.fp.WriteLinksCouple(&linksCouple)
+		//if err != nil {
+		//	return "", err
+		//}
 		if err != nil {
-			return "", err
+			fmt.Errorf("%w", err)
+			//return "", err
 		}
+
 		return strResult, nil
 	}
 	return "", nil
