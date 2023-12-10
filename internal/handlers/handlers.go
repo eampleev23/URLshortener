@@ -75,9 +75,11 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 
 		// Устаннавливаем тип контента text/plain
 		w.Header().Set("content-type", "text/plain")
-		// shortLinkWithPrefix := "http://localhost" + h.c.GetValueByIndex("runaddr") + "/" + shortLink
 		shortLinkWithPrefix := h.c.GetValueByIndex("baseshorturl") + "/" + shortLink
-		w.Write([]byte(shortLinkWithPrefix))
+		_, err := w.Write([]byte(shortLinkWithPrefix))
+		if err != nil {
+			h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
+		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
 	}
