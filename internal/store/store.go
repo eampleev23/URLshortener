@@ -4,10 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"go.uber.org/zap"
 	"log"
-	"math/rand"
 	"os"
 )
 
@@ -36,7 +36,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) *Store {
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
-	strResult, err := generateShortURL()
+	strResult, err := generatelinks.GenerateShortURL()
 	if err != nil {
 		return "", err
 	}
@@ -64,23 +64,6 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 	return "no match", nil
 }
 
-// Вспомогательная функция для генерации коротких ссылок.
-func generateShortURL() (string, error) {
-	// заводим слайс рун возможных для сгенерированной короткой ссылки
-	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
-	lenLetterRunes := len(letterRunes)
-	// делаем из 2 символов
-	numberOfSimbols := 3
-	b := make([]rune, numberOfSimbols)
-
-	// генерируем случайный символ последовательно для всей длины
-	for i := range b {
-		b[i] = letterRunes[rand.Intn(lenLetterRunes)]
-	}
-	// в результат записываем байты преобразованные в строку
-	strResult := string(b)
-	return strResult, nil
-}
 func (s *Store) ReadStoreFromFile(c *config.Config) {
 	// открываем файл чтобы посчитать количество строк
 	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0600)
