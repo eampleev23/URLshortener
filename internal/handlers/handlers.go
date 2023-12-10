@@ -2,15 +2,16 @@ package handlers
 
 import (
 	"encoding/json"
+	"io"
+	"log"
+	"net/http"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
-	"io"
-	"log"
-	"net/http"
 )
 
 type Handlers struct {

@@ -3,12 +3,13 @@ package store
 import (
 	"bufio"
 	"fmt"
+	"log"
+	"os"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"go.uber.org/zap"
-	"log"
-	"os"
 )
 
 type LinksCouple struct {

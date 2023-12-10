@@ -1,15 +1,16 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 var c *config.Config

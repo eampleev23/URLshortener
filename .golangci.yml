@@ -4,7 +4,7 @@ run:
   # Settable parameters #
   timeout: 5m
   tests: true
-  build-tags: []
+  build-tags: [ ]
   # Which dirs to skip: issues from them won't be reported.
   skip-dirs:
     - "bin"
@@ -12,7 +12,7 @@ run:
     - ".ci"
     - ".gradle"
   # Which files to skip: they will be analyzed, but issues from them won't be reported.
-  skip-files: []
+  skip-files: [ ]
 
   # Invariable parameters #
 
@@ -64,13 +64,13 @@ linters-settings:
     threshold: 100
 
   dupword:
-    keywords: []
+    keywords: [ ]
 
   errcheck:
     check-blank: false
     check-type-assertions: true
     disable-default-exclusions: false
-    exclude-functions: []
+    exclude-functions: [ ]
 
   errorlint:
     asserts: true
@@ -140,7 +140,7 @@ linters-settings:
 
   godot:
     capital: true
-    exclude: []
+    exclude: [ ]
     period: true
     scope: toplevel
 
@@ -148,7 +148,7 @@ linters-settings:
     simplify: false
 
   goimports:
-    local-prefixes: github.com/org/project
+    local-prefixes: ""
 
   gomnd:
     checks:
@@ -158,9 +158,9 @@ linters-settings:
       - operation
       - return
       - assign
-    ignored-files: []
-    ignored-functions: []
-    ignored-numbers: []
+    ignored-files: [ ]
+    ignored-functions: [ ]
+    ignored-numbers: [ ]
 
   gosec:
     includes:
@@ -216,7 +216,7 @@ linters-settings:
       - chan
 
   nolintlint:
-    allow-no-explanation: []
+    allow-no-explanation: [ ]
     allow-unused: false
     require-explanation: true
     require-specific: false
@@ -261,7 +261,7 @@ linters-settings:
     severity: error
 
   rowserrcheck:
-    packages: []
+    packages: [ ]
 
   staticcheck:
     checks:
@@ -271,7 +271,7 @@ linters-settings:
     checks:
       - "*"
       - -ST1000
-    http-status-code-whitelist: []
+    http-status-code-whitelist: [ ]
     initialisms:
       - ACL
       - API
@@ -418,7 +418,7 @@ linters:
 
 # Issues configuration
 issues:
-  exclude: []
+  exclude: [ ]
   exclude-case-sensitive: false
   exclude-rules:
     - path: "_test\\.go"
@@ -458,4 +458,4 @@ severity:
   # Severity rules have the same filtering capability as exclude rules
   # except you are allowed to specify one matcher per severity rule.
   # Only affects out formats that support setting severity information.
-  rules: []
+  rules: [ ]
