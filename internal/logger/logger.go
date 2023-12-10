@@ -33,11 +33,6 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Создаем логгер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
-		/*
-			Если обернуть ошибку вот так:
-			return nil, fmt.Errorf("%w", err)
-			то падает автотест 7 инкремента
-		*/
 		return nil, fmt.Errorf("%w", err)
 	}
 	zapObj.ZL = zl
@@ -67,7 +62,7 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 		return size, fmt.Errorf("%w", err)
 		то падает автотест 7 инкремента
 	*/
-	return size, err
+	return size, fmt.Errorf("%w", err)
 }
 
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
