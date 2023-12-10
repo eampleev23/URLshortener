@@ -45,7 +45,7 @@ func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	}
 
 	// записываем буфер в файл
-	return p.writer.Flush()
+	return fmt.Errorf("%w", p.writer.Flush())
 }
 
 type Consumer struct {
