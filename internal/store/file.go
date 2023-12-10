@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 )
@@ -22,9 +23,8 @@ func NewProducer(filename string) (*Producer, error) {
 	var perm os.FileMode = 0600
 	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
-
 	return &Producer{file: file}, nil
 }
 
