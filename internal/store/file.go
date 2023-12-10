@@ -79,7 +79,7 @@ func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 	linksCouple := LinksCouple{}
 	err := json.Unmarshal(data, &linksCouple)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return &linksCouple, nil
