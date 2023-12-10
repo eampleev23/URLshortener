@@ -86,7 +86,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 
 	countLines, err := LineCounter(file)
 	if err != nil {
-		//logger.Log.Info("Файл бд пустой")
+		log.Printf("%w", err)
 	}
 
 	if countLines > 0 {
