@@ -58,9 +58,39 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	size, err := r.ResponseWriter.Write(b)
 	r.responseData.size += size // захватываем размер
 	/*
-		Если обернуть ошибку вот так:
-		return size, fmt.Errorf("%w", err)
-		то падает автотест 7 инкремента
+				Если обернуть ошибку вот так:
+				return size, fmt.Errorf("%w", err)
+				то падает автотест 7 инкремента
+
+		iteration7_test.go:162:
+			11
+			        	Error Trace:	/__w/URLshortener/URLshortener/iteration7_test.go:162
+			12
+			        	            				/__w/URLshortener/URLshortener/suite.go:91
+			13
+			        	Error:      	Received unexpected error:
+			14
+			        	            	unexpected EOF
+			15
+			        	Test:       	TestIteration7/TestJSONHandler/shorten
+			16
+			        	Messages:   	Ошибка при попытке сделать запрос для сокращения URL
+			17
+			    iteration7_test.go:180: Оригинальный запрос:
+			18
+
+			19
+			        POST /api/shorten HTTP/1.1
+			20
+			        Host: localhost:8080
+			21
+			        Accept: application/json
+			22
+			        Content-Type: application/json
+			23
+			        User-Agent: go-resty/2.7.0 (https://github.com/go-resty/resty)
+
+
 	*/
 	return size, err
 }
