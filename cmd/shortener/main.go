@@ -23,6 +23,7 @@ func run() error {
 	c, err := config.NewConfig()
 	myLog, _ := logger.NewZapLogger("info")
 	if err != nil {
+		myLog.ZL.Info("Ошибка при создании конфига", zap.Error(err))
 		return err
 	}
 	s := store.NewStore(c, myLog)
