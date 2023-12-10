@@ -30,9 +30,9 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	if c.GetValueByIndex("sfilepath") != "" {
 		var perm os.FileMode = 0600
 		file, _ := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
-		//if err != nil {
+		// if err != nil {
 		//	return nil, err
-		//}
+		// }
 		return &Store{
 			s:  make(map[string]LinksCouple),
 			fp: &Producer{file: file, writer: bufio.NewWriter(file)},
