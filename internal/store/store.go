@@ -39,7 +39,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) *Store {
 func (s *Store) SetShortURL(longURL string) (string, error) {
 	strResult, err := generatelinks.GenerateShortURL()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("%w", err)
 	}
 	if _, ok := s.s[strResult]; !ok {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
