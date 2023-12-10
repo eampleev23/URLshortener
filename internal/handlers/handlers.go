@@ -40,7 +40,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var shortURL string = ""
+		shortURL := ""
 		var err error
 		var numberOfAttempts int8 = 0
 
@@ -82,7 +82,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 			longLink = string(b)
 		}
 		// Генерируем и сразу сохраняем короткую ссылку для переданной длинной
-		var shortLink string = ""
+		shortLink := ""
 		var err error
 		var numberOfAttempts int8 = 0
 		for shortLink == "" {
