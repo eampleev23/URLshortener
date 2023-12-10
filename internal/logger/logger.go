@@ -11,18 +11,19 @@ type ZapLog struct {
 	ZL *zap.Logger
 }
 
-func NewZapLogger(level string) *ZapLog {
+func NewZapLogger(level string) (*ZapLog, error) {
 	lg := &ZapLog{ZL: zap.NewNop()}
-	lg.LoggerInitialize(level)
-	return lg
+	var err error
+	lg, err = LoggerInitialize(level, lg)
+	return lg, err
 }
 
-// Initialize инициализирует синглтон логера с необходимым уровнем логирования.
-func (zaplog *ZapLog) LoggerInitialize(level string) error {
+// LoggerInitialize инициализирует синглтон логера с необходимым уровнем логирования.
+func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// Создаем новую конфигурацию логгера
 	cfg := zap.NewProductionConfig()
@@ -31,10 +32,10 @@ func (zaplog *ZapLog) LoggerInitialize(level string) error {
 	// Создаем логгер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
-		return err
+		return nil, err
 	}
-	zaplog.ZL = zl
-	return nil
+	zapObj.ZL = zl
+	return zapObj, nil
 }
 
 type (

@@ -26,7 +26,7 @@ func run() error {
 	}
 	s := store.NewStore(c)
 	s.ReadStoreFromFile(c)
-	myLog := logger.NewZapLogger("info")
+	myLog, _ := logger.NewZapLogger("info")
 	h := handlers.NewHandlers(s, c, myLog)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))
