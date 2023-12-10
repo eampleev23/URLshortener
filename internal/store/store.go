@@ -41,7 +41,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		s.s[strResult] = linksCouple
 		err := s.fp.WriteLinksCouple(&linksCouple)
 		if err != nil {
-			// ..
+			return "", err
 		}
 		return strResult, nil
 	}
