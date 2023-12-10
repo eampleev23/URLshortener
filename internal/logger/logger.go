@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
@@ -24,7 +23,12 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		/*
+			Если обернуть ошибку вот так:
+			return nil, fmt.Errorf("%w", err)
+			то падает автотест 7 инкремента
+		*/
+		return nil, err
 	}
 	// Создаем новую конфигурацию логгера
 	cfg := zap.NewProductionConfig()
@@ -33,7 +37,12 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Создаем логгер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		/*
+			Если обернуть ошибку вот так:
+			return nil, fmt.Errorf("%w", err)
+			то падает автотест 7 инкремента
+		*/
+		return nil, err
 	}
 	zapObj.ZL = zl
 	return zapObj, nil
@@ -57,7 +66,12 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
 	r.responseData.size += size // захватываем размер
-	return size, fmt.Errorf("%w", err)
+	/*
+		Если обернуть ошибку вот так:
+		return size, fmt.Errorf("%w", err)
+		то падает автотест 7 инкремента
+	*/
+	return size, err
 }
 
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
