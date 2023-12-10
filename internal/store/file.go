@@ -36,12 +36,12 @@ func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 
 	// записываем пару ссылок в буфер
 	if _, err := p.writer.Write(data); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	// добавляем перенос строки
 	if err := p.writer.WriteByte('\n'); err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	// записываем буфер в файл
