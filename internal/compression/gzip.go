@@ -64,11 +64,12 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 
 func (c compressReader) Read(p []byte) (n int, err error) {
 	// Здесь при попытке исправить рушатся тесты iter8.
-	/*
-		result, err := c.zr.Read(p)
-		return result, fmt.Errorf("%w", err)
-	*/
-	return c.zr.Read(p)
+
+	result, err := c.zr.Read(p)
+	return result, fmt.Errorf("%w", err)
+	//return result, err
+
+	//return c.zr.Read(p)
 }
 
 func (c *compressReader) Close() error {
