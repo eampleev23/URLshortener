@@ -71,7 +71,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 	// одиночное сканирование до следующей строки
 	if !c.scanner.Scan() {
-		return nil, c.scanner.Err()
+		return nil, fmt.Errorf("%w", c.scanner.Err())
 	}
 	// читаем данные из scanner
 	data := c.scanner.Bytes()
