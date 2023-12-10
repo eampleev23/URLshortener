@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/eampleev23/URLshortener/internal/compression"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -27,16 +26,12 @@ func run() error {
 	}
 	s := store.NewStore(c)
 	s.ReadStoreFromFile(c)
-	h := handlers.NewHandlers(s, c)
+	myLog := logger.NewZapLogger("info")
+	h := handlers.NewHandlers(s, c, myLog)
 
-	if err := logger.Initialize("info"); err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
-	logger.Log.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))
-
+	myLog.ZL.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))
 	r := chi.NewRouter()
-	r.Use(logger.RequestLogger)
+	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
 	r.Post("/", h.CreateShortLink)
 	r.Get("/{id}", h.UseShortLink)

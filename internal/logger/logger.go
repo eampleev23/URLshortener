@@ -7,13 +7,18 @@ import (
 	"time"
 )
 
-// Log будет доступен всему коду как синглтон.
-// Никакой код навыка, кроме функции InitLogger, не должен модифицировать эту переменную.
-// По умолчанию установлен no-op-логер, который не выводит никаких сообщений.
-var Log *zap.Logger = zap.NewNop()
+type ZapLog struct {
+	ZL *zap.Logger
+}
+
+func NewZapLogger(level string) *ZapLog {
+	lg := &ZapLog{ZL: zap.NewNop()}
+	lg.LoggerInitialize(level)
+	return lg
+}
 
 // Initialize инициализирует синглтон логера с необходимым уровнем логирования.
-func Initialize(level string) error {
+func (z *ZapLog) LoggerInitialize(level string) error {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -28,7 +33,7 @@ func Initialize(level string) error {
 	if err != nil {
 		return err
 	}
-	Log = zl
+	z.ZL = zl
 	return nil
 }
 
@@ -60,7 +65,7 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 }
 
 // RequestLogger — middleware-логер для входящих HTTP-запросов.
-func RequestLogger(next http.Handler) http.Handler {
+func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
@@ -77,7 +82,7 @@ func RequestLogger(next http.Handler) http.Handler {
 		next.ServeHTTP(&lw, r)
 
 		duration := time.Since(start)
-		Log.Info("got incoming HTTP request",
+		zl.ZL.Info("got incoming HTTP request",
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method),
 			zap.String("content-type", r.Header.Get("content-type")),

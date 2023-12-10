@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/config"
-	"github.com/eampleev23/URLshortener/internal/logger"
 	"log"
 	"math/rand"
 	"os"
@@ -19,7 +18,6 @@ type LinksCouple struct {
 type Store struct {
 	s  map[string]LinksCouple
 	fp *Producer
-	//c  *config.Config
 }
 
 func NewStore(c *config.Config) *Store {
@@ -41,8 +39,10 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	if _, ok := s.s[strResult]; !ok {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
 		s.s[strResult] = linksCouple
-		e := s.fp.WriteLinksCouple(&linksCouple)
-		fmt.Println("e=", e)
+		err := s.fp.WriteLinksCouple(&linksCouple)
+		if err != nil {
+			// ..
+		}
 		return strResult, nil
 	}
 	return "", nil
@@ -74,20 +74,11 @@ func generateShortURL() (string, error) {
 }
 func (s *Store) ReadStoreFromFile(c *config.Config) {
 	// открываем файл чтобы посчитать количество строк
-
-	fmt.Println("here in ReadStoreFromFile")
-	fmt.Println("c.GetValueByIndex(\"sfilepath\")=", c.GetValueByIndex("sfilepath"))
 	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0600)
 
 	if err != nil {
 		log.Printf("%s", err)
 	}
-
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("dir", dir)
 
 	if err != nil {
 		log.Printf("Error open file: %s", err)
@@ -95,7 +86,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 
 	countLines, err := LineCounter(file)
 	if err != nil {
-		logger.Log.Info("Файл бд пустой")
+		//logger.Log.Info("Файл бд пустой")
 	}
 
 	if countLines > 0 {
