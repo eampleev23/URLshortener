@@ -39,7 +39,24 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		shortURL, err := h.s.SetShortURL(req.LongURL)
+
+		var shortURL string = ""
+		var err error
+		var numberOfAttempts int8 = 0
+
+		for shortURL == "" {
+			shortURL, err = h.s.SetShortURL(req.LongURL)
+			if err != nil {
+				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
+				numberOfAttempts++
+				if numberOfAttempts > 10 {
+					// Попробовали, хватит
+					w.WriteHeader(http.StatusExpectationFailed)
+					return
+				}
+			}
+		}
+
 		shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
 		if err != nil {
 			h.l.ZL.Info("cannot set shortURL:", zap.Error(err))
@@ -65,19 +82,28 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 			longLink = string(b)
 		}
 		// Генерируем и сразу сохраняем короткую ссылку для переданной длинной
-		var shortLink string
-		shortLink = ""
+		var shortLink string = ""
+		var err error
+		var numberOfAttempts int8 = 0
 		for shortLink == "" {
-			shortLink, _ = h.s.SetShortURL(longLink)
+			shortLink, err = h.s.SetShortURL(longLink)
+			if err != nil {
+				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
+				numberOfAttempts++
+				if numberOfAttempts > 10 {
+					// Попробовали, хватит
+					w.WriteHeader(http.StatusExpectationFailed)
+					return
+				}
+			}
 		}
 
 		// Устанавливаем статус 201
 		w.WriteHeader(http.StatusCreated)
-
 		// Устаннавливаем тип контента text/plain
 		w.Header().Set("content-type", "text/plain")
 		shortLinkWithPrefix := h.c.GetValueByIndex("baseshorturl") + "/" + shortLink
-		_, err := w.Write([]byte(shortLinkWithPrefix))
+		_, err = w.Write([]byte(shortLinkWithPrefix))
 		if err != nil {
 			h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
 		}

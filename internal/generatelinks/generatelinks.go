@@ -1,11 +1,14 @@
 package generatelinks
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 // GenerateShortURL Вспомогательная функция для генерации коротких ссылок.
-func GenerateShortURL() (string, error) {
+func GenerateShortURL() string {
 	// заводим слайс рун возможных для сгенерированной короткой ссылки
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
+	//var letterRunes = []rune("ab")
 	lenLetterRunes := len(letterRunes)
 	// делаем из 2 символов
 	numberOfSimbols := 3
@@ -17,5 +20,5 @@ func GenerateShortURL() (string, error) {
 	}
 	// в результат записываем байты преобразованные в строку
 	strResult := string(b)
-	return strResult, nil
+	return strResult
 }

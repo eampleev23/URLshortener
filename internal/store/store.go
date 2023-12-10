@@ -2,6 +2,7 @@ package store
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -38,21 +39,24 @@ func NewStore(c *config.Config, l *logger.ZapLog) *Store {
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
-	strResult, err := generatelinks.GenerateShortURL()
-	if err != nil {
-		return "", fmt.Errorf("%w", err)
-	}
-	if _, ok := s.s[strResult]; !ok {
-		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
-		s.s[strResult] = linksCouple
+	// Сюда приходит короткая ссылка без проверки на коллизии
+	newShortLink := generatelinks.GenerateShortURL()
+
+	// Если такой короткой ссылки еще нет в базе, значит можем спокойно записывать
+	if _, ok := s.s[newShortLink]; !ok {
+		// Создаем структуру по заданию и в нее записываем значение
+		linksCouple := LinksCouple{UUID: "1", ShortURL: newShortLink, OriginalURL: longURL}
+		// Заносим эту структуру в стор
+		s.s[newShortLink] = linksCouple
+		// Также записываем в файл
 		err := s.fp.WriteLinksCouple(&linksCouple)
 		if err != nil {
-			s.l.ZL.Info("Ошибка при записи новой пары ссылок", zap.Error(err))
+			s.l.ZL.Info("Ошибка при записи новой пары ссылок в файл:", zap.Error(err))
 		}
-
-		return strResult, nil
+		return newShortLink, nil
 	}
-	return "", nil
+	// Иначе у нас произошла коллизия
+	return "", errors.New("Произошла коллизия, в бд нет места для новых ссылок")
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {

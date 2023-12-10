@@ -31,21 +31,25 @@ func NewProducer(filename string) (*Producer, error) {
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	data, err := json.Marshal(&linksCouple)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("ошибка после json.Marshal(&linksCouple) writeLinksCouple %w", err)
 	}
 
 	// записываем пару ссылок в буфер
 	if _, err := p.writer.Write(data); err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("ошибка при записи в буфер p.writer.Write(data) %w", err)
 	}
 
 	// добавляем перенос строки
 	if err := p.writer.WriteByte('\n'); err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("ошибка при добавлении переноса строки %w", err)
 	}
 
 	// записываем буфер в файл
-	return fmt.Errorf("%w", p.writer.Flush())
+	err = p.writer.Flush()
+	if err != nil {
+		return fmt.Errorf(" ошибка при вызове p.writer.Flush() %w", err)
+	}
+	return nil
 }
 
 type Consumer struct {
