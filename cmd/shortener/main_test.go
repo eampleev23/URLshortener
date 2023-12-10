@@ -17,8 +17,8 @@ var l *logger.ZapLog
 
 func TestCreateShortLink(t *testing.T) {
 	c, _ = config.NewConfig()
-	s := store.NewStore(c)
 	l, _ := logger.NewZapLogger("info")
+	s := store.NewStore(c, l)
 	h := handlers.NewHandlers(s, c, l)
 
 	testCases := []struct {
@@ -46,7 +46,7 @@ func TestCreateShortLink(t *testing.T) {
 }
 
 func TestUseShortLink(t *testing.T) {
-	s := store.NewStore(c)
+	s := store.NewStore(c, l)
 	l, _ := logger.NewZapLogger("info")
 	h := handlers.NewHandlers(s, c, l)
 
@@ -77,7 +77,7 @@ func TestUseShortLink(t *testing.T) {
 }
 
 func TestJSONHandler(t *testing.T) {
-	s := store.NewStore(c)
+	s := store.NewStore(c, l)
 	l, _ := logger.NewZapLogger("info")
 	h := handlers.NewHandlers(s, c, l)
 	handler := http.HandlerFunc(h.JSONHandler)

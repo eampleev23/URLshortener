@@ -21,12 +21,12 @@ func main() {
 
 func run() error {
 	c, err := config.NewConfig()
+	myLog, _ := logger.NewZapLogger("info")
 	if err != nil {
 		return err
 	}
-	s := store.NewStore(c)
+	s := store.NewStore(c, myLog)
 	s.ReadStoreFromFile(c)
-	myLog, _ := logger.NewZapLogger("info")
 	h := handlers.NewHandlers(s, c, myLog)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))

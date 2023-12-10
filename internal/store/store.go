@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"go.uber.org/zap"
 	"log"
 	"math/rand"
 	"os"
@@ -18,9 +20,10 @@ type LinksCouple struct {
 type Store struct {
 	s  map[string]LinksCouple
 	fp *Producer
+	l  *logger.ZapLog
 }
 
-func NewStore(c *config.Config) *Store {
+func NewStore(c *config.Config, l *logger.ZapLog) *Store {
 	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
@@ -28,6 +31,7 @@ func NewStore(c *config.Config) *Store {
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: &Producer{file: file, writer: bufio.NewWriter(file)},
+		l:  l,
 	}
 }
 
@@ -44,7 +48,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		//	return "", err
 		//}
 		if err != nil {
-			fmt.Errorf("%w", err)
+			s.l.ZL.Info("Ошибка при записи новой пары ссылок", zap.Error(err))
 			//return "", err
 		}
 
