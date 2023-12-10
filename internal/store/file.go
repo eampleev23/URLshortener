@@ -58,7 +58,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 	var perm os.FileMode = 0600
 	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, perm)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 
 	return &Consumer{
