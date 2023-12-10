@@ -31,7 +31,7 @@ func NewProducer(filename string) (*Producer, error) {
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	data, err := json.Marshal(&linksCouple)
 	if err != nil {
-		return err
+		return fmt.Errorf("%w", err)
 	}
 
 	// записываем пару ссылок в буфер
