@@ -62,7 +62,7 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 		return size, fmt.Errorf("%w", err)
 		то падает автотест 7 инкремента
 	*/
-	return size, fmt.Errorf("%w", err)
+	return size, err
 }
 
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
