@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
 )
 
@@ -65,9 +66,21 @@ func (c *Config) SetValues() error {
 		sFilePath = envSFilePath
 	}
 
-	c.SetValue("runaddr", runAddr)
-	c.SetValue("loglevel", logLevel)
-	c.SetValue("baseshorturl", baseShortURL)
-	c.SetValue("sfilepath", sFilePath)
+	err := c.SetValue("runaddr", runAddr)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	err = c.SetValue("loglevel", logLevel)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	err = c.SetValue("baseshorturl", baseShortURL)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	err = c.SetValue("sfilepath", sFilePath)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
 	return nil
 }
