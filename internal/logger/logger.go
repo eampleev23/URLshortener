@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
@@ -28,7 +29,7 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 			return nil, fmt.Errorf("%w", err)
 			то падает автотест 7 инкремента
 		*/
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	// Создаем новую конфигурацию логгера
 	cfg := zap.NewProductionConfig()
