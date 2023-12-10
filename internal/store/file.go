@@ -105,7 +105,7 @@ func LineCounter(r io.Reader) (int, error) {
 			return count, nil
 
 		case err != nil:
-			return count, err
+			return count, fmt.Errorf("%w", err)
 		}
 	}
 }
