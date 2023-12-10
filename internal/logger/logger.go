@@ -18,7 +18,7 @@ func NewZapLogger(level string) *ZapLog {
 }
 
 // Initialize инициализирует синглтон логера с необходимым уровнем логирования.
-func (z *ZapLog) LoggerInitialize(level string) error {
+func (zaplog *ZapLog) LoggerInitialize(level string) error {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -33,7 +33,7 @@ func (z *ZapLog) LoggerInitialize(level string) error {
 	if err != nil {
 		return err
 	}
-	z.ZL = zl
+	zaplog.ZL = zl
 	return nil
 }
 
