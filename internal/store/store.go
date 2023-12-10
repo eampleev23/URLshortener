@@ -56,7 +56,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		return newShortLink, nil
 	}
 	// Иначе у нас произошла коллизия
-	return "", errors.New("Произошла коллизия, в бд нет места для новых ссылок")
+	return "", errors.New("произошла коллизия")
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
