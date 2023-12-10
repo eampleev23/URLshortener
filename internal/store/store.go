@@ -45,12 +45,8 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: strResult, OriginalURL: longURL}
 		s.s[strResult] = linksCouple
 		err := s.fp.WriteLinksCouple(&linksCouple)
-		//if err != nil {
-		//	return "", err
-		//}
 		if err != nil {
 			s.l.ZL.Info("Ошибка при записи новой пары ссылок", zap.Error(err))
-			//return "", err
 		}
 
 		return strResult, nil
@@ -66,8 +62,9 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 }
 
 func (s *Store) ReadStoreFromFile(c *config.Config) {
+	var perm os.FileMode = 0600
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, 0600)
+	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, perm)
 
 	if err != nil {
 		log.Printf("%s", err)
