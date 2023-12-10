@@ -86,7 +86,7 @@ func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 }
 
 func (c *Consumer) Close() error {
-	return c.file.Close()
+	return fmt.Errorf("%w", c.file.Close())
 }
 
 // LineCounter - считает количество строк в файле при инициализации стора.
