@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
+	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
@@ -12,11 +13,13 @@ import (
 )
 
 var c *config.Config
+var l *logger.ZapLog
 
 func TestCreateShortLink(t *testing.T) {
 	c, _ = config.NewConfig()
 	s := store.NewStore(c)
-	h := handlers.NewHandlers(s, c)
+	l := logger.NewZapLogger("info")
+	h := handlers.NewHandlers(s, c, l)
 
 	testCases := []struct {
 		method       string
@@ -44,7 +47,8 @@ func TestCreateShortLink(t *testing.T) {
 
 func TestUseShortLink(t *testing.T) {
 	s := store.NewStore(c)
-	h := handlers.NewHandlers(s, c)
+	l := logger.NewZapLogger("info")
+	h := handlers.NewHandlers(s, c, l)
 
 	testCases := []struct {
 		method       string
@@ -74,7 +78,8 @@ func TestUseShortLink(t *testing.T) {
 
 func TestJSONHandler(t *testing.T) {
 	s := store.NewStore(c)
-	h := handlers.NewHandlers(s, c)
+	l := logger.NewZapLogger("info")
+	h := handlers.NewHandlers(s, c, l)
 	handler := http.HandlerFunc(h.JSONHandler)
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
