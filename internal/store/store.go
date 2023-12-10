@@ -23,18 +23,25 @@ type Store struct {
 	s  map[string]LinksCouple
 	fp *Producer
 	l  *logger.ZapLog
+	c  *config.Config
 }
 
 func NewStore(c *config.Config, l *logger.ZapLog) *Store {
-	var perm os.FileMode = 0600
-	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
-	if err != nil {
-		log.Printf("Error open file: %s", err)
+	if c.GetValueByIndex("sfilepath") != "" {
+		var perm os.FileMode = 0600
+		file, _ := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
+		return &Store{
+			s:  make(map[string]LinksCouple),
+			fp: &Producer{file: file, writer: bufio.NewWriter(file)},
+			l:  l,
+			c:  c,
+		}
 	}
 	return &Store{
 		s:  make(map[string]LinksCouple),
-		fp: &Producer{file: file, writer: bufio.NewWriter(file)},
+		fp: nil,
 		l:  l,
+		c:  c,
 	}
 }
 
@@ -48,10 +55,12 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: newShortLink, OriginalURL: longURL}
 		// Заносим эту структуру в стор
 		s.s[newShortLink] = linksCouple
-		// Также записываем в файл
-		err := s.fp.WriteLinksCouple(&linksCouple)
-		if err != nil {
-			s.l.ZL.Info("Ошибка при записи новой пары ссылок в файл:", zap.Error(err))
+		if s.c.GetValueByIndex("sfilepath") != "" {
+			// Также записываем в файл
+			err := s.fp.WriteLinksCouple(&linksCouple)
+			if err != nil {
+				s.l.ZL.Info("ошибка при записи новой пары ссылок в файл:", zap.Error(err))
+			}
 		}
 		return newShortLink, nil
 	}

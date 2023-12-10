@@ -30,7 +30,10 @@ func run() error {
 	}
 
 	s := store.NewStore(c, myLog)
-	s.ReadStoreFromFile(c)
+	if c.GetValueByIndex("sfilepath") != "" {
+		s.ReadStoreFromFile(c)
+	}
+
 	h := handlers.NewHandlers(s, c, myLog)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))
