@@ -43,20 +43,20 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		shortURL := ""
 		var err error
 		var numberOfAttempts int8 = 0
+		var limitTry int8 = 10
 
 		for shortURL == "" {
 			shortURL, err = h.s.SetShortURL(req.LongURL)
 			if err != nil {
 				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
 				numberOfAttempts++
-				if numberOfAttempts > 10 {
+				if numberOfAttempts > limitTry {
 					// Попробовали, хватит
 					w.WriteHeader(http.StatusExpectationFailed)
 					return
 				}
 			}
 		}
-
 		shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
 		if err != nil {
 			h.l.ZL.Info("cannot set shortURL:", zap.Error(err))
@@ -85,12 +85,13 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		shortLink := ""
 		var err error
 		var numberOfAttempts int8 = 0
+		var limitTry int8 = 10
 		for shortLink == "" {
 			shortLink, err = h.s.SetShortURL(longLink)
 			if err != nil {
 				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
 				numberOfAttempts++
-				if numberOfAttempts > 10 {
+				if numberOfAttempts > limitTry {
 					// Попробовали, хватит
 					w.WriteHeader(http.StatusExpectationFailed)
 					return
