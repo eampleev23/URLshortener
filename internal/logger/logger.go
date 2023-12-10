@@ -24,11 +24,6 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
-		/*
-			Если обернуть ошибку вот так:
-			return nil, fmt.Errorf("%w", err)
-			то падает автотест 7 инкремента
-		*/
 		return nil, fmt.Errorf("%w", err)
 	}
 	// Создаем новую конфигурацию логгера
@@ -43,7 +38,7 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 			return nil, fmt.Errorf("%w", err)
 			то падает автотест 7 инкремента
 		*/
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	zapObj.ZL = zl
 	return zapObj, nil
