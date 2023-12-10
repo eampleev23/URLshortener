@@ -99,7 +99,6 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			ow = cw
 			// не забываем отправить клиенту все сжатые данные после завершения middleware
 			defer cw.Close()
-			//logger.Log.Info("используем сжатие")
 		}
 
 		// проверяем, что клиент отправил серверу сжатые данные в формате gzip
