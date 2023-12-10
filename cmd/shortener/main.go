@@ -29,7 +29,10 @@ func run() error {
 		return fmt.Errorf("%w", err)
 	}
 
-	s := store.NewStore(c, myLog)
+	s, err := store.NewStore(c, myLog)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
 	if c.GetValueByIndex("sfilepath") != "" {
 		s.ReadStoreFromFile(c)
 	}

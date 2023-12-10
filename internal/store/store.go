@@ -26,23 +26,27 @@ type Store struct {
 	c  *config.Config
 }
 
-func NewStore(c *config.Config, l *logger.ZapLog) *Store {
+func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	if c.GetValueByIndex("sfilepath") != "" {
 		var perm os.FileMode = 0600
-		file, _ := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
+		file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
+		if err != nil {
+			return nil, err
+		}
 		return &Store{
 			s:  make(map[string]LinksCouple),
 			fp: &Producer{file: file, writer: bufio.NewWriter(file)},
 			l:  l,
 			c:  c,
-		}
+		}, nil
 	}
+
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: nil,
 		l:  l,
 		c:  c,
-	}
+	}, nil
 }
 
 func (s *Store) SetShortURL(longURL string) (string, error) {
