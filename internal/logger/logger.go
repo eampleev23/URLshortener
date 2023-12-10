@@ -93,7 +93,7 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 
 
 	*/
-	//return size, fmt.Errorf("%w", err)
+	// return size, fmt.Errorf("%w", err)
 	return size, err
 }
 
