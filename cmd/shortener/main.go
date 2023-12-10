@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/eampleev23/URLshortener/internal/compression"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -24,8 +25,9 @@ func run() error {
 	myLog, _ := logger.NewZapLogger("info")
 	if err != nil {
 		myLog.ZL.Info("Ошибка при создании конфига", zap.Error(err))
-		return err
+		return fmt.Errorf("%w", err)
 	}
+
 	s := store.NewStore(c, myLog)
 	s.ReadStoreFromFile(c)
 	h := handlers.NewHandlers(s, c, myLog)
