@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
@@ -23,7 +24,7 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	// Создаем новую конфигурацию логгера
 	cfg := zap.NewProductionConfig()
@@ -32,7 +33,7 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Создаем логгер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w", err)
 	}
 	zapObj.ZL = zl
 	return zapObj, nil
@@ -56,7 +57,7 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
 	r.responseData.size += size // захватываем размер
-	return size, err
+	return size, fmt.Errorf("%w", err)
 }
 
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
