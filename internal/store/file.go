@@ -55,7 +55,8 @@ type Consumer struct {
 }
 
 func NewConsumer(filename string) (*Consumer, error) {
-	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, 0600)
+	var perm os.FileMode = 0600
+	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, perm)
 	if err != nil {
 		return nil, err
 	}
