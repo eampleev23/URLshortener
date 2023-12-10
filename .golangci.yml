@@ -421,6 +421,10 @@ issues:
   exclude: [ ]
   exclude-case-sensitive: false
   exclude-rules:
+    - linters:
+        - errcheck
+      source: "defer"
+
     - path: "_test\\.go"
       text: "fieldalignment: struct with \\d+ pointer bytes could be \\d+"
   fix: false
