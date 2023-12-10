@@ -24,7 +24,8 @@ type Store struct {
 }
 
 func NewStore(c *config.Config, l *logger.ZapLog) *Store {
-	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	var perm os.FileMode = 0600
+	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
 	if err != nil {
 		log.Printf("Error open file: %s", err)
 	}
