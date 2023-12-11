@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// compressWriter реализует интерфейс http.ResponseWriter и позволяет прозрачно для сервера
+// compressWriter реализует интерфейс http.ResponseWriter и позволяет aпрозрачно для сервера
 // сжимать передаваемые данные и выставлять правильные HTTP-заголовки.
 type compressWriter struct {
 	w  http.ResponseWriter
