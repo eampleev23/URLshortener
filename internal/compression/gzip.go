@@ -67,7 +67,7 @@ func (c compressReader) Read(p []byte) (n int, err error) {
 	result, err := c.zr.Read(p)
 	// Здесь при попытке исправить рушатся тесты iter8.
 	// return result, fmt.Errorf("%w", err)
-	return result, err
+	return result, err // #txt for linter
 }
 
 func (c *compressReader) Close() error {
@@ -117,7 +117,12 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			}
 			// меняем тело запроса на новое
 			r.Body = cr
-			defer cr.Close()
+			defer func() {
+				err := cr.Close()
+				if err != nil {
+					log.Printf("ошибка при замене тела запроса на новое в GzipMiddleware %s", fmt.Errorf("%w", err))
+				}
+			}()
 		}
 
 		// передаём управление хендлеру
