@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -96,7 +97,12 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			// меняем оригинальный http.ResponseWriter на новый
 			ow = cw
 			// не забываем отправить клиенту все сжатые данные после завершения middleware.
-			defer cw.Close()
+			defer func() {
+				err := cw.Close()
+				if err != nil {
+					log.Printf("ошибка при отправке сжатых данных в GzipMiddleware %s", fmt.Errorf("%w", err))
+				}
+			}()
 		}
 
 		// проверяем, что клиент отправил серверу сжатые данные в формате gzip

@@ -94,7 +94,7 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 
 	*/
 	// return size, fmt.Errorf("%w", err)
-	return size, err
+	return size, err // return size, nil и проверка выше
 }
 
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
