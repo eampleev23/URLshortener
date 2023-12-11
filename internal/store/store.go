@@ -31,7 +31,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		var perm os.FileMode = 0600
 		file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w", err)
 		}
 		return &Store{
 			s:  make(map[string]LinksCouple),
