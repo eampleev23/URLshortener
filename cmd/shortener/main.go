@@ -33,13 +33,13 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
-	if c.GetValueByIndex("sfilepath") != "" {
+	if c.SFilePath != "" {
 		s.ReadStoreFromFile(c)
 	}
 
 	h := handlers.NewHandlers(s, c, myLog)
 
-	myLog.ZL.Info("Running server", zap.String("address", c.GetValueByIndex("runaddr")))
+	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
 	r := chi.NewRouter()
 	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
@@ -47,7 +47,7 @@ func run() error {
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
 
-	err = http.ListenAndServe(c.GetValueByIndex("runaddr"), r)
+	err = http.ListenAndServe(c.RanAddr, r)
 	if err != nil {
 		log.Fatal(err)
 	}

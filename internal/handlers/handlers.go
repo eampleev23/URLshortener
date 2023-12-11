@@ -57,7 +57,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-		shortURL = h.c.GetValueByIndex("baseshorturl") + "/" + shortURL
+		shortURL = h.c.BaseShortURL + "/" + shortURL
 		if err != nil {
 			h.l.ZL.Info("cannot set shortURL:", zap.Error(err))
 			w.WriteHeader(http.StatusUnprocessableEntity)
@@ -103,7 +103,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		// Устаннавливаем тип контента text/plain
 		w.Header().Set("content-type", "text/plain")
-		shortLinkWithPrefix := h.c.GetValueByIndex("baseshorturl") + "/" + shortLink
+		shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
 		_, err = w.Write([]byte(shortLinkWithPrefix))
 		if err != nil {
 			h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))

@@ -27,9 +27,9 @@ type Store struct {
 }
 
 func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
-	if c.GetValueByIndex("sfilepath") != "" {
+	if c.SFilePath != "" {
 		var perm os.FileMode = 0600
-		file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
+		file, err := os.OpenFile(c.SFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
 		if err != nil {
 			return nil, fmt.Errorf("%w", err)
 		}
@@ -59,7 +59,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: newShortLink, OriginalURL: longURL}
 		// Заносим эту структуру в стор
 		s.s[newShortLink] = linksCouple
-		if s.c.GetValueByIndex("sfilepath") != "" {
+		if s.c.SFilePath != "" {
 			// Также записываем в файл
 			err := s.fp.WriteLinksCouple(&linksCouple)
 			if err != nil {
@@ -82,7 +82,7 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 func (s *Store) ReadStoreFromFile(c *config.Config) {
 	var perm os.FileMode = 0600
 	// открываем файл чтобы посчитать количество строк
-	file, err := os.OpenFile(c.GetValueByIndex("sfilepath"), os.O_RDONLY|os.O_CREATE, perm)
+	file, err := os.OpenFile(c.SFilePath, os.O_RDONLY|os.O_CREATE, perm)
 
 	if err != nil {
 		log.Printf("%s", err)
@@ -99,7 +99,7 @@ func (s *Store) ReadStoreFromFile(c *config.Config) {
 
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
-		fc, err := NewConsumer(c.GetValueByIndex("sfilepath"))
+		fc, err := NewConsumer(c.SFilePath)
 		if err != nil {
 			log.Printf("%s", err)
 		}
