@@ -34,7 +34,7 @@ func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	// записываем буфер в файл
 	err = p.writer.Flush()
 	if err != nil {
-		return fmt.Errorf(" ошибка при вызове p.writer.Flush() %w", err)
+		return fmt.Errorf("failed in case call p.writer.Flush():  %w", err)
 	}
 	return nil
 }
