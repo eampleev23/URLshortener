@@ -13,12 +13,7 @@ type Config struct {
 }
 
 func NewConfig() (*Config, error) {
-	config := &Config{
-		RanAddr:      "",
-		LogLevel:     "",
-		BaseShortURL: "",
-		SFilePath:    "",
-	}
+	config := &Config{}
 	err := config.SetValues()
 	if err != nil {
 		return nil, err
