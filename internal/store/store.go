@@ -10,7 +10,6 @@ import (
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
-	"go.uber.org/zap"
 )
 
 type LinksCouple struct {
@@ -63,13 +62,14 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 			// Также записываем в файл
 			err := s.fp.WriteLinksCouple(&linksCouple)
 			if err != nil {
-				s.l.ZL.Info("ошибка при записи новой пары ссылок в файл:", zap.Error(err))
+				delete(s.s, newShortLink)
+				return "", fmt.Errorf("failed to write a new couple links in file: %w", err)
 			}
 		}
 		return newShortLink, nil
 	}
 	// Иначе у нас произошла коллизия
-	return "", errors.New("произошла коллизия")
+	return "", errors.New("a collision occurred")
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
