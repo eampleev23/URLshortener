@@ -63,7 +63,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 			err := s.fp.WriteLinksCouple(&linksCouple)
 			if err != nil {
 				delete(s.s, newShortLink)
-				return "", fmt.Errorf("failed to write a new couple links in file: %w", err)
+				return "", fmt.Errorf("failed to write a new couple links in file %w", err)
 			}
 		}
 		return newShortLink, nil
