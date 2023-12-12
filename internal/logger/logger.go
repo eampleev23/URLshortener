@@ -16,16 +16,16 @@ type ZapLog struct {
 func NewZapLogger(level string) (*ZapLog, error) {
 	lg := &ZapLog{ZL: zap.NewNop()}
 	var err error
-	lg, err = LoggerInitialize(level, lg)
+	lg, err = Initialize(level, lg)
 	return lg, err
 }
 
-// LoggerInitialize инициализирует синглтон логера с необходимым уровнем логирования.
-func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
+// Initialize инициализирует синглтон логера с необходимым уровнем логирования.
+func Initialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("failed to ParseAtomicLevel by LoggerInitialaze: %w", err)
 	}
 	// Создаем новую конфигурацию логгера
 	cfg := zap.NewProductionConfig()
@@ -34,7 +34,7 @@ func LoggerInitialize(level string, zapObj *ZapLog) (*ZapLog, error) {
 	// Создаем логгер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("failed to build by config in init logger: %w", err)
 	}
 	zapObj.ZL = zl
 	return zapObj, nil
@@ -58,7 +58,7 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
 	if err != nil {
-		return 0, fmt.Errorf("%w", err)
+		return 0, fmt.Errorf("failed to write response by original responsewriter: %w", err)
 	}
 	r.responseData.size += size // захватываем размер
 	return size, nil

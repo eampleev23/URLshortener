@@ -49,7 +49,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 	var perm os.FileMode = 0600
 	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, perm)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("failed to initialize a NewConsumer: %w", err)
 	}
 
 	return &Consumer{
@@ -62,7 +62,7 @@ func NewConsumer(filename string) (*Consumer, error) {
 func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 	// одиночное сканирование до следующей строки
 	if !c.scanner.Scan() {
-		return nil, fmt.Errorf("%w", c.scanner.Err())
+		return nil, fmt.Errorf("failed to read a new string from file by c.scanner.Scan: %w", c.scanner.Err())
 	}
 	// читаем данные из scanner
 	data := c.scanner.Bytes()
@@ -70,14 +70,18 @@ func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 	linksCouple := LinksCouple{}
 	err := json.Unmarshal(data, &linksCouple)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("failed unmarshal in case to read file: %w", err)
 	}
 
 	return &linksCouple, nil
 }
 
 func (c *Consumer) Close() error {
-	return fmt.Errorf("%w", c.file.Close())
+	err := c.file.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close consumer in case read store from file: %w", err)
+	}
+	return nil
 }
 
 // LineCounter - считает количество строк в файле при инициализации стора.
@@ -96,7 +100,7 @@ func LineCounter(r io.Reader) (int, error) {
 			return count, nil
 
 		case err != nil:
-			return count, fmt.Errorf("%w", err)
+			return count, fmt.Errorf("failed to count lines in file storage: %w", err)
 		}
 	}
 }

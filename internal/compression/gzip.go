@@ -58,7 +58,7 @@ type compressReader struct {
 func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	zr, err := gzip.NewReader(r)
 	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("failed to initialize a newCompressReader: %w", err)
 	}
 
 	return &compressReader{
@@ -74,7 +74,7 @@ func (c compressReader) Read(p []byte) (n int, err error) {
 
 func (c *compressReader) Close() error {
 	if err := c.r.Close(); err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to close a *compressReader: %w", err)
 	}
 	return nil
 }
@@ -102,7 +102,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cw.Close()
 				if err != nil {
-					log.Printf("ошибка при отправке сжатых данных в GzipMiddleware %s", fmt.Errorf("%w", err))
+					log.Printf("%s", fmt.Errorf("failed by compresswriter: %w", err))
 				}
 			}()
 		}
@@ -122,7 +122,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cr.Close()
 				if err != nil {
-					log.Printf("ошибка при замене тела запроса на новое в GzipMiddleware %s", fmt.Errorf("%w", err))
+					log.Printf("%s", fmt.Errorf("failed by compressreader: %w", err))
 				}
 			}()
 		}
