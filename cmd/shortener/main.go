@@ -23,8 +23,6 @@ func main() {
 }
 
 func run() error {
-
-	// ниже то, что было до 10 итерации
 	c, err := config.NewConfig()
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new config: %w", err)
