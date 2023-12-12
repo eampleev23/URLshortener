@@ -11,6 +11,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 )
 
@@ -22,6 +23,8 @@ func main() {
 }
 
 func run() error {
+
+	// ниже то, что было до 10 итерации
 	c, err := config.NewConfig()
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new config: %w", err)
@@ -45,6 +48,7 @@ func run() error {
 	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
 	r.Post("/", h.CreateShortLink)
+	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
 

@@ -28,6 +28,15 @@ func NewHandlers(s *store.Store, c *config.Config, l *logger.ZapLog) *Handlers {
 	}
 }
 
+func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
+	pingDB := false
+	if pingDB {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.WriteHeader(http.StatusInternalServerError)
+}
+
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		w.Header().Set("content-type", "application/json")
