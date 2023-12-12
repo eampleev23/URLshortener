@@ -29,9 +29,13 @@ func NewHandlers(s *store.Store, c *config.Config, l *logger.ZapLog) *Handlers {
 }
 
 func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
+
 	pingDB := false
+	h.l.ZL.Info("here")
 	if pingDB {
+		h.l.ZL.Info("here1")
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test"))
 		return
 	}
 	w.WriteHeader(http.StatusInternalServerError)
