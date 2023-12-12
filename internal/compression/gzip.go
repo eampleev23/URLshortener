@@ -65,9 +65,8 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 
 func (c compressReader) Read(p []byte) (n int, err error) {
 	result, err := c.zr.Read(p)
-	// Здесь при попытке исправить рушатся тесты iter8.
-	// return result, fmt.Errorf("%w", err)
-	return result, err // #txt for linter
+	// Здесь из-за специфики Read (устаревшим способом обрабатывается ошибка внутри).
+	return result, err //nolint:wrapcheck,unused
 }
 
 func (c *compressReader) Close() error {

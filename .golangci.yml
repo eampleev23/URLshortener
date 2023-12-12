@@ -421,9 +421,9 @@ issues:
   exclude: [ ]
   exclude-case-sensitive: false
   exclude-rules:
-    - linters:
-        - wrapcheck
-      source: "#txt for linter"
+#    - linters:
+#        - wrapcheck
+#      source: "#txt for linter"
     - path: "_test\\.go"
       text: "fieldalignment: struct with \\d+ pointer bytes could be \\d+"
   fix: false
