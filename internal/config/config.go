@@ -10,6 +10,7 @@ type Config struct {
 	LogLevel     string
 	BaseShortURL string
 	SFilePath    string
+	DBDSN        string
 }
 
 func NewConfig() (*Config, error) {
@@ -30,6 +31,8 @@ func (c *Config) SetValues() error {
 	flag.StringVar(&c.BaseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// принимаем путь к файлу где хранить данные
 	flag.StringVar(&c.SFilePath, "f", "/tmp/short-url-db.json", "file database")
+	// принимаем строку подключения к базе данных
+	flag.StringVar(&c.DBDSN, "d", "host=localhost user=gopher password=gopher dbname=urlshortener sslmode=disable", "postgres database")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
@@ -47,6 +50,9 @@ func (c *Config) SetValues() error {
 
 	if envSFilePath := os.Getenv("FILE_STORAGE_PATH"); envSFilePath != "" {
 		c.SFilePath = envSFilePath
+	}
+	if envDBDSN := os.Getenv("FILE_STORAGE_PATH"); envDBDSN != "" {
+		c.DBDSN = envDBDSN
 	}
 	return nil
 }
