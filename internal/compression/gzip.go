@@ -66,7 +66,7 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 func (c compressReader) Read(p []byte) (n int, err error) {
 	result, err := c.zr.Read(p)
 	// Здесь из-за специфики Read (устаревшим способом обрабатывается ошибка внутри).
-	return result, err //nolint:wrapcheck,unused
+	return result, err //nolint:wrapcheck // устаревший способ обработки ошибки внутри Read
 }
 
 func (c *compressReader) Close() error {
