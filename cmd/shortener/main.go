@@ -23,15 +23,16 @@ func main() {
 
 func run() error {
 	c, err := config.NewConfig()
-	myLog, _ := logger.NewZapLogger("info")
 	if err != nil {
-		myLog.ZL.Info("Ошибка при создании конфига", zap.Error(err))
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to initialize a new config: %w", err)
 	}
-
+	myLog, err := logger.NewZapLogger("info")
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new logger: %w", err)
+	}
 	s, err := store.NewStore(c, myLog)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf("failed to initialize a new store: %w", err)
 	}
 	if c.SFilePath != "" {
 		s.ReadStoreFromFile(c)

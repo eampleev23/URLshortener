@@ -29,7 +29,7 @@ func (c *compressWriter) Header() http.Header {
 
 func (c *compressWriter) Write(p []byte) (int, error) {
 	result, err := c.zw.Write(p)
-	return result, fmt.Errorf("%w", err)
+	return result, fmt.Errorf("failed to write by compressWriter: %w", err)
 }
 
 func (c *compressWriter) WriteHeader(statusCode int) {
@@ -41,7 +41,11 @@ func (c *compressWriter) WriteHeader(statusCode int) {
 
 // Close закрывает gzip.Writer и досылает все данные из буфера.
 func (c *compressWriter) Close() error {
-	return fmt.Errorf("%w", c.zw.Close())
+	err := c.zw.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close gzip.writer: %w", err)
+	}
+	return nil
 }
 
 // compressReader реализует интерфейс io.ReadCloser и позволяет прозрачно для сервера

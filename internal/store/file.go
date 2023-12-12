@@ -15,19 +15,6 @@ type Producer struct {
 	writer *bufio.Writer
 }
 
-func NewProducer(filename string) (*Producer, error) {
-	// открываем файл для записи в конец
-	/*
-		Линтер ругается на 0600, не понятно где взть константу, самому определить?
-	*/
-	var perm os.FileMode = 0600
-	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
-	}
-	return &Producer{file: file}, nil
-}
-
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	data, err := json.Marshal(&linksCouple)
 	if err != nil {
