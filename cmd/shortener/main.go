@@ -1,27 +1,56 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
+	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/eampleev23/URLshortener/internal/compression"
+	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/handlers"
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"github.com/eampleev23/URLshortener/internal/store"
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
 )
 
-var linksCouples = map[string]string{
-	"shortlink": "longlink",
-}
-
-func run(appConfig AppConfig) error {
-	log.Printf("running server on %s", appConfig.flagRunAddr)
-	r := chi.NewRouter()
-	r.Post("/", createShortLink)
-	r.Get("/{id}", useShortLink)
-	return http.ListenAndServe(appConfig.flagRunAddr, r)
-}
-
 func main() {
-	// обрабатываем флаги
-	appConfig := getAppConfig()
-	if err := run(appConfig); err != nil {
+	err := run()
+	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func run() error {
+	c, err := config.NewConfig()
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new config: %w", err)
+	}
+	myLog, err := logger.NewZapLogger("info")
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new logger: %w", err)
+	}
+	s, err := store.NewStore(c, myLog)
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new store: %w", err)
+	}
+	if c.SFilePath != "" {
+		s.ReadStoreFromFile(c)
+	}
+
+	h := handlers.NewHandlers(s, c, myLog)
+
+	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
+	r := chi.NewRouter()
+	r.Use(myLog.RequestLogger)
+	r.Use(compression.GzipMiddleware)
+	r.Post("/", h.CreateShortLink)
+	r.Get("/{id}", h.UseShortLink)
+	r.Post("/api/shorten", h.JSONHandler)
+
+	err = http.ListenAndServe(c.RanAddr, r)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return nil
 }
