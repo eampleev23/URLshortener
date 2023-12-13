@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// iter11 start
+// iter11 start.
 func main() {
 	err := run()
 	if err != nil {
