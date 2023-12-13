@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"io"
 	"log"
@@ -11,6 +13,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 )
 
@@ -29,16 +32,41 @@ func NewHandlers(s *store.Store, c *config.Config, l *logger.ZapLog) *Handlers {
 }
 
 func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
-	pingDB := false
-	if pingDB {
-		w.WriteHeader(http.StatusOK)
-		_, err := w.Write([]byte(""))
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+	// Подключаемся к бд.
+	// Проверяем, что DSN не пустой
+	if len(h.c.DBDSN) == 0 {
+		h.l.ZL.Info("passed DSN is empty")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusInternalServerError)
+	// Пробуем соединиться.
+	db, err := sql.Open("pgx", h.c.DBDSN)
+	if err != nil {
+		h.l.ZL.Info("failed to open a connection to the DB")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Проверяем через контекст из-за специфики работы sql.Open.
+	err = db.PingContext(context.Background())
+	if err != nil {
+		h.l.ZL.Info("PingContext not nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Отложенно закрываем соединение.
+	defer func() {
+		if err := db.Close(); err != nil {
+			h.l.ZL.Info("failed to properly close the DB connection")
+		}
+	}()
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(""))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	return
+
 }
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
