@@ -34,7 +34,7 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, err := w.Write([]byte(""))
 		if err != nil {
-			w.WriteHeader(http.StatusUnprocessableEntity)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
 	}

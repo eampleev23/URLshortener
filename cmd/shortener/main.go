@@ -23,6 +23,7 @@ func main() {
 }
 
 func run() error {
+
 	c, err := config.NewConfig()
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new config: %w", err)
