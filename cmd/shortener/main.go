@@ -11,6 +11,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 )
 
@@ -45,6 +46,7 @@ func run() error {
 	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
 	r.Post("/", h.CreateShortLink)
+	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
 
