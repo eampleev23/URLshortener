@@ -64,9 +64,8 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 	_, err = w.Write([]byte(""))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		h.l.ZL.Info("failed to properly write response")
 	}
-	return
-
 }
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
