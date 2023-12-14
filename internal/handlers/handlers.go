@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
@@ -47,7 +48,11 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Проверяем через контекст из-за специфики работы sql.Open.
-	err = db.PingContext(context.Background())
+	// Устанавливаем таймаут 3 секудны на запрос.
+	var limitTimeQuery = 3 * time.Second
+	ctx, cancel := context.WithTimeout(r.Context(), limitTimeQuery)
+	defer cancel()
+	err = db.PingContext(ctx)
 	if err != nil {
 		h.l.ZL.Info("PingContext not nil")
 		w.WriteHeader(http.StatusInternalServerError)

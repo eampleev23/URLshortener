@@ -32,7 +32,7 @@ func (c *Config) SetValues() error {
 	// принимаем путь к файлу где хранить данные
 	flag.StringVar(&c.SFilePath, "f", "/tmp/short-url-db.json", "file database")
 	// принимаем строку подключения к базе данных
-	flag.StringVar(&c.DBDSN, "d", "postgresql://gopher:gopher1@localhost:5432/gopher_corp", "postgres database")
+	flag.StringVar(&c.DBDSN, "d", "postgresql://gopher:gopher@localhost:5432/gopher_corp", "postgres database")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
