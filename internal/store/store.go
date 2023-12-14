@@ -136,6 +136,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 	if len(s.c.DBDSN) != 0 {
+		s.l.ZL.Info("len > 0")
 		// Создаем подключение
 		db, err := sql.Open("pgx", s.c.DBDSN)
 		if err != nil {
