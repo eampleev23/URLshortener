@@ -30,11 +30,7 @@ type Store struct {
 }
 
 func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
-
-	// Проверяем наличие DSN в конфиге
 	if len(c.DBDSN) != 0 {
-		// Создаем таблицу в БД.
-		// Создаем подключение к БД.
 		db, err := sql.Open("pgx", c.DBDSN)
 		if err != nil {
 			l.ZL.Info("failed to open a connection to the DB in case to create store")
@@ -61,10 +57,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error in case to create table links_couples %w", err)
 		}
-
 	}
-	l.ZL.Info("passed DSN is empty, so we are going to use file store")
-
 	if c.SFilePath != "" {
 		var perm os.FileMode = 0600
 		file, err := os.OpenFile(c.SFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
@@ -78,8 +71,6 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 			c:  c,
 		}, nil
 	}
-	l.ZL.Info("File path is empty, so we are going to use memory store")
-
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: nil,
