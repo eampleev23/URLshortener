@@ -2,14 +2,18 @@ package store
 
 import (
 	"bufio"
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type LinksCouple struct {
@@ -26,6 +30,34 @@ type Store struct {
 }
 
 func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
+	if len(c.DBDSN) != 0 {
+		db, err := sql.Open("pgx", c.DBDSN)
+		if err != nil {
+			l.ZL.Info("failed to open a connection to the DB in case to create store")
+			return nil, fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
+		}
+		// Проверяем через контекст из-за специфики работы sql.Open.
+		// Устанавливаем таймаут 3 секудны на запрос.
+		var limitTimeQuery = 20 * time.Second
+		ctx, cancel := context.WithTimeout(context.Background(), limitTimeQuery)
+		defer cancel()
+		err = db.PingContext(ctx)
+		if err != nil {
+			l.ZL.Info("PingContext not nil in case to create store db")
+			return nil, fmt.Errorf("pingcontext not nil in case to create store db %w", err)
+		}
+		// Отложенно закрываем соединение.
+		defer func() {
+			if err := db.Close(); err != nil {
+				l.ZL.Info("failed to properly close the DB connection")
+			}
+		}()
+
+		err = QueryCreateTableLinksCouples(ctx, db)
+		if err != nil {
+			return nil, fmt.Errorf("error in case to create table links_couples %w", err)
+		}
+	}
 	if c.SFilePath != "" {
 		var perm os.FileMode = 0600
 		file, err := os.OpenFile(c.SFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
@@ -39,7 +71,6 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 			c:  c,
 		}, nil
 	}
-
 	return &Store{
 		s:  make(map[string]LinksCouple),
 		fp: nil,
@@ -58,6 +89,37 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		linksCouple := LinksCouple{UUID: "1", ShortURL: newShortLink, OriginalURL: longURL}
 		// Заносим эту структуру в стор
 		s.s[newShortLink] = linksCouple
+		if len(s.c.DBDSN) != 0 {
+			// добавляем в бд
+			// Создаем подключение
+			db, err := sql.Open("pgx", s.c.DBDSN)
+			if err != nil {
+				return "", fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
+			}
+
+			// Проверяем через контекст из-за специфики работы sql.Open.
+			// Устанавливаем таймаут 3 секудны на запрос.
+			var limitTimeQuery = 20 * time.Second
+			ctx, cancel := context.WithTimeout(context.Background(), limitTimeQuery)
+			defer cancel()
+			err = db.PingContext(ctx)
+			if err != nil {
+				s.l.ZL.Info("PingContext not nil in case to create store db")
+				return "", fmt.Errorf("pingcontext not nil in case to insert entry %w", err)
+			}
+			// Отложенно закрываем соединение.
+			defer func() {
+				if err := db.Close(); err != nil {
+					s.l.ZL.Info("failed to properly close the DB connection")
+				}
+			}()
+
+			err = InsertLinksCouple(ctx, db, linksCouple)
+			if err != nil {
+				return "", fmt.Errorf("failed to insert linkscouple in db %w", err)
+			}
+		}
+
 		if s.c.SFilePath != "" {
 			// Также записываем в файл
 			err := s.fp.WriteLinksCouple(&linksCouple)
@@ -73,6 +135,37 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
+	if len(s.c.DBDSN) != 0 {
+		s.l.ZL.Info("len > 0")
+		// Создаем подключение
+		db, err := sql.Open("pgx", s.c.DBDSN)
+		if err != nil {
+			return "", fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
+		}
+		// Проверяем через контекст из-за специфики работы sql.Open.
+		// Устанавливаем таймаут 3 секудны на запрос.
+		var limitTimeQuery = 20 * time.Second
+		ctx, cancel := context.WithTimeout(context.Background(), limitTimeQuery)
+		defer cancel()
+		err = db.PingContext(ctx)
+		if err != nil {
+			s.l.ZL.Info("PingContext not nil in case to create store db")
+			return "", fmt.Errorf("pingcontext not nil in case to insert entry %w", err)
+		}
+		// Отложенно закрываем соединение.
+		defer func() {
+			if err := db.Close(); err != nil {
+				s.l.ZL.Info("failed to properly close the DB connection")
+			}
+		}()
+
+		originalURL, err := GetOriginalURLByShortURL(ctx, db, shortURL)
+		if err != nil {
+			return "", fmt.Errorf("failed to get original URL %w", err)
+		}
+		return originalURL, nil
+	}
+
 	if c, ok := s.s[shortURL]; ok {
 		return c.OriginalURL, nil
 	}
