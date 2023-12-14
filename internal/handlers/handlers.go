@@ -49,7 +49,7 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Проверяем через контекст из-за специфики работы sql.Open.
 	// Устанавливаем таймаут 3 секудны на запрос.
-	var limitTimeQuery = 3 * time.Second
+	var limitTimeQuery = 20 * time.Second
 	ctx, cancel := context.WithTimeout(r.Context(), limitTimeQuery)
 	defer cancel()
 	err = db.PingContext(ctx)
