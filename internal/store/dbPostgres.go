@@ -26,3 +26,18 @@ VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
 	}
 	return nil
 }
+
+func GetOriginalURLByShortURL(ctx context.Context, db *sql.DB, shortURL string) (string, error) {
+	row := db.QueryRowContext(ctx,
+		"SELECT original_url "+
+			"FROM links_couples WHERE short_url = $1 LIMIT 1", shortURL,
+	)
+	// Готовим переменную для чтения результата
+	var originalURL string
+
+	err := row.Scan(&originalURL) // Разбираем результат
+	if err != nil {
+		return "", fmt.Errorf("faild to get originalURL %w", err)
+	}
+	return originalURL, nil
+}
