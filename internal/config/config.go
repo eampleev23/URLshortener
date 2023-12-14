@@ -51,7 +51,7 @@ func (c *Config) SetValues() error {
 	if envSFilePath := os.Getenv("FILE_STORAGE_PATH"); envSFilePath != "" {
 		c.SFilePath = envSFilePath
 	}
-	if envDBDSN := os.Getenv("FILE_STORAGE_PATH"); envDBDSN != "" {
+	if envDBDSN := os.Getenv("DATABASE_DSN"); envDBDSN != "" {
 		c.DBDSN = envDBDSN
 	}
 	return nil
