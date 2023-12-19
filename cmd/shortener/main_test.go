@@ -1,16 +1,15 @@
 package main
 
-import (
-	"net/http"
-	"net/http/httptest"
-	"testing"
-
+import ( //nolint:goimports // не понятно что не так с импортом
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
+	"net/http" //nolint:goimports // не понятно что не так с импортом
+	"net/http/httptest"
+	"testing"
 )
 
 var c *config.Config
@@ -56,7 +55,7 @@ func TestUseShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	l, err = logger.NewZapLogger("info")
+	l, err := logger.NewZapLogger("info")
 	if err != nil {
 		t.Log(err)
 	}

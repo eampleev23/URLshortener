@@ -1,16 +1,21 @@
 package handlers
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"go.uber.org/zap"
 )
 
@@ -25,6 +30,81 @@ func NewHandlers(s *store.Store, c *config.Config, l *logger.ZapLog) *Handlers {
 		s: s,
 		c: c,
 		l: l,
+	}
+}
+
+func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
+	// Подключаемся к бд.
+	// Проверяем, что DSN не пустой
+	if len(h.c.DBDSN) == 0 {
+		h.l.ZL.Info("passed DSN is empty")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Пробуем соединиться.
+	db, err := sql.Open("pgx", h.c.DBDSN)
+	if err != nil {
+		h.l.ZL.Info("failed to open a connection to the DB")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Проверяем через контекст из-за специфики работы sql.Open.
+	// Устанавливаем таймаут 3 секудны на запрос.
+	var limitTimeQuery = 20 * time.Second
+	ctx, cancel := context.WithTimeout(r.Context(), limitTimeQuery)
+	defer cancel()
+	err = db.PingContext(ctx)
+	if err != nil {
+		h.l.ZL.Info("PingContext not nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Отложенно закрываем соединение.
+	defer func() {
+		if err := db.Close(); err != nil {
+			h.l.ZL.Info("failed to properly close the DB connection")
+		}
+	}()
+
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write([]byte(""))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		h.l.ZL.Info("failed to properly write response")
+	}
+}
+
+func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("here")
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	var req []models.BatchItemReq
+
+	// Декодер работает потоково, кажется это правильнее + короче, чем анмаршал.
+	dec := json.NewDecoder(r.Body)
+	if err := dec.Decode(&req); err != nil {
+		h.l.ZL.Info("cannot decode request JSON body", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	// Получается реквест мы получили корректный, теперь начинаем готовить ответ
+	// Перебираем каждый элемент в запросе
+	res := make([]models.BatchItemRes, 0)
+	for i := range req {
+		shortURL, err := h.s.SetShortURL(req[i].OriginalURL)
+		if err != nil {
+			log.Printf(" set shortURL error %v", err)
+		}
+		res = append(res, models.BatchItemRes{
+			CorrelationID: req[i].CorrelationID,
+			ShortURL:      h.c.BaseShortURL + "/" + shortURL,
+		})
+	}
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(res); err != nil {
+		h.l.ZL.Info("error encoding response in batch handler", zap.Error(err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		return
 	}
 }
 
@@ -118,6 +198,7 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
 		loc, err := h.s.GetLongLinkByShort(chi.URLParam(r, "id"))
+
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
