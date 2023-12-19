@@ -95,7 +95,10 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf(" set shortURL error %v", err)
 		}
-		res = append(res, models.BatchItemRes{CorrelationID: req[i].CorrelationID, ShortURL: h.c.BaseShortURL + "/" + shortURL})
+		res = append(res, models.BatchItemRes{
+			CorrelationID: req[i].CorrelationID,
+			ShortURL:      h.c.BaseShortURL + "/" + shortURL,
+		})
 	}
 	enc := json.NewEncoder(w)
 	if err := enc.Encode(res); err != nil {
