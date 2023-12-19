@@ -50,7 +50,7 @@ func run() error {
 	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
-	r.Post("/api/shorten/batch", h.JSONHandler)
+	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
 
 	err = http.ListenAndServe(c.RanAddr, r)
 	if err != nil {

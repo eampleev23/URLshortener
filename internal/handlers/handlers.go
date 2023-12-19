@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -74,9 +76,32 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("here")
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	var req models.RequestAddShortURL
+	var req []models.BatchItemReq
+
+	// попробовали через декодер, кажется не пошло
+	/*dec := json.NewDecoder(r.Body)
+	if err := dec.Decode(&req); err != nil {
+		h.l.ZL.Info("cannot decode request JSON body", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}*/
+
+	// Пробуем через Unmarshal
+	// читаем тело запроса
+	var buf bytes.Buffer
+	_, err := buf.ReadFrom(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	err = json.Unmarshal(buf.Bytes(), &req)
+	if err != nil {
+		log.Printf("error unmarshal %v", err)
+	}
+	fmt.Println("req=", req)
 }
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
