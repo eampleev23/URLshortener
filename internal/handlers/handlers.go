@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -81,27 +80,33 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	var req []models.BatchItemReq
 
-	// попробовали через декодер, кажется не пошло
-	/*dec := json.NewDecoder(r.Body)
+	// Декодер работает потоково, кажется это правильнее + короче, чем анмаршал.
+	dec := json.NewDecoder(r.Body)
 	if err := dec.Decode(&req); err != nil {
 		h.l.ZL.Info("cannot decode request JSON body", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-	}*/
-
-	// Пробуем через Unmarshal
-	// читаем тело запроса
-	var buf bytes.Buffer
-	_, err := buf.ReadFrom(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	// Получается реквест мы получили корректный, теперь начинаем готовить ответ
+	// Перебираем каждый элемент в запросе
+	res := make([]models.BatchItemRes, 0)
+	for i := range req {
+		shortURL, err := h.s.SetShortURL(req[i].OriginalURL)
+		if err != nil {
+			log.Printf(" set shortURL error %v", err)
+		}
+		res = append(res, models.BatchItemRes{CorrelationID: req[i].CorrelationID, ShortURL: shortURL})
+	}
+	for i := range res {
+		fmt.Println("i, res[i].CorrelationID=", i, res[i].CorrelationID)
+		fmt.Println("i, res[i].ShortURL=", i, res[i].ShortURL)
+	}
+	enc := json.NewEncoder(w)
+	if err := enc.Encode(res); err != nil {
+		h.l.ZL.Info("error encoding response in batch handler", zap.Error(err))
+		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	err = json.Unmarshal(buf.Bytes(), &req)
-	if err != nil {
-		log.Printf("error unmarshal %v", err)
-	}
-	fmt.Println("req=", req)
 }
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
