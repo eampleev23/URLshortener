@@ -73,6 +73,12 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	var req models.RequestAddShortURL
+}
+
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		w.Header().Set("content-type", "application/json")
