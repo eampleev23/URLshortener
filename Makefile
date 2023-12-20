@@ -22,7 +22,7 @@ clean-data:
 
 GOLANGCI_LINT_CACHE?=/tmp/praktikum-golangci-lint-cache
 
-.PHONY: golangci-lint-run
+.PHONY:
 golangci-lint-run: _golangci-lint-rm-unformatted-report
 
 .PHONY: _golangci-lint-reports-mkdir
