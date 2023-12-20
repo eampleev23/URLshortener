@@ -176,6 +176,12 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		for shortLink == "" {
 			shortLink, err = h.s.SetShortURL(longLink)
 			if err != nil {
+				// здесь делаем проверку на конфликт
+				if errors.Is(err, store.ErrConflict) {
+					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
+					w.WriteHeader(http.StatusConflict)
+					return
+				}
 				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
 				numberOfAttempts++
 				if numberOfAttempts > limitTry {
