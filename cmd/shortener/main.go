@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/compression"
 	"log"
 	"net/http"
+
+	"github.com/eampleev23/URLshortener/internal/compression"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -15,7 +16,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// iter13 start.
 func main() {
 	err := run()
 	if err != nil {

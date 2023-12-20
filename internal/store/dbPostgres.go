@@ -3,7 +3,8 @@ package store
 import (
 	"context"
 	"database/sql"
-	"fmt" //nolint:goimports // не понятно что не так с импортом
+	"fmt"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 

@@ -77,7 +77,7 @@ func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("here")
-	w.Header().Set("content-type", "application/json")
+	w.Header().Set("content-type", "application/json") //nolint:goconst // не понятно зачем константа
 	w.WriteHeader(http.StatusCreated)
 	var req []models.BatchItemReq
 

@@ -6,11 +6,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
 	"log"
 	"os"
 	"time"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
@@ -35,10 +36,10 @@ var ErrConflict = errors.New("data conflict")
 
 func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	if len(c.DBDSN) != 0 {
-		db, err := sql.Open("pgx", c.DBDSN)
+		db, err := sql.Open("pgx", c.DBDSN) //nolint:goconst // не понятно зачем константа
 		if err != nil {
 			l.ZL.Info("failed to open a connection to the DB in case to create store")
-			return nil, fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
+			return nil, fmt.Errorf("%w", errors.New("new store sql.open failed"))
 		}
 		// Проверяем через контекст из-за специфики работы sql.Open.
 		// Устанавливаем таймаут 3 секудны на запрос.
@@ -47,13 +48,13 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		defer cancel()
 		err = db.PingContext(ctx)
 		if err != nil {
-			l.ZL.Info("PingContext not nil in case to create store db")
-			return nil, fmt.Errorf("pingcontext not nil in case to create store db %w", err)
+			l.ZL.Info("PingContext not nil in case to create store db NewStore")
+			return nil, fmt.Errorf("new store pingcontext not nil in case to create store db %w", err)
 		}
 		// Отложенно закрываем соединение.
 		defer func() {
 			if err := db.Close(); err != nil {
-				l.ZL.Info("failed to properly close the DB connection")
+				l.ZL.Info("new store failed to properly close the DB connection")
 			}
 		}()
 
@@ -145,7 +146,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 }
 
 func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
-	if len(s.c.DBDSN) != 0 {
+	if len(s.c.DBDSN) != 0 { //nolint:dupl // разные данные получаем
 		// Создаем подключение
 		db, err := sql.Open("pgx", s.c.DBDSN)
 		if err != nil {
@@ -182,7 +183,7 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 }
 
 func (s *Store) GetShortLinkByLong(originalURL string) (string, error) {
-	if len(s.c.DBDSN) != 0 {
+	if len(s.c.DBDSN) != 0 { //nolint:dupl // разные данные получаем
 		// Создаем подключение
 		db, err := sql.Open("pgx", s.c.DBDSN)
 		if err != nil {
