@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -111,7 +112,7 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		w.Header().Set("content-type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		//w.WriteHeader(http.StatusCreated)
 		var req models.RequestAddShortURL
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&req); err != nil {
@@ -128,6 +129,11 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		for shortURL == "" {
 			shortURL, err = h.s.SetShortURL(req.LongURL)
 			if err != nil {
+				if errors.Is(err, store.ErrConflict) {
+					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
+					w.WriteHeader(http.StatusConflict)
+					return
+				}
 				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
 				numberOfAttempts++
 				if numberOfAttempts > limitTry {
@@ -137,6 +143,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
+		w.WriteHeader(http.StatusCreated)
 		shortURL = h.c.BaseShortURL + "/" + shortURL
 		if err != nil {
 			h.l.ZL.Info("cannot set shortURL:", zap.Error(err))

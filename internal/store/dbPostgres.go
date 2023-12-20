@@ -13,7 +13,7 @@ func QueryCreateTableLinksCouples(ctx context.Context, db *sql.DB) error {
         "short_url" VARCHAR(250) NOT NULL DEFAULT '',
         "original_url"  VARCHAR(1000) NOT NULL DEFAULT ''
       );
-CREATE UNIQUE INDEX links_couples_index_by_original_url_unique
+CREATE UNIQUE INDEX IF NOT EXISTS links_couples_index_by_original_url_unique
   ON links_couples
   USING btree(original_url);`)
 	if err != nil {

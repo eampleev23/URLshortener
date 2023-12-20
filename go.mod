@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-resty/resty/v2 v2.10.0
+	github.com/jackc/pgerrcode v0.0.0-20220416144525-469b46aa5efa
 	github.com/jackc/pgx/v5 v5.5.1
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0

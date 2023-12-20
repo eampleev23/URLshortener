@@ -6,6 +6,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"log"
 	"os"
 	"time"
@@ -28,6 +30,8 @@ type Store struct {
 	l  *logger.ZapLog
 	c  *config.Config
 }
+
+var ErrConflict = errors.New("data conflict")
 
 func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	if len(c.DBDSN) != 0 {
@@ -115,7 +119,13 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 			}()
 
 			err = InsertLinksCouple(ctx, db, linksCouple)
+
 			if err != nil {
+				// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
+				var pgErr *pgconn.PgError
+				if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+					err = ErrConflict
+				}
 				return "", fmt.Errorf("failed to insert linkscouple in db %w", err)
 			}
 		}
