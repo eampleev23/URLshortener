@@ -112,7 +112,6 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		w.Header().Set("content-type", "application/json")
-		//w.WriteHeader(http.StatusCreated)
 		var req models.RequestAddShortURL
 		dec := json.NewDecoder(r.Body)
 		if err := dec.Decode(&req); err != nil {
@@ -130,8 +129,21 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			shortURL, err = h.s.SetShortURL(req.LongURL)
 			if err != nil {
 				if errors.Is(err, store.ErrConflict) {
-					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
+					// Пытаемся получить ссылку для оригинального урл, который уже есть в базе.
 					w.WriteHeader(http.StatusConflict)
+					shortURL, err = h.s.GetShortLinkByLong(req.LongURL)
+					if err != nil {
+						log.Printf("%v", err)
+						return
+					}
+					shortURL = h.c.BaseShortURL + "/" + shortURL
+					resp := models.ResponseAddShortURL{ShortURL: shortURL}
+					enc := json.NewEncoder(w)
+					if err := enc.Encode(resp); err != nil {
+						h.l.ZL.Info("error encoding response", zap.Error(err))
+						w.WriteHeader(http.StatusUnprocessableEntity)
+						return
+					}
 					return
 				}
 				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
@@ -180,6 +192,13 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 				if errors.Is(err, store.ErrConflict) {
 					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 					w.WriteHeader(http.StatusConflict)
+					w.Header().Set("content-type", "text/plain")
+					shortLink, err = h.s.GetShortLinkByLong(longLink)
+					shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
+					_, err = w.Write([]byte(shortLinkWithPrefix))
+					if err != nil {
+						h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
+					}
 					return
 				}
 				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
