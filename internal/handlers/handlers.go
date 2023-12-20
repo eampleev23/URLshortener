@@ -194,6 +194,9 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					w.WriteHeader(http.StatusConflict)
 					w.Header().Set("content-type", "text/plain")
 					shortLink, err = h.s.GetShortLinkByLong(longLink)
+					if err != nil {
+						log.Printf("%v", err)
+					}
 					shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
 					_, err = w.Write([]byte(shortLinkWithPrefix))
 					if err != nil {
