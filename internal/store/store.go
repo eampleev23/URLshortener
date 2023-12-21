@@ -109,6 +109,10 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	// Сюда приходит короткая ссылка без проверки на коллизии
 	newShortLink := generatelinks.GenerateShortURL()
 	linksCouple := LinksCouple{ShortURL: newShortLink, OriginalURL: longURL}
+	log.Println("s.useM=", s.useM)
+	log.Println("s.useDB=", s.useDB)
+	log.Println("s.useF=", s.useF)
+	log.Println("filepath=", s.c.SFilePath)
 	switch {
 	case s.useDB:
 		err := InsertLinksCouple(s.ctx, s.DBConn, linksCouple)
