@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
 	"io"
@@ -22,6 +23,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		var limitTry int8 = 10
 		for shortLink == "" {
 			shortLink, err = h.s.SetShortURL(longLink)
+			fmt.Println("shortlink=", shortLink)
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {

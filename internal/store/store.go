@@ -104,6 +104,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	}, nil
 }
 
+// SetShortURL генерирует короткую ссылку без коллизий, но это не точно
 func (s *Store) SetShortURL(longURL string) (string, error) {
 	// Сюда приходит короткая ссылка без проверки на коллизии
 	newShortLink := generatelinks.GenerateShortURL()
@@ -130,6 +131,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	case s.useM:
 		if _, ok := s.s[newShortLink]; !ok {
 			s.s[newShortLink] = linksCouple
+			return newShortLink, nil
 		} else {
 			// Иначе у нас произошла коллизия
 			return "", errors.New("a collision occurred")
