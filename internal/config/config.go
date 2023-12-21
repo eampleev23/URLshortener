@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -11,10 +12,11 @@ type Config struct {
 	BaseShortURL string
 	SFilePath    string
 	DBDSN        string
+	TLimitQuery  time.Duration
 }
 
 func NewConfig() (*Config, error) {
-	config := &Config{}
+	config := &Config{TLimitQuery: 20 * time.Second}
 	err := config.SetValues()
 	if err != nil {
 		return nil, err

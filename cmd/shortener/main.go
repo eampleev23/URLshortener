@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/compression"
 	"log"
 	"net/http"
-
-	"github.com/eampleev23/URLshortener/internal/compression"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -28,18 +27,24 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new config: %w", err)
 	}
+
 	myLog, err := logger.NewZapLogger("info")
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new logger: %w", err)
 	}
+
 	s, err := store.NewStore(c, myLog)
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new store: %w", err)
 	}
-	if c.SFilePath != "" {
-		s.ReadStoreFromFile(c)
+	if len(c.DBDSN) != 0 {
+		// Отложенно закрываем соединение. Если закрыть, то перестает работать. Переносить в main?
+		defer func() {
+			if err := s.DBConn.Close(); err != nil {
+				myLog.ZL.Info("new store failed to properly close the DB connection")
+			}
+		}()
 	}
-
 	h := handlers.NewHandlers(s, c, myLog)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
