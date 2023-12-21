@@ -129,15 +129,19 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		}
 		break
 	case s.useM:
+		log.Printf("s.useM")
 		if _, ok := s.s[newShortLink]; !ok {
+			log.Printf("Зашли в условие, что нет коллизии")
 			s.s[newShortLink] = linksCouple
 			return newShortLink, nil
 		} else {
 			// Иначе у нас произошла коллизия
+			log.Printf("Зашли в условие, что есть коллизия")
 			return "", errors.New("a collision occurred")
 		}
 		break
 	}
+	log.Printf("Зашли ниже всех кейсов")
 	return "", errors.New("a collision occurred")
 }
 
