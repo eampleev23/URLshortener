@@ -141,7 +141,9 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		}
 		break
 	}
-
+	log.Println("s.useM=", s.useM)
+	log.Println("s.useDB=", s.useDB)
+	log.Println("s.useF=", s.useF)
 	log.Printf("Зашли ниже всех кейсов")
 	return "", errors.New("a collision occurred")
 }
