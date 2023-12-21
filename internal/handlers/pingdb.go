@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := h.s.PingDB()
+	_, err := h.s.PingDB(r.Context())
 	if err != nil {
 		log.Printf("not ping %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -6,12 +6,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
-	"os"
-	"time"
-
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"log"
+	"os"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
@@ -45,8 +43,16 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		// Создаем подключение один раз и дальше всегда тольоко его используем
 		dbConn, err := sql.Open("pgx", c.DBDSN) //nolint:goconst // не понятно зачем константа
 		if err != nil {
-			return nil, fmt.Errorf("%w", errors.New("new store sql.open failed"))
+			return nil, fmt.Errorf("error create db connection %w", err)
 		}
+
+		// Отложенно закрываем соединение. Если закрыть, то перестает работать. Переносить в main?
+		//defer func() {
+		//	if err := dbConn.Close(); err != nil {
+		//		l.ZL.Info("new store failed to properly close the DB connection")
+		//	}
+		//}()
+
 		ctx := context.Background()
 		err = QueryCreateTableLinksCouples(ctx, dbConn)
 		if err != nil {
@@ -133,8 +139,8 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	return "", errors.New("a collision occurred")
 }
 
-func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
-	if len(s.c.DBDSN) != 0 { //nolint:dupl // разные данные получаем
+func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (string, error) {
+	if s.useDB { //nolint:dupl // разные данные получаем
 		// Создаем подключение
 		db, err := sql.Open("pgx", s.c.DBDSN)
 		if err != nil {
@@ -142,8 +148,7 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 		}
 		// Проверяем через контекст из-за специфики работы sql.Open.
 		// Устанавливаем таймаут 3 секудны на запрос.
-		var limitTimeQuery = 20 * time.Second
-		ctx, cancel := context.WithTimeout(context.Background(), limitTimeQuery)
+		ctx, cancel := context.WithTimeout(ctxR, s.c.TLimitQuery)
 		defer cancel()
 		err = db.PingContext(ctx)
 		if err != nil {
@@ -170,31 +175,11 @@ func (s *Store) GetLongLinkByShort(shortURL string) (string, error) {
 	return "no match", nil
 }
 
-func (s *Store) GetShortLinkByLong(originalURL string) (string, error) {
-	if len(s.c.DBDSN) != 0 { //nolint:dupl // разные данные получаем
-		// Создаем подключение
-		db, err := sql.Open("pgx", s.c.DBDSN)
-		if err != nil {
-			return "", fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
-		}
-		// Проверяем через контекст из-за специфики работы sql.Open.
-		// Устанавливаем таймаут 3 секудны на запрос.
-		var limitTimeQuery = 20 * time.Second
-		ctx, cancel := context.WithTimeout(context.Background(), limitTimeQuery)
+func (s *Store) GetShortLinkByLong(ctxR context.Context, originalURL string) (string, error) {
+	if s.useDB { //nolint:dupl // разные данные получаем
+		ctx, cancel := context.WithTimeout(ctxR, s.c.TLimitQuery)
 		defer cancel()
-		err = db.PingContext(ctx)
-		if err != nil {
-			s.l.ZL.Info("PingContext not nil in case to create store db")
-			return "", fmt.Errorf("pingcontext not nil in case to insert entry %w", err)
-		}
-		// Отложенно закрываем соединение.
-		defer func() {
-			if err := db.Close(); err != nil {
-				s.l.ZL.Info("failed to properly close the DB connection")
-			}
-		}()
-
-		shortURL, err := GetShortURLByOriginalURL(ctx, db, originalURL)
+		shortURL, err := GetShortURLByOriginalURL(ctx, s.DBConn, originalURL)
 		if err != nil {
 			return "", fmt.Errorf("failed to get original URL %w", err)
 		}
@@ -238,9 +223,9 @@ func (s *Store) readStoreFromFile(c *config.Config) {
 	}
 }
 
-func (s *Store) PingDB() (bool, error) {
+func (s *Store) PingDB(ctxR context.Context) (bool, error) {
 	// Проверяем через контекст из-за специфики работы sql.Open.
-	ctx, cancel := context.WithTimeout(s.ctx, s.c.TLimitQuery)
+	ctx, cancel := context.WithTimeout(ctxR, s.c.TLimitQuery)
 	defer cancel()
 	err := s.DBConn.PingContext(ctx)
 	if err != nil {

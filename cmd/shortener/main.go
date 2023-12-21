@@ -38,7 +38,7 @@ func run() error {
 		return fmt.Errorf("failed to initialize a new store: %w", err)
 	}
 	if len(c.DBDSN) != 0 {
-		// Отложенно закрываем соединение. Если закрыть, то перестает работать. Переносить в main?
+		// Отложенно закрываем соединение. Если вызвать при создании стора, то перестает работать. Переносить в main?
 		defer func() {
 			if err := s.DBConn.Close(); err != nil {
 				myLog.ZL.Info("new store failed to properly close the DB connection")

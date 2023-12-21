@@ -2,24 +2,22 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("here")
 	w.Header().Set("content-type", "application/json") //nolint:goconst // не понятно зачем константа
-	w.WriteHeader(http.StatusCreated)
 	var req []models.BatchItemReq
 
 	// Декодер работает потоково, кажется это правильнее + короче, чем анмаршал.
 	dec := json.NewDecoder(r.Body)
 	if err := dec.Decode(&req); err != nil {
 		h.l.ZL.Info("cannot decode request JSON body", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// Получается реквест мы получили корректный, теперь начинаем готовить ответ
@@ -29,16 +27,20 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 		shortURL, err := h.s.SetShortURL(req[i].OriginalURL)
 		if err != nil {
 			log.Printf(" set shortURL error %v", err)
+			w.WriteHeader(http.StatusConflict)
+			return
 		}
+		resURL, err := url.JoinPath(h.c.BaseShortURL + "/" + shortURL)
 		res = append(res, models.BatchItemRes{
 			CorrelationID: req[i].CorrelationID,
-			ShortURL:      h.c.BaseShortURL + "/" + shortURL,
+			ShortURL:      resURL,
 		})
 	}
 	enc := json.NewEncoder(w)
+	w.WriteHeader(http.StatusCreated)
 	if err := enc.Encode(res); err != nil {
 		h.l.ZL.Info("error encoding response in batch handler", zap.Error(err))
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }

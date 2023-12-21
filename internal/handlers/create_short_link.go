@@ -28,7 +28,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 					w.WriteHeader(http.StatusConflict)
 					w.Header().Set("content-type", "text/plain")
-					shortLink, err = h.s.GetShortLinkByLong(longLink)
+					shortLink, err = h.s.GetShortLinkByLong(r.Context(), longLink)
 					if err != nil {
 						log.Printf("%v", err)
 					}
@@ -36,6 +36,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					_, err = w.Write([]byte(shortLinkWithPrefix))
 					if err != nil {
 						h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
+						w.WriteHeader(http.StatusInternalServerError)
 					}
 					return
 				}
@@ -57,6 +58,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		_, err = w.Write([]byte(shortLinkWithPrefix))
 		if err != nil {
 			h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
