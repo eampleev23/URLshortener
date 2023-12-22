@@ -143,7 +143,6 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 			log.Printf("Зашли в условие, что есть коллизия")
 			return "", errors.New("a collision occurred")
 		}
-		break
 	default:
 		log.Printf("default")
 		if _, ok := s.s[newShortLink]; !ok {
@@ -155,13 +154,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 			log.Printf("Зашли в условие, что есть коллизия")
 			return "", errors.New("a collision occurred")
 		}
-		break
 	}
-	log.Println("s.useM=", s.useM)
-	log.Println("s.useDB=", s.useDB)
-	log.Println("s.useF=", s.useF)
-	log.Printf("Зашли ниже всех кейсов")
-	return "", errors.New("a collision occurred")
 }
 
 func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (string, error) {
