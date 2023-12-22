@@ -31,6 +31,9 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		resURL, err := url.JoinPath(h.c.BaseShortURL + "/" + shortURL)
+		if err != nil {
+			h.l.ZL.Info("error url.joinpath", zap.Error(err))
+		}
 		res = append(res, models.BatchItemRes{
 			CorrelationID: req[i].CorrelationID,
 			ShortURL:      resURL,
