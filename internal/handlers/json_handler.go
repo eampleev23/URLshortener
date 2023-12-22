@@ -33,6 +33,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortURL
 			resp := models.ResponseAddShortURL{ShortURL: shortLinkWithPrefix}
 			enc := json.NewEncoder(w)
+			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusConflict)
 			if err := enc.Encode(resp); err != nil {
 				h.l.ZL.Info("error encoding response", zap.Error(err))
@@ -47,6 +48,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortURL
 	resp := models.ResponseAddShortURL{ShortURL: shortLinkWithPrefix}
 	enc := json.NewEncoder(w)
+	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := enc.Encode(resp); err != nil {
 		h.l.ZL.Info("error encoding response", zap.Error(err))
