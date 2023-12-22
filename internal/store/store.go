@@ -130,6 +130,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		log.Printf("case s.useF:")
 		err := s.fp.WriteLinksCouple(&linksCouple)
 		if err != nil {
+			log.Printf("case s.useF:err not nil")
 			delete(s.s, newShortLink)
 			return "", fmt.Errorf("failed to write a new couple links in file %w", err)
 		}

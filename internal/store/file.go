@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 )
 
@@ -17,6 +18,7 @@ type Producer struct {
 
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	data, err := json.Marshal(&linksCouple)
+	log.Printf("case WriteLinksCouple")
 	if err != nil {
 		return fmt.Errorf("ошибка после json.Marshal(&linksCouple) writeLinksCouple %w", err)
 	}
