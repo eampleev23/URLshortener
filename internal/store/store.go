@@ -134,6 +134,15 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 			delete(s.s, newShortLink)
 			return "", fmt.Errorf("failed to write a new couple links in file %w", err)
 		}
+		if _, ok := s.s[newShortLink]; !ok {
+			log.Printf("Зашли в условие, что нет коллизии")
+			s.s[newShortLink] = linksCouple
+			return newShortLink, nil
+		} else {
+			// Иначе у нас произошла коллизия
+			log.Printf("Зашли в условие, что есть коллизия")
+			return "", errors.New("a collision occurred")
+		}
 		break
 	default:
 		log.Printf("default")
