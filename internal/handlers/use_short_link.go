@@ -10,16 +10,15 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
+		log.Printf("зашли в UseShortLink")
 		loc, err := h.s.GetLongLinkByShort(r.Context(), chi.URLParam(r, "id"))
-
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
+		log.Printf("loc=%v", loc)
 		w.Header().Add("Location", loc)
-		// добавляю для эксперимента
 		w.WriteHeader(http.StatusTemporaryRedirect)
-
 		// Если совпадений в бд нет, то ставим статус код бэд реквест
 		if loc == "no match" {
 			w.WriteHeader(http.StatusBadRequest)
