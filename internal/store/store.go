@@ -6,10 +6,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
 	"log"
 	"os"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
@@ -29,7 +30,7 @@ type Store struct {
 	l      *logger.ZapLog
 	c      *config.Config
 	DBConn *sql.DB
-	ctx    context.Context
+	ctx    context.Context //nolint:containedctx // надо разбираться один на один
 	useDB  bool
 	useF   bool
 	useM   bool
@@ -41,17 +42,17 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	if len(c.DBDSN) != 0 {
 		// Используем только базу данных и не используем файл и озу
 		// Создаем подключение один раз и дальше всегда тольоко его используем
-		dbConn, err := sql.Open("pgx", c.DBDSN) //nolint:goconst // не понятно зачем константа
+		dbConn, err := sql.Open("pgx", c.DBDSN)
 		if err != nil {
 			return nil, fmt.Errorf("error create db connection %w", err)
 		}
 
 		// Отложенно закрываем соединение. Если закрыть, то перестает работать. Переносить в main?
-		//defer func() {
+		// defer func() {
 		//	if err := dbConn.Close(); err != nil {
 		//		l.ZL.Info("new store failed to properly close the DB connection")
 		//	}
-		//}()
+		// }()
 
 		ctx := context.Background()
 		err = QueryCreateTableLinksCouples(ctx, dbConn)
@@ -104,15 +105,11 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 	}, nil
 }
 
-// SetShortURL генерирует короткую ссылку без коллизий, но это не точно
+// SetShortURL генерирует короткую ссылку без коллизий, но это не точно.
 func (s *Store) SetShortURL(longURL string) (string, error) {
 	// Сюда приходит короткая ссылка без проверки на коллизии
 	newShortLink := generatelinks.GenerateShortURL()
 	linksCouple := LinksCouple{ShortURL: newShortLink, OriginalURL: longURL}
-	log.Println("s.useM=", s.useM)
-	log.Println("s.useDB=", s.useDB)
-	log.Println("s.useF=", s.useF)
-	log.Println("filepath=", s.c.SFilePath)
 	switch {
 	case s.useDB:
 		log.Printf("case s.useDB:")
@@ -158,7 +155,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 }
 
 func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (string, error) {
-	if s.useDB { //nolint:dupl // разные данные получаем
+	if s.useDB {
 		// Создаем подключение
 		db, err := sql.Open("pgx", s.c.DBDSN)
 		if err != nil {
@@ -194,7 +191,7 @@ func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (strin
 }
 
 func (s *Store) GetShortLinkByLong(ctxR context.Context, originalURL string) (string, error) {
-	if s.useDB { //nolint:dupl // разные данные получаем
+	if s.useDB {
 		ctx, cancel := context.WithTimeout(ctxR, s.c.TLimitQuery)
 		defer cancel()
 		shortURL, err := GetShortURLByOriginalURL(ctx, s.DBConn, originalURL)

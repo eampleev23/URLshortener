@@ -3,11 +3,12 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/store"
-	"go.uber.org/zap"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/eampleev23/URLshortener/internal/store"
+	"go.uber.org/zap"
 )
 
 func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {

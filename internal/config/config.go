@@ -16,7 +16,7 @@ type Config struct {
 }
 
 func NewConfig() (*Config, error) {
-	config := &Config{TLimitQuery: 20 * time.Second}
+	config := &Config{TLimitQuery: 20 * time.Second} //nolint:gomnd //nomagik
 	err := config.SetValues()
 	if err != nil {
 		return nil, err

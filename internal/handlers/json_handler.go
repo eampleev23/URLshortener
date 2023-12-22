@@ -3,11 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"log"
+	"net/http"
+
 	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
-	"log"
-	"net/http"
 )
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +43,6 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-
 	}
 	// Здесь получается такой ссылки нет в базе, создаем новую
 	shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortURL

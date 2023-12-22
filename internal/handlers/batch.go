@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/eampleev23/URLshortener/internal/models"
-	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/eampleev23/URLshortener/internal/models"
+	"go.uber.org/zap"
 )
 
 func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
