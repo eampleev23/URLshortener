@@ -115,6 +115,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	log.Println("filepath=", s.c.SFilePath)
 	switch {
 	case s.useDB:
+		log.Printf("case s.useDB:")
 		err := InsertLinksCouple(s.ctx, s.DBConn, linksCouple)
 		if err != nil {
 			// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
@@ -126,6 +127,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		}
 		return newShortLink, nil
 	case s.useF:
+		log.Printf("case s.useF:")
 		err := s.fp.WriteLinksCouple(&linksCouple)
 		if err != nil {
 			delete(s.s, newShortLink)
