@@ -27,17 +27,19 @@ func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	if _, err := p.writer.Write(data); err != nil {
 		return fmt.Errorf("ошибка при записи в буфер p.writer.Write(data) %w", err)
 	}
-
+	log.Printf("записываем пару ссылок в буфер")
 	// добавляем перенос строки
 	if err := p.writer.WriteByte('\n'); err != nil {
 		return fmt.Errorf("ошибка при добавлении переноса строки %w", err)
 	}
-
+	log.Printf("добавляем перенос строки")
 	// записываем буфер в файл
 	err = p.writer.Flush()
+	log.Printf("записываем буфер в файл")
 	if err != nil {
 		return fmt.Errorf("failed in case call p.writer.Flush():  %w", err)
 	}
+	log.Printf("возвращаем nil")
 	return nil
 }
 

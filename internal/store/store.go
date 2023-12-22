@@ -79,7 +79,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		}
 
 		store := &Store{
-			s:      nil,
+			s:      make(map[string]LinksCouple),
 			fp:     &Producer{file: file, writer: bufio.NewWriter(file)},
 			l:      l,
 			c:      c,
