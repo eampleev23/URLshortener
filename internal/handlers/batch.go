@@ -31,7 +31,7 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		resURL, err := url.JoinPath(h.c.BaseShortURL + "/" + shortURL)
+		resURL, err := url.JoinPath(h.c.BaseShortURL, shortURL)
 		if err != nil {
 			h.l.ZL.Info("error url.joinpath", zap.Error(err))
 		}
