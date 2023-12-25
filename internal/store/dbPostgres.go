@@ -33,8 +33,7 @@ VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
 
 func GetOriginalURLByShortURL(ctx context.Context, db *sql.DB, shortURL string) (string, error) {
 	row := db.QueryRowContext(ctx,
-		"SELECT original_url "+
-			"FROM links_couples WHERE short_url = $1 LIMIT 1", shortURL,
+		`SELECT original_url FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
 	)
 	// Готовим переменную для чтения результата
 	var originalURL string
