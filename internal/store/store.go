@@ -55,10 +55,6 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		// }()
 
 		ctx := context.Background()
-		err = QueryCreateTableLinksCouples(ctx, dbConn)
-		if err != nil {
-			return nil, fmt.Errorf("error create table %w", err)
-		}
 		return &Store{
 			s:      nil,
 			fp:     nil,
