@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 
 	"github.com/go-chi/chi/v5"
 )

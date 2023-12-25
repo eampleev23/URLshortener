@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
 func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
