@@ -54,7 +54,7 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 		// }()
 
 		ctx := context.Background()
-		return &Store{
+		store := &Store{
 			s:      nil,
 			fp:     nil,
 			l:      l,
@@ -64,7 +64,12 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 			useDB:  true,
 			useF:   false,
 			useM:   false,
-		}, nil
+		}
+		err = store.QueryCreateTableLinksCouples()
+		if err != nil {
+			return nil, fmt.Errorf("ошибка при создании таблицы для автотестов (миграции есть): %w", err)
+		}
+		return store, nil
 	}
 	if c.SFilePath != "" {
 		// используем только файл
