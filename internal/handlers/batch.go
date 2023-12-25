@@ -28,7 +28,7 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 		shortURL, err := h.s.SetShortURL(req[i].OriginalURL)
 		if err != nil {
 			log.Printf(" set shortURL error %v", err)
-			w.WriteHeader(http.StatusConflict)
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		resURL, err := url.JoinPath(h.c.BaseShortURL + "/" + shortURL)
