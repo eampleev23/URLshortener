@@ -104,13 +104,13 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 }
 
 // SetShortURL генерирует короткую ссылку без коллизий, но это не точно.
-func (s *Store) SetShortURL(longURL string) (string, error) {
+func (s *Store) SetShortURL(ctxR context.Context, longURL string) (string, error) {
 	// Сюда приходит короткая ссылка без проверки на коллизии
 	newShortLink := generatelinks.GenerateShortURL()
 	linksCouple := LinksCouple{ShortURL: newShortLink, OriginalURL: longURL}
 	switch {
 	case s.useDB:
-		err := InsertLinksCouple(s.ctx, s.DBConn, linksCouple)
+		err := s.InsertLinksCouple(ctxR, linksCouple)
 		if err != nil {
 			// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
 			var pgErr *pgconn.PgError
@@ -146,7 +146,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 
 func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (string, error) {
 	if s.useDB {
-		originalURL, err := GetOriginalURLByShortURL(ctxR, s.DBConn, shortURL)
+		originalURL, err := s.GetOriginalURLByShortURL(ctxR, shortURL)
 		if err != nil {
 			return "", fmt.Errorf("failed to get original URL %w", err)
 		}
@@ -161,9 +161,7 @@ func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (strin
 
 func (s *Store) GetShortLinkByLong(ctxR context.Context, originalURL string) (string, error) {
 	if s.useDB {
-		ctx, cancel := context.WithTimeout(ctxR, s.c.TLimitQuery)
-		defer cancel()
-		shortURL, err := GetShortURLByOriginalURL(ctx, s.DBConn, originalURL)
+		shortURL, err := s.GetShortURLByOriginalURL(ctxR, originalURL)
 		if err != nil {
 			return "", fmt.Errorf("failed to get original URL %w", err)
 		}

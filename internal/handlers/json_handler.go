@@ -20,7 +20,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortURL, err := h.s.SetShortURL(req.LongURL)
+	shortURL, err := h.s.SetShortURL(r.Context(), req.LongURL)
 	if err != nil {
 		h.l.ZL.Info("Ошибка создания новой ссылки: ", zap.Error(err))
 		// Если такая ссылка уже есть в базе, возвращаем шорт для нее

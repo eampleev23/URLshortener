@@ -22,7 +22,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		var numberOfAttempts int8 = 0
 		var limitTry int8 = 10
 		for shortLink == "" {
-			shortLink, err = h.s.SetShortURL(longLink)
+			shortLink, err = h.s.SetShortURL(r.Context(), longLink)
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {
