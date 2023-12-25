@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/jackc/pgerrcode"
@@ -85,10 +84,13 @@ func NewStore(c *config.Config, l *logger.ZapLog) (*Store, error) {
 			useF:   true,
 			useM:   false,
 		}
-		store.readStoreFromFile(c)
+		err = store.readStoreFromFile(c)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
 		return store, nil
 	}
-	// иначе используем ОЗУ
+	// Иначе используем только ОЗУ.
 	return &Store{
 		s:      make(map[string]LinksCouple),
 		fp:     nil,
@@ -108,7 +110,6 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 	linksCouple := LinksCouple{ShortURL: newShortLink, OriginalURL: longURL}
 	switch {
 	case s.useDB:
-		log.Printf("case s.useDB:")
 		err := InsertLinksCouple(s.ctx, s.DBConn, linksCouple)
 		if err != nil {
 			// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
@@ -120,31 +121,24 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 		}
 		return newShortLink, nil
 	case s.useF:
-		log.Printf("case s.useF:")
 		err := s.fp.WriteLinksCouple(&linksCouple)
 		if err != nil {
-			log.Printf("case s.useF:err not nil")
 			delete(s.s, newShortLink)
 			return "", fmt.Errorf("failed to write a new couple links in file %w", err)
 		}
 		if _, ok := s.s[newShortLink]; !ok {
-			log.Printf("Зашли в условие, что нет коллизии")
 			s.s[newShortLink] = linksCouple
 			return newShortLink, nil
 		} else {
 			// Иначе у нас произошла коллизия
-			log.Printf("Зашли в условие, что есть коллизия")
 			return "", errors.New("a collision occurred")
 		}
 	default:
-		log.Printf("default")
 		if _, ok := s.s[newShortLink]; !ok {
-			log.Printf("Зашли в условие, что нет коллизии")
 			s.s[newShortLink] = linksCouple
 			return newShortLink, nil
 		} else {
 			// Иначе у нас произошла коллизия
-			log.Printf("Зашли в условие, что есть коллизия")
 			return "", errors.New("a collision occurred")
 		}
 	}
@@ -178,39 +172,31 @@ func (s *Store) GetShortLinkByLong(ctxR context.Context, originalURL string) (st
 	return "no match", nil
 }
 
-func (s *Store) readStoreFromFile(c *config.Config) {
+func (s *Store) readStoreFromFile(c *config.Config) error {
 	var perm os.FileMode = 0600
 	// открываем файл чтобы посчитать количество строк
 	file, err := os.OpenFile(c.SFilePath, os.O_RDONLY|os.O_CREATE, perm)
-
 	if err != nil {
-		log.Printf("%s", err)
+		return fmt.Errorf("ошибка при попытке открытия файла при стартовой загрузке данных: %w", err)
 	}
-
-	if err != nil {
-		log.Printf("Error open file: %s", err)
-	}
-
 	countLines, err := LineCounter(file)
-	if err != nil {
-		log.Printf("%s", err)
-	}
+	return fmt.Errorf("ошибка при подсчете количества строк в файле при стартовой загрузке данных: %w", err)
 
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
 		fc, err := NewConsumer(c.SFilePath)
 		if err != nil {
-			log.Printf("%s", err)
+			return fmt.Errorf("ошибка при создании читателя файла при стартовом получении данных: %w", err)
 		}
 		for i := 0; i < countLines; i++ {
 			linksCouple, err := fc.ReadLinksCouple()
 			if err != nil {
-				log.Printf("%s", err)
+				return fmt.Errorf("ошибка при чтении строки файла при стартовом получении данных: %w", err)
 			}
-			fmt.Println("linksCouple=", linksCouple)
 			s.s[linksCouple.ShortURL] = *linksCouple
 		}
 	}
+	return nil
 }
 
 func (s *Store) PingDB(ctxR context.Context) (bool, error) {

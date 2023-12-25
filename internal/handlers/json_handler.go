@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/eampleev23/URLshortener/internal/models"
@@ -29,7 +28,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 			shortURL, err = h.s.GetShortLinkByLong(r.Context(), req.LongURL)
 			if err != nil {
-				log.Printf("ошибка получения существующей короткой ссылки при конфликте%v", err)
+				h.l.ZL.Error("ошибка получения существующей короткой ссылки при конфликте", zap.Error(err))
 			}
 			shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortURL
 			resp := models.ResponseAddShortURL{ShortURL: shortLinkWithPrefix}

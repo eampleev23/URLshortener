@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"log"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := h.s.PingDB(r.Context())
 	if err != nil {
-		log.Printf("not ping %v", err)
+		h.l.ZL.Info("not ping", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

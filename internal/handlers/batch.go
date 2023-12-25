@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/url"
 
@@ -27,7 +26,6 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	for i := range req {
 		shortURL, err := h.s.SetShortURL(req[i].OriginalURL)
 		if err != nil {
-			log.Printf(" set shortURL error %v", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

@@ -84,7 +84,6 @@ func (c *compressReader) Close() error {
 
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("Используем мидлвар сжатия")
 		// по умолчанию устанавливаем оригинальный http.ResponseWriter как тот,
 		// который будем передавать следующей функции
 		ow := w
@@ -106,7 +105,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cw.Close()
 				if err != nil {
-					log.Printf("%s", fmt.Errorf("failed by compresswriter: %w", err))
+					log.Printf("%s", fmt.Errorf("middleware failed by compresswriter: %w", err))
 				}
 			}()
 		}
@@ -126,7 +125,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cr.Close()
 				if err != nil {
-					log.Printf("%s", fmt.Errorf("failed by compressreader: %w", err))
+					log.Printf("%s", fmt.Errorf("middleware failed by compressreader: %w", err))
 				}
 			}()
 		}

@@ -2,10 +2,9 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"io"
-	"log"
 	"net/http"
+	"net/url"
 
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
@@ -24,7 +23,6 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		var limitTry int8 = 10
 		for shortLink == "" {
 			shortLink, err = h.s.SetShortURL(longLink)
-			fmt.Println("shortlink=", shortLink)
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {
@@ -33,7 +31,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					w.Header().Set("content-type", "text/plain")
 					shortLink, err = h.s.GetShortLinkByLong(r.Context(), longLink)
 					if err != nil {
-						log.Printf("%v", err)
+						h.l.ZL.Info("error GetShortLinkByLong", zap.Error(err))
 					}
 					shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
 					_, err = w.Write([]byte(shortLinkWithPrefix))
@@ -43,11 +41,10 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					}
 					return
 				}
-				h.l.ZL.Info("Произошла коллизия: ", zap.Error(err))
 				numberOfAttempts++
 				if numberOfAttempts > limitTry {
 					// Попробовали, хватит
-					w.WriteHeader(http.StatusExpectationFailed)
+					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
 			}
@@ -57,7 +54,10 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		// Устаннавливаем тип контента text/plain
 		w.Header().Set("content-type", "text/plain")
-		shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
+		shortLinkWithPrefix, err := url.JoinPath(h.c.BaseShortURL, shortLink)
+		if err != nil {
+			h.l.ZL.Info("error url.joinpath in handler", zap.Error(err))
+		}
 		_, err = w.Write([]byte(shortLinkWithPrefix))
 		if err != nil {
 			h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
