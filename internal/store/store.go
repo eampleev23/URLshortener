@@ -156,28 +156,7 @@ func (s *Store) SetShortURL(longURL string) (string, error) {
 
 func (s *Store) GetLongLinkByShort(ctxR context.Context, shortURL string) (string, error) {
 	if s.useDB {
-		// Создаем подключение
-		db, err := sql.Open("pgx", s.c.DBDSN)
-		if err != nil {
-			return "", fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
-		}
-		// Проверяем через контекст из-за специфики работы sql.Open.
-		// Устанавливаем таймаут 3 секудны на запрос.
-		ctx, cancel := context.WithTimeout(ctxR, s.c.TLimitQuery)
-		defer cancel()
-		err = db.PingContext(ctx)
-		if err != nil {
-			s.l.ZL.Info("PingContext not nil in case to create store db")
-			return "", fmt.Errorf("pingcontext not nil in case to insert entry %w", err)
-		}
-		// Отложенно закрываем соединение.
-		defer func() {
-			if err := db.Close(); err != nil {
-				s.l.ZL.Info("failed to properly close the DB connection")
-			}
-		}()
-
-		originalURL, err := GetOriginalURLByShortURL(ctx, db, shortURL)
+		originalURL, err := GetOriginalURLByShortURL(ctxR, s.DBConn, shortURL)
 		if err != nil {
 			return "", fmt.Errorf("failed to get original URL %w", err)
 		}
