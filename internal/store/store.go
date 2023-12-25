@@ -178,8 +178,9 @@ func (s *Store) readStoreFromFile(c *config.Config) error {
 		return fmt.Errorf("ошибка при попытке открытия файла при стартовой загрузке данных: %w", err)
 	}
 	countLines, err := LineCounter(file)
-	return fmt.Errorf("ошибка при подсчете количества строк в файле при стартовой загрузке данных: %w", err)
-
+	if err != nil {
+		return fmt.Errorf("ошибка при подсчете количества строк в файле при стартовой загрузке данных: %w", err)
+	}
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
 		fc, err := NewConsumer(c.SFilePath)
