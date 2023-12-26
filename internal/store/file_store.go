@@ -3,16 +3,39 @@ package store
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 )
 
+type FileStore struct {
+	producer Producer
+	consumer Consumer
+}
 type Producer struct {
 	file *os.File
 	// добавляем Writer в Producer
 	writer *bufio.Writer
+}
+type Consumer struct {
+	file *os.File
+	// заменяем Reader на Scanner
+	scanner *bufio.Scanner
+}
+
+func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (shortURL string, err error) {
+	shortURL = ""
+	return shortURL, nil
+}
+func (fs *FileStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
+	originalURL = ""
+	return originalURL, nil
+}
+func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL string) (shortURL string, err error) {
+	shortURL = ""
+	return shortURL, nil
 }
 
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
@@ -35,13 +58,6 @@ func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	}
 	return nil
 }
-
-type Consumer struct {
-	file *os.File
-	// заменяем Reader на Scanner
-	scanner *bufio.Scanner
-}
-
 func NewConsumer(filename string) (*Consumer, error) {
 	var perm os.FileMode = 0600
 	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, perm)
@@ -55,7 +71,6 @@ func NewConsumer(filename string) (*Consumer, error) {
 		scanner: bufio.NewScanner(file),
 	}, nil
 }
-
 func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 	// одиночное сканирование до следующей строки
 	if !c.scanner.Scan() {
@@ -72,7 +87,6 @@ func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 
 	return &linksCouple, nil
 }
-
 func (c *Consumer) Close() error {
 	err := c.file.Close()
 	if err != nil {

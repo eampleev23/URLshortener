@@ -12,7 +12,7 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusBadRequest)
 	} else {
-		loc, err := h.s.GetLongLinkByShort(r.Context(), chi.URLParam(r, "id"))
+		loc, err := h.s.GetOriginalURLByShort(r.Context(), chi.URLParam(r, "id"))
 		if err != nil {
 			h.l.ZL.Info("error GetLongLinkByShort: ", zap.Error(err))
 			w.WriteHeader(http.StatusBadRequest)
