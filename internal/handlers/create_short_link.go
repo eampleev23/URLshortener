@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"errors"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"io"
 	"log"
 	"net/http"
@@ -27,8 +29,13 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 			shortLink, err = h.s.SetShortURL(r.Context(), longLink)
 			if err != nil {
 				// здесь делаем проверку на конфликт
+				var pgErr *pgconn.PgError
+				if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+					log.Println("конфликт")
+					return
+				}
+				log.Println("нет конфликта")
 				if errors.Is(err, store.ErrConflict) {
-					log.Println("here")
 					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 					w.WriteHeader(http.StatusConflict)
 					w.Header().Set("content-type", "text/plain")

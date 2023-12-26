@@ -40,11 +40,11 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (shortURL
 	// Создаем структуру и в нее записываем значение
 	linksCouple := LinksCouple{ShortURL: newShortLink, OriginalURL: originalURL}
 	_, err = ds.dbConn.ExecContext(ctx,
-		`INSERT INTO links_couples(uuid, short_url, original_url) VALUES (DEFAULT, $1, $2)`,
+		`INSERT INTO links_couples(short_url, original_url) VALUES ($1, $2)`,
 		linksCouple.ShortURL,
 		linksCouple.OriginalURL)
 	if err != nil {
-		return "", fmt.Errorf("insert error %w", err)
+		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
 	}
 	return shortURL, nil
 }
