@@ -9,6 +9,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -16,6 +17,8 @@ var ErrConflict = errors.New("data conflict")
 
 type DBStore struct {
 	dbConn *sql.DB
+	c      *config.Config
+	l      *logger.ZapLog
 }
 
 func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
@@ -23,13 +26,11 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 	if err != nil {
 		return &DBStore{}, fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
 	}
-	// Отложенно закрываем соединение.
-	defer func() {
-		if err := db.Close(); err != nil {
-			l.ZL.Info("failed to properly close the DB connection")
-		}
-	}()
-	return &DBStore{dbConn: db}, nil
+	return &DBStore{
+		dbConn: db,
+		c:      c,
+		l:      l,
+	}, nil
 }
 
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (shortURL string, err error) {
@@ -73,6 +74,13 @@ func (ds DBStore) PingDB(ctx context.Context, timeLimit time.Duration) error {
 	err := ds.dbConn.PingContext(ctx)
 	if err != nil {
 		return fmt.Errorf("db doesn't ping %w", err)
+	}
+	return nil
+}
+func (ds DBStore) Close() error {
+	if err := ds.dbConn.Close(); err != nil {
+		ds.l.ZL.Info("failed to properly close the DB connection", zap.Error(err))
+		return err
 	}
 	return nil
 }

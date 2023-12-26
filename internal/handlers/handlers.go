@@ -8,12 +8,12 @@ import (
 )
 
 type Handlers struct {
-	s *store.Storage
+	s store.Store
 	c *config.Config
 	l *logger.ZapLog
 }
 
-func NewHandlers(s *store.Storage, c *config.Config, l *logger.ZapLog) *Handlers {
+func NewHandlers(s store.Store, c *config.Config, l *logger.ZapLog) *Handlers {
 	return &Handlers{
 		s: s,
 		c: c,

@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -12,6 +13,7 @@ import (
 
 func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
+
 		var longLink string
 		if b, err := io.ReadAll(r.Body); err == nil {
 			longLink = string(b)
@@ -20,12 +22,13 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		shortLink := ""
 		var err error
 		var numberOfAttempts int8 = 0
-		var limitTry int8 = 10
+		var limitTry int8 = 3
 		for shortLink == "" {
 			shortLink, err = h.s.SetShortURL(r.Context(), longLink)
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {
+					log.Println("here")
 					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 					w.WriteHeader(http.StatusConflict)
 					w.Header().Set("content-type", "text/plain")
