@@ -15,8 +15,6 @@ import (
 	"time"
 )
 
-var ErrConflict = errors.New("data conflict")
-
 type DBStore struct {
 	dbConn *sql.DB
 	c      *config.Config
@@ -34,24 +32,19 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 		l:      l,
 	}, nil
 }
-
-func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (shortURL string, err error) {
-	shortURL = ""
-	// Сюда приходит короткая ссылка без проверки на коллизии
-	newShortLink := generatelinks.GenerateShortURL()
-	// Создаем структуру и в нее записываем значение
-	linksCouple := LinksCouple{ShortURL: newShortLink, OriginalURL: originalURL}
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url)
-VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
-	if err != nil {
-		// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-			err = ErrConflict
-		}
+func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
+	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL})
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		err = ErrConflict
+		return "", fmt.Errorf("conflict: %w", err)
 	}
-	return shortURL, nil
+	if err != nil {
+		return "", fmt.Errorf("error InsertURL: %w", err)
+	}
+	return newShortURL, nil
 }
+
 func (ds DBStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
 	row := ds.dbConn.QueryRowContext(ctx,
 		`SELECT original_url FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
@@ -107,4 +100,14 @@ func (ds DBStore) createTable() error {
 	}
 
 	return nil
+}
+
+// InsertURL занимается непосредственно запросом вставки строки в бд
+func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url)
+VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
+	if err != nil {
+		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
+	}
+	return linksCouple.ShortURL, nil
 }

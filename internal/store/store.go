@@ -22,6 +22,9 @@ type Store interface {
 	Close() (err error)
 }
 
+// ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных
+var ErrConflict = errors.New("data conflict")
+
 func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 	if len(c.DBDSN) != 0 {
 		// используем в качестве хранилища только базу данных

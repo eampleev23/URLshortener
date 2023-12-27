@@ -29,9 +29,9 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 					w.WriteHeader(http.StatusConflict)
 					w.Header().Set("content-type", "text/plain")
-					shortLink, err = h.s.SetShortURL(r.Context(), longLink)
+					shortLink, err = h.s.GetShortURLByOriginal(r.Context(), longLink)
 					if err != nil {
-						h.l.ZL.Info("error GetShortLinkByLong", zap.Error(err))
+						h.l.ZL.Info("error GetShortURLByOriginal", zap.Error(err))
 					}
 					shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
 					_, err = w.Write([]byte(shortLinkWithPrefix))
