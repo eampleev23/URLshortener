@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/config"
-	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"io"
 	"log"
@@ -18,6 +17,7 @@ import (
 type FileStore struct {
 	Producer *Producer
 	Consumer *Consumer
+	ms       *MemoryStore
 }
 type Producer struct {
 	file *os.File
@@ -44,14 +44,22 @@ func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error creating NewConsumer: %w", err)
 	}
+	ms, err := NewMemoryStore(c, l)
+	if err != nil {
+		return nil, fmt.Errorf("error create memory store inside filestore: %w", err)
+	}
 	return &FileStore{
 		Producer: &pr,
 		Consumer: co,
+		ms:       ms,
 	}, nil
 }
 
 func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
-	newShortURL = generatelinks.GenerateShortURL()
+	newShortURL, err = fs.ms.SetShortURL(ctx, originalURL)
+	if err != nil {
+		return "", fmt.Errorf("error set in memory store in file store: %w", err)
+	}
 	linksCouple := LinksCouple{UUID: "1", ShortURL: newShortURL, OriginalURL: originalURL}
 	err = fs.Producer.WriteLinksCouple(&linksCouple)
 	if err != nil {
@@ -60,11 +68,17 @@ func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (newSh
 	return newShortURL, nil
 }
 func (fs *FileStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
-	originalURL = ""
+	originalURL, err = fs.ms.GetOriginalURLByShort(ctx, shortURL)
+	if err != nil {
+		return "", fmt.Errorf("error GetOriginalURLByShort in file store %w", err)
+	}
 	return originalURL, nil
 }
 func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL string) (shortURL string, err error) {
-	shortURL = ""
+	shortURL, err = fs.ms.GetShortURLByOriginal(ctx, originalURL)
+	if err != nil {
+		return "", fmt.Errorf("error GetShortURLByOriginal in file store %w", err)
+	}
 	return shortURL, nil
 }
 
