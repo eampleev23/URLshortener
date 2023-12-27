@@ -24,14 +24,14 @@ func main() {
 }
 
 func run() error {
-	c, err := config.NewConfig()
-	if err != nil {
-		return fmt.Errorf("failed to initialize a new config: %w", err)
-	}
-
 	myLog, err := logger.NewZapLogger("info")
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new logger: %w", err)
+	}
+
+	c, err := config.NewConfig(myLog)
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new config: %w", err)
 	}
 
 	s, err := store.NewStorage(c, myLog)
@@ -40,7 +40,7 @@ func run() error {
 	}
 
 	if len(c.DBDSN) != 0 {
-		// Отложенно закрываем соединение. Если вызвать при создании стора, то перестает работать. Переносить в main?
+		// Отложенно закрываем соединение.
 		defer func() {
 			if err := s.Close(); err != nil {
 				myLog.ZL.Info("new store failed to properly close the DB connection")

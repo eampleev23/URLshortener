@@ -32,6 +32,8 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 		l:      l,
 	}, nil
 }
+
+// SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
 	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL})
 	var pgErr *pgconn.PgError

@@ -49,7 +49,6 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-
 		// Устанавливаем статус 201
 		w.WriteHeader(http.StatusCreated)
 		// Устаннавливаем тип контента text/plain

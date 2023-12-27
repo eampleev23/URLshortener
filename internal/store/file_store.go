@@ -6,13 +6,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/generatelinks"
+	"github.com/eampleev23/URLshortener/internal/logger"
 	"io"
+	"log"
 	"os"
+	"time"
 )
 
 type FileStore struct {
-	producer Producer
-	consumer Consumer
+	Producer *Producer
+	Consumer *Consumer
 }
 type Producer struct {
 	file *os.File
@@ -25,9 +30,34 @@ type Consumer struct {
 	scanner *bufio.Scanner
 }
 
-func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (shortURL string, err error) {
-	shortURL = ""
-	return shortURL, nil
+func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
+	var perm os.FileMode = 0600
+	file, err := os.OpenFile(c.SFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize a store by file: %w", err)
+	}
+	pr := Producer{
+		file:   file,
+		writer: bufio.NewWriter(file),
+	}
+	co, err := NewConsumer(c.SFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("error creating NewConsumer: %w", err)
+	}
+	return &FileStore{
+		Producer: &pr,
+		Consumer: co,
+	}, nil
+}
+
+func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
+	newShortURL = generatelinks.GenerateShortURL()
+	linksCouple := LinksCouple{UUID: "1", ShortURL: newShortURL, OriginalURL: originalURL}
+	err = fs.Producer.WriteLinksCouple(&linksCouple)
+	if err != nil {
+		return "", fmt.Errorf("error write links couple in file store %w", err)
+	}
+	return newShortURL, nil
 }
 func (fs *FileStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
 	originalURL = ""
@@ -36,6 +66,16 @@ func (fs *FileStore) GetOriginalURLByShort(ctx context.Context, shortURL string)
 func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL string) (shortURL string, err error) {
 	shortURL = ""
 	return shortURL, nil
+}
+
+// PingDB проверяет подключение к базе данных
+func (fs *FileStore) PingDB(ctx context.Context, tiimeLimit time.Duration) (err error) {
+	return nil
+}
+
+// Close закрывает соединение с базой данных
+func (fs *FileStore) Close() (err error) {
+	return nil
 }
 
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
@@ -112,6 +152,40 @@ func LineCounter(r io.Reader) (int, error) {
 
 		case err != nil:
 			return count, fmt.Errorf("failed to count lines in file storage: %w", err)
+		}
+	}
+}
+func (s *FileStore) ReadStoreFromFile(c *config.Config) {
+	var perm os.FileMode = 0600
+	// открываем файл чтобы посчитать количество строк
+	file, err := os.OpenFile(c.SFilePath, os.O_RDONLY|os.O_CREATE, perm)
+
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	if err != nil {
+		log.Printf("Error open file: %s", err)
+	}
+
+	countLines, err := LineCounter(file)
+	if err != nil {
+		log.Printf("%s", err)
+	}
+
+	if countLines > 0 {
+		// добавляем каждую существующую строку в стор
+		fc, err := NewConsumer(c.SFilePath)
+		if err != nil {
+			log.Printf("%s", err)
+		}
+		for i := 0; i < countLines; i++ {
+			linksCouple, err := fc.ReadLinksCouple()
+			if err != nil {
+				log.Printf("%s", err)
+			}
+			fmt.Println("linksCouple=", linksCouple)
+			//s.s[linksCouple.ShortURL] = *linksCouple
 		}
 	}
 }

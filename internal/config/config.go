@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"github.com/eampleev23/URLshortener/internal/logger"
 	"os"
 	"time"
 )
@@ -13,9 +14,10 @@ type Config struct {
 	SFilePath    string
 	DBDSN        string
 	TLimitQuery  time.Duration
+	l            *logger.ZapLog
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig(l *logger.ZapLog) (*Config, error) {
 	config := &Config{TLimitQuery: 20 * time.Second} //nolint:gomnd //nomagik
 	err := config.SetValues()
 	if err != nil {

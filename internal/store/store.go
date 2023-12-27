@@ -26,8 +26,10 @@ type Store interface {
 var ErrConflict = errors.New("data conflict")
 
 func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
-	if len(c.DBDSN) != 0 {
+	switch {
+	case len(c.DBDSN) != 0:
 		// используем в качестве хранилища только базу данных
+		l.ZL.Info("Using DB Store..")
 		s, err := NewDBStore(c, l)
 		if err != nil {
 			return nil, fmt.Errorf("error creating new db store: %w", err)
@@ -37,8 +39,23 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 			return nil, fmt.Errorf("error create table: %w", err)
 		}
 		return s, nil
+
+	case len(c.SFilePath) != 0:
+		l.ZL.Info("Using File Store..")
+		s, err := NewFileStore(c, l)
+		if err != nil {
+			return nil, fmt.Errorf("error creating new file store: %w", err)
+		}
+		return s, nil
+	default:
+		l.ZL.Info("Using Memory Store..")
+		s, err := NewMemoryStore(c, l)
+		if err != nil {
+			return nil, fmt.Errorf("error create memory store: %w", err)
+		}
+		return s, nil
 	}
-	return nil, errors.New("in the development for now: ")
+	return nil, errors.New("error store creating")
 }
 
 type LinksCouple struct {
