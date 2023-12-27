@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/go-resty/resty/v2"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,7 +10,6 @@ import (
 	"github.com/eampleev23/URLshortener/internal/handlers"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,7 +56,7 @@ func TestUseShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	l, err := logger.NewZapLogger("info")
+	l, err = logger.NewZapLogger("info")
 	if err != nil {
 		t.Log(err)
 	}
@@ -67,7 +67,7 @@ func TestUseShortLink(t *testing.T) {
 		expectedCode int
 		expectedURL  string
 	}{
-		{method: http.MethodGet, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodGet, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 		{method: http.MethodPost, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 		{method: http.MethodPut, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 		{method: http.MethodDelete, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},

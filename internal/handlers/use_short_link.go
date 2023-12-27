@@ -1,9 +1,8 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
-
-	"go.uber.org/zap"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -14,11 +13,13 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 	} else {
 		loc, err := h.s.GetOriginalURLByShort(r.Context(), chi.URLParam(r, "id"))
 		if err != nil {
-			h.l.ZL.Info("error GetLongLinkByShort: ", zap.Error(err))
+			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Add("Location", loc)
+		// добавляю для эксперимента
 		w.WriteHeader(http.StatusTemporaryRedirect)
+
 		// Если совпадений в бд нет, то ставим статус код бэд реквест
 		if loc == "no match" {
 			w.WriteHeader(http.StatusBadRequest)
