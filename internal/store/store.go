@@ -29,6 +29,10 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating new db store: %w", err)
 		}
+		err = s.createTable()
+		if err != nil {
+			return nil, fmt.Errorf("error create table: %w", err)
+		}
 		return s, nil
 	}
 	return nil, errors.New("in the development for now: ")
