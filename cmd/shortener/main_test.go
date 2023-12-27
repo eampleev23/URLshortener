@@ -22,7 +22,7 @@ func TestCreateShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	s, err := store.NewStore(c, l)
+	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
@@ -52,7 +52,7 @@ func TestCreateShortLink(t *testing.T) {
 }
 
 func TestUseShortLink(t *testing.T) {
-	s, err := store.NewStore(c, l)
+	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
@@ -89,7 +89,7 @@ func TestUseShortLink(t *testing.T) {
 }
 
 func TestJSONHandler(t *testing.T) {
-	s, err := store.NewStore(c, l)
+	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
