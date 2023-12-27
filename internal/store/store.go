@@ -55,7 +55,6 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		}
 		return s, nil
 	}
-	return nil, errors.New("error store creating")
 }
 
 type LinksCouple struct {
