@@ -3,11 +3,12 @@ package store
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"go.uber.org/zap"
-	"time"
 )
 
 type MemoryStore struct {
@@ -66,12 +67,12 @@ func (ms *MemoryStore) GetShortURLByOriginal(ctx context.Context, originalURL st
 	return shortURL, fmt.Errorf("there is no original URL like this: %v", originalURL)
 }
 
-// PingDB проверяет подключение к базе данных
+// PingDB проверяет подключение к базе данных.
 func (ms *MemoryStore) PingDB(ctx context.Context, tiimeLimit time.Duration) (err error) {
 	return nil
 }
 
-// Close закрывает соединение с базой данных
+// Close закрывает соединение с базой данных.
 func (ms *MemoryStore) Close() (err error) {
 	return nil
 }

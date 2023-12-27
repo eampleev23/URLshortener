@@ -6,12 +6,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/config"
-	"github.com/eampleev23/URLshortener/internal/logger"
 	"io"
-	"log"
 	"os"
 	"time"
+
+	"github.com/eampleev23/URLshortener/internal/config"
+	"github.com/eampleev23/URLshortener/internal/logger"
 )
 
 type FileStore struct {
@@ -48,11 +48,16 @@ func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error create memory store inside filestore: %w", err)
 	}
-	return &FileStore{
+	fs := &FileStore{
 		Producer: &pr,
 		Consumer: co,
 		ms:       ms,
-	}, nil
+	}
+	err = fs.ReadStoreFromFile(c)
+	if err != nil {
+		return nil, fmt.Errorf("ReadStoreFromFile error: %w", err)
+	}
+	return fs, nil
 }
 
 func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
@@ -82,12 +87,12 @@ func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL stri
 	return shortURL, nil
 }
 
-// PingDB проверяет подключение к базе данных
+// PingDB проверяет подключение к базе данных.
 func (fs *FileStore) PingDB(ctx context.Context, tiimeLimit time.Duration) (err error) {
 	return nil
 }
 
-// Close закрывает соединение с базой данных
+// Close закрывает соединение с базой данных.
 func (fs *FileStore) Close() (err error) {
 	return nil
 }
@@ -169,37 +174,33 @@ func LineCounter(r io.Reader) (int, error) {
 		}
 	}
 }
-func (fs *FileStore) ReadStoreFromFile(c *config.Config) {
+func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 	var perm os.FileMode = 0600
 	// открываем файл чтобы посчитать количество строк
 	file, err := os.OpenFile(c.SFilePath, os.O_RDONLY|os.O_CREATE, perm)
 
 	if err != nil {
-		log.Printf("%s", err)
-	}
-
-	if err != nil {
-		log.Printf("Error open file: %s", err)
+		return fmt.Errorf("error oppening or creating file: %w", err)
 	}
 
 	countLines, err := LineCounter(file)
 	if err != nil {
-		log.Printf("%s", err)
+		return fmt.Errorf("error counting lines in the file: %w", err)
 	}
 
 	if countLines > 0 {
 		// добавляем каждую существующую строку в стор
 		fc, err := NewConsumer(c.SFilePath)
 		if err != nil {
-			log.Printf("%s", err)
+			return fmt.Errorf("NewConsumer error: %w", err)
 		}
 		for i := 0; i < countLines; i++ {
 			linksCouple, err := fc.ReadLinksCouple()
 			if err != nil {
-				log.Printf("%s", err)
+				return fmt.Errorf("fc.ReadLinksCouple %v error: %w", linksCouple, err)
 			}
-			fmt.Println("linksCouple=", linksCouple)
-			//s.s[linksCouple.ShortURL] = *linksCouple
+			fs.ms.s[linksCouple.ShortURL] = *linksCouple
 		}
 	}
+	return nil
 }

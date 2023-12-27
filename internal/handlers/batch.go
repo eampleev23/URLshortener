@@ -24,7 +24,6 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	// Перебираем каждый элемент в запросе
 	res := make([]models.BatchItemRes, 0)
 	for i := range req {
-		//shortURL, err := h.s.SetShortURL(r.Context(), req[i].OriginalURL)
 		shortURL, err := h.s.SetShortURL(r.Context(), req[i].OriginalURL)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

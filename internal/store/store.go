@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
-	"time"
 )
 
 type Store interface {
@@ -22,7 +23,7 @@ type Store interface {
 	Close() (err error)
 }
 
-// ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных
+// ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.
 var ErrConflict = errors.New("data conflict")
 
 func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {

@@ -2,9 +2,10 @@ package config
 
 import (
 	"flag"
-	"github.com/eampleev23/URLshortener/internal/logger"
 	"os"
 	"time"
+
+	"github.com/eampleev23/URLshortener/internal/logger"
 )
 
 type Config struct {
@@ -14,7 +15,6 @@ type Config struct {
 	SFilePath    string
 	DBDSN        string
 	TLimitQuery  time.Duration
-	l            *logger.ZapLog
 }
 
 func NewConfig(l *logger.ZapLog) (*Config, error) {
@@ -23,6 +23,7 @@ func NewConfig(l *logger.ZapLog) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	l.ZL.Info("Config set success..")
 	return config, nil
 }
 

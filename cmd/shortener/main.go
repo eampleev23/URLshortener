@@ -40,7 +40,7 @@ func run() error {
 	}
 
 	if len(c.DBDSN) != 0 {
-		// Отложенно закрываем соединение.
+		// Отложенно закрываем соединение с бд.
 		defer func() {
 			if err := s.Close(); err != nil {
 				myLog.ZL.Info("new store failed to properly close the DB connection")

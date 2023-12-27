@@ -5,14 +5,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"go.uber.org/zap"
-	"time"
 )
 
 type DBStore struct {
@@ -33,7 +33,7 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 	}, nil
 }
 
-// SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта
+// SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
 	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL})
 	var pgErr *pgconn.PgError
@@ -78,13 +78,12 @@ func (ds DBStore) PingDB(ctx context.Context, timeLimit time.Duration) error {
 }
 func (ds DBStore) Close() error {
 	if err := ds.dbConn.Close(); err != nil {
-		ds.l.ZL.Info("failed to properly close the DB connection", zap.Error(err))
-		return err
+		return fmt.Errorf("failed to properly close the DB connection %w", err)
 	}
 	return nil
 }
 
-// CreateTable создает таблицу если ее нет при инициализации стора. Без этого не работают тесты 11 инкремента
+// CreateTable создает таблицу если ее нет при инициализации стора. Без этого не работают тесты 11 инкремента.
 func (ds DBStore) createTable() error {
 	ctx := context.Background()
 	defer ctx.Done()
@@ -104,7 +103,7 @@ func (ds DBStore) createTable() error {
 	return nil
 }
 
-// InsertURL занимается непосредственно запросом вставки строки в бд
+// InsertURL занимается непосредственно запросом вставки строки в бд.
 func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
 	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url)
 VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
