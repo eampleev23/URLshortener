@@ -155,7 +155,7 @@ func LineCounter(r io.Reader) (int, error) {
 		}
 	}
 }
-func (s *FileStore) ReadStoreFromFile(c *config.Config) {
+func (fs *FileStore) ReadStoreFromFile(c *config.Config) {
 	var perm os.FileMode = 0600
 	// открываем файл чтобы посчитать количество строк
 	file, err := os.OpenFile(c.SFilePath, os.O_RDONLY|os.O_CREATE, perm)
