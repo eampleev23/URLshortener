@@ -17,11 +17,11 @@ var c *config.Config
 var l *logger.ZapLog
 
 func TestCreateShortLink(t *testing.T) {
-	c, _ = config.NewConfig()
 	l, err := logger.NewZapLogger("info")
 	if err != nil {
 		t.Log(err)
 	}
+	c, _ = config.NewConfig(l)
 	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
