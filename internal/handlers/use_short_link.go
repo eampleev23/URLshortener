@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -13,7 +12,6 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 	} else {
 		loc, err := h.s.GetOriginalURLByShort(r.Context(), chi.URLParam(r, "id"))
 		if err != nil {
-			log.Print(err)
 			w.WriteHeader(http.StatusBadRequest)
 		}
 		w.Header().Add("Location", loc)
