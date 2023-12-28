@@ -1,12 +1,12 @@
 package logger
 
 import (
+	"context"
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
-
-	"go.uber.org/zap"
 )
 
 type ZapLog struct {
@@ -74,19 +74,16 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-
 		responseData := &responseData{
 			status: 0,
 			size:   0,
 		}
-
 		lw := loggingResponseWriter{
 			ResponseWriter: w, // встраиваем оригинальный http.ResponseWriter
 			responseData:   responseData,
 		}
-
-		next.ServeHTTP(&lw, r)
-
+		ctx := context.WithValue(r.Context(), "logger", zl)
+		next.ServeHTTP(&lw, r.WithContext(ctx))
 		duration := time.Since(start)
 		zl.ZL.Info("got incoming HTTP request",
 			zap.String("path", r.URL.Path),

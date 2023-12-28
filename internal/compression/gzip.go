@@ -3,8 +3,9 @@ package compression
 import (
 	"compress/gzip"
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -84,6 +85,8 @@ func (c *compressReader) Close() error {
 
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		// Получаем логгер из контекста запроса
+		logger := r.Context().Value("logger").(*logger.ZapLog)
 		// по умолчанию устанавливаем оригинальный http.ResponseWriter как тот,
 		// который будем передавать следующей функции
 		ow := w
@@ -105,7 +108,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cw.Close()
 				if err != nil {
-					log.Printf("%s", fmt.Errorf("middleware failed by compresswriter: %w", err))
+					logger.ZL.Info("middleware failed by compresswriter", zap.Error(err))
 				}
 			}()
 		}
@@ -125,7 +128,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cr.Close()
 				if err != nil {
-					log.Printf("%s", fmt.Errorf("middleware failed by compressreader: %w", err))
+					logger.ZL.Info("middleware failed by compressreader", zap.Error(err))
 				}
 			}()
 		}
