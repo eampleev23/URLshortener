@@ -82,7 +82,7 @@ func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 			ResponseWriter: w, // встраиваем оригинальный http.ResponseWriter
 			responseData:   responseData,
 		}
-		myCtx := context.WithValue(r.Context(), "logger", zl)
+		myCtx := context.WithValue(r.Context(), "mylogger", zl)
 		next.ServeHTTP(&lw, r.WithContext(myCtx))
 		duration := time.Since(start)
 		zl.ZL.Info("got incoming HTTP request",
