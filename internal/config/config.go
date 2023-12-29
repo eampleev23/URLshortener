@@ -15,6 +15,7 @@ type Config struct {
 	SFilePath    string
 	DBDSN        string
 	TLimitQuery  time.Duration
+	DatagenEC    int
 }
 
 func NewConfig(l *logger.ZapLog) (*Config, error) {
@@ -38,6 +39,8 @@ func (c *Config) SetValues() error {
 	flag.StringVar(&c.SFilePath, "f", "/tmp/short-url-db.json", "file database")
 	// принимаем строку подключения к базе данных
 	flag.StringVar(&c.DBDSN, "d", "", "postgres database")
+	// количество записей. генерирующихся по умолчанию
+	flag.IntVar(&c.DatagenEC, "dg", 1, "entries count for data generation in case to use it")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 

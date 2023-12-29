@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/datagen"
 	"time"
 
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -30,7 +31,6 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 	switch {
 	case len(c.DBDSN) != 0:
 		// используем в качестве хранилища только базу данных
-		l.ZL.Info("Using DB Store..")
 		s, err := NewDBStore(c, l)
 		if err != nil {
 			return nil, fmt.Errorf("error creating new db store: %w", err)
@@ -38,6 +38,10 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		err = s.createTable()
 		if err != nil {
 			return nil, fmt.Errorf("error create table: %w", err)
+		}
+		err = datagen.GenerateData(context.Background(), c, l)
+		if err != nil {
+			return nil, fmt.Errorf("error data generation: %w", err)
 		}
 		return s, nil
 
