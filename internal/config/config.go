@@ -16,10 +16,15 @@ type Config struct {
 	DBDSN        string
 	TLimitQuery  time.Duration
 	DatagenEC    int
+	SecretKey    string
+	TokenEXP     time.Duration
 }
 
 func NewConfig(l *logger.ZapLog) (*Config, error) {
-	config := &Config{TLimitQuery: 20 * time.Second} //nolint:gomnd //nomagik
+	config := &Config{
+		TLimitQuery: 20 * time.Second, //nolint:gomnd //nomagik
+		TokenEXP:    time.Hour * 3,    //nolint:gomnd //nomagik
+	}
 	err := config.SetValues()
 	if err != nil {
 		return nil, err
@@ -41,6 +46,8 @@ func (c *Config) SetValues() error {
 	flag.StringVar(&c.DBDSN, "d", "", "postgres database")
 	// количество записей. генерирующихся по умолчанию
 	flag.IntVar(&c.DatagenEC, "dg", 1, "entries count for data generation in case to use it")
+	// принимаем секретный ключ сервера для авторизации
+	flag.StringVar(&c.SecretKey, "s", "e4853f5c4810101e88f1898db21c15d3", "server's secret key for authorization")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
@@ -61,6 +68,9 @@ func (c *Config) SetValues() error {
 	}
 	if envDBDSN := os.Getenv("DATABASE_DSN"); envDBDSN != "" {
 		c.DBDSN = envDBDSN
+	}
+	if envSecretKey := os.Getenv("SECRET_KEY"); envSecretKey != "" {
+		c.SecretKey = envSecretKey
 	}
 	return nil
 }
