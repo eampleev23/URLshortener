@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/store"
+	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
