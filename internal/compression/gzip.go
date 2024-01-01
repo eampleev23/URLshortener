@@ -83,16 +83,12 @@ func (c *compressReader) Close() error {
 	return nil
 }
 
-type key int
-
-const (
-	keyLoggerID key = iota
-)
+var keyLogger string = string(logger.KeyLoggerCtx)
 
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
-		logger := r.Context().Value(string(keyLoggerID)).(*logger.ZapLog)
+		logger := r.Context().Value(keyLogger).(*logger.ZapLog)
 		// по умолчанию устанавливаем оригинальный http.ResponseWriter как тот,
 		// который будем передавать следующей функции
 		ow := w
