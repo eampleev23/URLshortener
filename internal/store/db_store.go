@@ -112,3 +112,30 @@ VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
 	}
 	return linksCouple.ShortURL, nil
 }
+
+func GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error) {
+	rows, err := db.QueryContext(ctx, "SELECT * FROM links_couples WHERE owner_id = $1", ownerID)
+	fmt.Println("ownerID", ownerID)
+	if err != nil {
+		return nil, fmt.Errorf("error get links for owner by ownerid %w", err)
+	}
+	// обязательно закрываем перед возвратом функции
+	defer rows.Close()
+	// Готовим переменную для чтения результата
+	var linksCouples []LinksCouple
+	for rows.Next() {
+		var v LinksCouple
+		err = rows.Scan(&v.UUID, &v.ShortURL, &v.OriginalURL, &v.OwnerID)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(v)
+		linksCouples = append(linksCouples, v)
+	}
+	// проверяем на ошибки
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return linksCouples, nil
+}
