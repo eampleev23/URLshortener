@@ -3,6 +3,9 @@ package config
 import (
 	"flag"
 	"os"
+	"time"
+
+	"github.com/eampleev23/URLshortener/internal/logger"
 )
 
 type Config struct {
@@ -10,14 +13,18 @@ type Config struct {
 	LogLevel     string
 	BaseShortURL string
 	SFilePath    string
+	DBDSN        string
+	TLimitQuery  time.Duration
+	DatagenEC    int
 }
 
-func NewConfig() (*Config, error) {
-	config := &Config{}
+func NewConfig(l *logger.ZapLog) (*Config, error) {
+	config := &Config{TLimitQuery: 20 * time.Second} //nolint:gomnd //nomagik
 	err := config.SetValues()
 	if err != nil {
 		return nil, err
 	}
+	l.ZL.Info("Config set success..")
 	return config, nil
 }
 
@@ -30,6 +37,10 @@ func (c *Config) SetValues() error {
 	flag.StringVar(&c.BaseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// принимаем путь к файлу где хранить данные
 	flag.StringVar(&c.SFilePath, "f", "/tmp/short-url-db.json", "file database")
+	// принимаем строку подключения к базе данных
+	flag.StringVar(&c.DBDSN, "d", "", "postgres database")
+	// количество записей. генерирующихся по умолчанию
+	flag.IntVar(&c.DatagenEC, "dg", 1, "entries count for data generation in case to use it")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
@@ -47,6 +58,9 @@ func (c *Config) SetValues() error {
 
 	if envSFilePath := os.Getenv("FILE_STORAGE_PATH"); envSFilePath != "" {
 		c.SFilePath = envSFilePath
+	}
+	if envDBDSN := os.Getenv("DATABASE_DSN"); envDBDSN != "" {
+		c.DBDSN = envDBDSN
 	}
 	return nil
 }
