@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -75,4 +76,8 @@ func (ms *MemoryStore) PingDB(ctx context.Context, tiimeLimit time.Duration) (er
 // Close закрывает соединение с базой данных.
 func (ms *MemoryStore) Close() (err error) {
 	return nil
+}
+
+func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error) {
+	return nil, errors.New("map store dont uses this method")
 }

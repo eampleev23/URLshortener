@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -23,6 +24,8 @@ type Store interface {
 	PingDB(ctx context.Context, tiimeLimit time.Duration) (err error)
 	// Close закрывает соединение с базой данных
 	Close() (err error)
+	// GetURLsByOwnerID возвращает ссылки по ID пользователя с использованием авторизации.
+	GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error)
 }
 
 // ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.
@@ -67,4 +70,5 @@ type LinksCouple struct {
 	UUID        string `json:"uuid"`
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
+	OwnerID     int    `json:"owner_id"`
 }

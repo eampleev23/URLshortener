@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -85,6 +87,9 @@ func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL stri
 		return "", fmt.Errorf("error GetShortURLByOriginal in file store %w", err)
 	}
 	return shortURL, nil
+}
+func (fs *FileStore) GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error) {
+	return nil, errors.New("file store dont uses this method")
 }
 
 // PingDB проверяет подключение к базе данных.

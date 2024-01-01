@@ -5,10 +5,8 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/store"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 	"time"
 )
@@ -28,14 +26,14 @@ GetURLsByUserID возвращает пользователю все когда-
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
-		log.Printf("no cookie: %v", err)
+		h.l.ZL.Info("No cookie", zap.Error(err))
 		// Cookie не установлена, устанавливаем
 		err := h.setNewCookie(w)
 		if err != nil {
-			log.Printf("error setting cookie: %v", err)
+			h.l.ZL.Info("Error setting cookie:", zap.Error(err))
 		}
-		log.Printf("success setted cookie")
-		log.Printf("token was empty:`%s`", cookie)
+		h.l.ZL.Info("Success setted cookie")
+		h.l.ZL.Info("Token was empty..")
 		enc := json.NewEncoder(w)
 		if err := enc.Encode("[{}]"); err != nil {
 			h.l.ZL.Info("error encoding response in handler", zap.Error(err))
@@ -48,7 +46,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	// Надо проверить на валидность
 	validCookie, err := h.isValidateCookie(cookie.Value)
 	if err != nil {
-		log.Printf("ошибка при проверке на валидность токена из куки %v", err)
+		h.l.ZL.Info("Ошибка при проверке на валидность токена из куки", zap.Error(err))
 	}
 	// Обрабатываем если значение не валидное
 	if !validCookie {
@@ -60,7 +58,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	// Получаем все ссылки для пользователя
 	db, err := sql.Open("pgx", h.c.DBDSN) //nolint:goconst // не понятно зачем константа
 	if err != nil {
-		log.Printf("failed to open a connection to the DB in GetURLsByUserID %v", err)
+		h.l.ZL.Info("Failed to open a connection to the DB in GetURLsByUserID ", zap.Error(err))
 	}
 	// Создаем экземпляр структуры с утверждениями
 	claims := &Claims{}
@@ -69,12 +67,12 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		return []byte(h.c.SecretKey), nil
 	})
 	if err != nil {
-		log.Printf("failed in case to get ownerId from token %v", err)
+		h.l.ZL.Info("Failed in case to get ownerId from token ", zap.Error(err))
 	}
 
-	ownersURLs, err := store.GetURLsByOwnerID(context.Background(), db, claims.UserID)
+	ownersURLs, err := h.s.GetURLsByOwnerID(context.Background(), db, claims.UserID)
 	if err != nil {
-		log.Printf("error GetURLsByOwnerID: %v", err)
+		h.l.ZL.Info("Error GetURLsByOwnerID:", zap.Error(err))
 	}
 	if len(ownersURLs) == 0 {
 		w.WriteHeader(http.StatusNoContent)
