@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/datagen"
 	"time"
+
+	"github.com/eampleev23/URLshortener/internal/datagen"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"

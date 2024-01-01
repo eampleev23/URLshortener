@@ -3,11 +3,13 @@ package compression
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/logger"
-	"go.uber.org/zap"
 	"io"
+	"log"
 	"net/http"
 	"strings"
+
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"go.uber.org/zap"
 )
 
 // compressWriter реализует интерфейс http.ResponseWriter и позволяет прозрачно для сервера
@@ -88,7 +90,11 @@ var keyLogger logger.Key = logger.KeyLoggerCtx
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
-		logger := r.Context().Value(keyLogger).(*logger.ZapLog)
+		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
+		if !ok {
+			log.Printf("Error getting logger")
+			return
+		}
 		// по умолчанию устанавливаем оригинальный http.ResponseWriter как тот,
 		// который будем передавать следующей функции
 		ow := w

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/compression"
 	"log"
 	"net/http"
+
+	"github.com/eampleev23/URLshortener/internal/compression"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"

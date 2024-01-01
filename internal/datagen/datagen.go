@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"go.uber.org/zap"
-	"strings"
 )
 
 func GenerateData(ctx context.Context, cfg *config.Config, l *logger.ZapLog) error {
@@ -138,12 +139,13 @@ func generateLinksCouplesStatement(count int) string {
 VALUES %s`
 
 	valuesParts := make([]string, 0, count)
+	numColumns := 2
 	for i := 0; i < count; i++ {
 		valuesParts = append(
 			valuesParts,
 			fmt.Sprintf(
 				"($%d, $%d)",
-				i*2+1, i*2+2,
+				i*numColumns+1, i*numColumns+2, //nolint:gomnd // not magik
 			),
 		)
 	}
@@ -151,7 +153,7 @@ VALUES %s`
 	return fmt.Sprintf(stmtTmpl, strings.Join(valuesParts, ","))
 }
 func generateLinksCouplesFields(count int) []any {
-	values := make([]any, 0, 2*count)
+	values := make([]any, 0, 2*count) //nolint:gomnd // not magik
 	for i := 0; i < count; i++ {
 		values = append(
 			values,
