@@ -83,7 +83,7 @@ func (c *compressReader) Close() error {
 	return nil
 }
 
-var keyLogger string = string(logger.KeyLoggerCtx)
+var keyLogger logger.Key = logger.KeyLoggerCtx
 
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
