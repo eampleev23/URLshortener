@@ -59,6 +59,7 @@ func run() error {
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
 	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
+	r.Get("/api/user/urls", h.GetURLsByUserID)
 
 	err = http.ListenAndServe(c.RanAddr, r)
 	if err != nil {
