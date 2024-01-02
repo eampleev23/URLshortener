@@ -89,7 +89,7 @@ func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL stri
 	return shortURL, nil
 }
 func (fs *FileStore) GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error) {
-	return nil, errors.New("file store dont uses this method")
+	return nil, errors.New("file store doesn't use this method")
 }
 
 // PingDB проверяет подключение к базе данных.
