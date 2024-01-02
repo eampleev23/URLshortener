@@ -35,6 +35,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		h.l.ZL.Info("Success setted cookie")
 		enc := json.NewEncoder(w)
 		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
 		if err := enc.Encode("[{}]"); err != nil {
 			h.l.ZL.Info("error encoding response in handler", zap.Error(err))
 			w.WriteHeader(http.StatusUnprocessableEntity)
