@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -79,6 +78,6 @@ func (ms *MemoryStore) Close() (err error) {
 	return nil
 }
 
-func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error) {
+func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, ownerID int64) ([]LinksCouple, error) {
 	return nil, errors.New("map store doesn't use this method")
 }

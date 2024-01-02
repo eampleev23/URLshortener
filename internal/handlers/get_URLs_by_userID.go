@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
@@ -57,10 +55,6 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 
 	}
 	// Получаем все ссылки для пользователя
-	db, err := sql.Open("pgx", h.c.DBDSN) //nolint:goconst // не понятно зачем константа
-	if err != nil {
-		h.l.ZL.Info("Failed to open a connection to the DB in GetURLsByUserID ", zap.Error(err))
-	}
 	// Создаем экземпляр структуры с утверждениями
 	claims := &Claims{}
 	// Парсим из строки токена tokenString в структуру claims
@@ -71,7 +65,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		h.l.ZL.Info("Failed in case to get ownerId from token ", zap.Error(err))
 	}
 
-	ownersURLs, err := h.s.GetURLsByOwnerID(context.Background(), db, claims.UserID)
+	ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), claims.UserID)
 	if err != nil {
 		h.l.ZL.Info("Error GetURLsByOwnerID:", zap.Error(err))
 	}
@@ -80,13 +74,13 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	enc := json.NewEncoder(w)
+	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "application/json")
 	if err := enc.Encode(ownersURLs); err != nil {
 		h.l.ZL.Info("error encoding response in handler", zap.Error(err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
 
 }
 

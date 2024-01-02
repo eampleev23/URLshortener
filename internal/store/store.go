@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -25,7 +24,7 @@ type Store interface {
 	// Close закрывает соединение с базой данных
 	Close() (err error)
 	// GetURLsByOwnerID возвращает ссылки по ID пользователя с использованием авторизации.
-	GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error)
+	GetURLsByOwnerID(ctx context.Context, ownerID int64) ([]LinksCouple, error)
 }
 
 // ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -88,7 +87,7 @@ func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL stri
 	}
 	return shortURL, nil
 }
-func (fs *FileStore) GetURLsByOwnerID(ctx context.Context, db *sql.DB, ownerID int64) ([]LinksCouple, error) {
+func (fs *FileStore) GetURLsByOwnerID(ctx context.Context, ownerID int64) ([]LinksCouple, error) {
 	return nil, errors.New("file store doesn't use this method")
 }
 
