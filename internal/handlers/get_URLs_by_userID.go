@@ -9,20 +9,8 @@ import (
 	"time"
 )
 
-/*
-GetURLsByUserID возвращает пользователю все когда-либо сокращённые им URL в формате(id получает в куке):
-[
-
-	{
-	    "short_url": "http://...",
-	    "original_url": "http://..."
-	},
-	...
-
-]
-*/
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("token")
+	cookie, err := r.Cookie("ID")
 	if err != nil {
 		h.l.ZL.Info("No cookie", zap.Error(err))
 		// Cookie не установлена, устанавливаем
@@ -118,7 +106,7 @@ func (h *Handlers) setNewCookie(w http.ResponseWriter) error {
 		return fmt.Errorf("ошибка при генерации нового токена %w", err)
 	}
 	cookie := http.Cookie{
-		Name:  "token",
+		Name:  "ID",
 		Value: tokenString,
 	}
 	http.SetCookie(w, &cookie)
