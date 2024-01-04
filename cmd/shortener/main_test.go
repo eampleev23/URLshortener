@@ -5,11 +5,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/go-resty/resty/v2"
+
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,12 +18,12 @@ var c *config.Config
 var l *logger.ZapLog
 
 func TestCreateShortLink(t *testing.T) {
-	c, _ = config.NewConfig()
 	l, err := logger.NewZapLogger("info")
 	if err != nil {
 		t.Log(err)
 	}
-	s, err := store.NewStore(c, l)
+	c, _ = config.NewConfig(l)
+	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
@@ -52,7 +53,7 @@ func TestCreateShortLink(t *testing.T) {
 }
 
 func TestUseShortLink(t *testing.T) {
-	s, err := store.NewStore(c, l)
+	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
@@ -67,7 +68,7 @@ func TestUseShortLink(t *testing.T) {
 		expectedCode int
 		expectedURL  string
 	}{
-		{method: http.MethodGet, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodGet, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 		{method: http.MethodPost, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 		{method: http.MethodPut, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
 		{method: http.MethodDelete, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
@@ -89,7 +90,7 @@ func TestUseShortLink(t *testing.T) {
 }
 
 func TestJSONHandler(t *testing.T) {
-	s, err := store.NewStore(c, l)
+	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}

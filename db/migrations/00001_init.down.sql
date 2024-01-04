@@ -1,0 +1,5 @@
+BEGIN TRANSACTION;
+
+DROP TABLE links_couples;
+
+COMMIT;

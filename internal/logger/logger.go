@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -70,28 +71,31 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
+type Key string
+
+const (
+	KeyLoggerCtx Key = "logger"
+)
+
 // RequestLogger — middleware-логер для входящих HTTP-запросов.
 func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-
 		responseData := &responseData{
 			status: 0,
 			size:   0,
 		}
-
 		lw := loggingResponseWriter{
 			ResponseWriter: w, // встраиваем оригинальный http.ResponseWriter
 			responseData:   responseData,
 		}
-
-		next.ServeHTTP(&lw, r)
-
+		ctx := context.WithValue(r.Context(), KeyLoggerCtx, zl)
+		next.ServeHTTP(&lw, r.WithContext(ctx))
 		duration := time.Since(start)
 		zl.ZL.Info("got incoming HTTP request",
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method),
-			zap.String("content-type", r.Header.Get("content-type")),
+			zap.String("header", r.Header.Get("content-type")),
 			zap.String("duration", shortDur(duration)),
 			zap.Int("status", responseData.status),
 			zap.Int("size", responseData.size),
