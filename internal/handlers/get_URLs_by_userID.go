@@ -3,8 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"time"
 )
@@ -54,6 +56,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), claims.UserID)
+	log.Println("ownersURLs", ownersURLs)
 	if err != nil {
 		h.l.ZL.Info("Error GetURLsByOwnerID:", zap.Error(err))
 	}
@@ -64,7 +67,12 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	enc := json.NewEncoder(w)
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "application/json")
-	if err := enc.Encode(ownersURLs); err != nil {
+	ownersURLsD, err := models.GetResponseGetOwnerURLs(ownersURLs)
+	if err != nil {
+		h.l.ZL.Info("GetResponseGetOwnerURLs error", zap.Error(err))
+		return
+	}
+	if err := enc.Encode(ownersURLsD); err != nil {
 		h.l.ZL.Info("error encoding response in handler", zap.Error(err))
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		return

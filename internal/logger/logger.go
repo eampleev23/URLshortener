@@ -95,7 +95,7 @@ func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 		zl.ZL.Info("got incoming HTTP request",
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method),
-			zap.String("content-type", r.Header.Get("content-type")),
+			zap.String("header", r.Header.Get("content-type")),
 			zap.String("duration", shortDur(duration)),
 			zap.Int("status", responseData.status),
 			zap.Int("size", responseData.size),
