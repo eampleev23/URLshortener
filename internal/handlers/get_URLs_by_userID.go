@@ -12,7 +12,7 @@ import (
 )
 
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("ID")
+	cookie, err := r.Cookie("token")
 	if err != nil {
 		h.l.ZL.Info("No cookie", zap.Error(err))
 		// Cookie не установлена, устанавливаем
@@ -41,6 +41,11 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	if !validCookie {
 		// не валидная
 		w.WriteHeader(http.StatusUnauthorized)
+		h.l.ZL.Info("w.WriteHeader(http.StatusUnauthorized)")
+		err := h.setNewCookie(w)
+		if err != nil {
+			h.l.ZL.Info("Error setting cookie:", zap.Error(err))
+		}
 		return
 
 	}
@@ -114,7 +119,7 @@ func (h *Handlers) setNewCookie(w http.ResponseWriter) error {
 		return fmt.Errorf("ошибка при генерации нового токена %w", err)
 	}
 	cookie := http.Cookie{
-		Name:  "ID",
+		Name:  "token",
 		Value: tokenString,
 	}
 	http.SetCookie(w, &cookie)
