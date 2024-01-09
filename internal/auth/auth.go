@@ -1,6 +1,7 @@
 package myauth
 
 import (
+	"context"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/golang-jwt/jwt/v4"
@@ -28,7 +29,12 @@ func Initialize(secretKey string, tokenExp time.Duration, l *logger.ZapLog) (*Au
 	return au, nil
 }
 
-// Auth — middleware авторизации.
+type Key string
+
+const (
+	KeyAuthCtx Key = "set"
+)
+
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
@@ -38,9 +44,8 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 			log.Printf("Error getting logger")
 			return
 		}
-
-		cookie, err := r.Cookie("token")
-		fmt.Println(cookie)
+		settedNewCookie := false
+		_, err := r.Cookie("token")
 		if err != nil {
 			logger.ZL.Info("No cookie", zap.Error(err))
 			// Cookie не установлена, устанавливаем
@@ -49,11 +54,14 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 				logger.ZL.Info("Error setting cookie:", zap.Error(err))
 			}
 			logger.ZL.Info("Success setted cookie")
-			w.WriteHeader(http.StatusUnauthorized)
+			settedNewCookie = true
+			ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
+			next.ServeHTTP(w, r.WithContext(ctx))
+			//w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		next.ServeHTTP(w, r)
-
+		ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
 }
