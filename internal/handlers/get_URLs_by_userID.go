@@ -5,6 +5,7 @@ import (
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"go.uber.org/zap"
+	"log"
 	"net/http"
 )
 
@@ -30,6 +31,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		h.l.ZL.Info("Error GetURLsByOwnerID:", zap.Error(err))
 	}
 	if len(ownersURLs) == 0 {
+		log.Println("user ID ------->", userID)
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
