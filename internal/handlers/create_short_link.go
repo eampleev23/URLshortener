@@ -29,6 +29,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		var aInt int
+		aInt = 1
 		if !setNewCookie {
 			h.l.ZL.Info("не устанавливалась новая, есть старая")
 			cookie, _ := r.Cookie("token")
