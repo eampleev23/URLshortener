@@ -49,7 +49,10 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					if err != nil {
 						h.l.ZL.Info("error GetShortURLByOriginal", zap.Error(err))
 					}
-					shortLinkWithPrefix := h.c.BaseShortURL + "/" + shortLink
+					shortLinkWithPrefix, err := url.JoinPath(h.c.BaseShortURL, shortLink)
+					if err != nil {
+						h.l.ZL.Info("error url.JoinPath", zap.String("shortlink", shortLink))
+					}
 					_, err = w.Write([]byte(shortLinkWithPrefix))
 					if err != nil {
 						h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
@@ -64,6 +67,8 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
+			h.l.ZL.Info("внизу цикла оказались")
+
 		}
 		// Устанавливаем статус 201
 		w.WriteHeader(http.StatusCreated)
