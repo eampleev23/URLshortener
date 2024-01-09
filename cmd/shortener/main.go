@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"log"
 	"net/http"
 
@@ -34,6 +35,11 @@ func run() error {
 		return fmt.Errorf("failed to initialize a new config: %w", err)
 	}
 
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, myLog)
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new authorizer: %w", err)
+	}
+
 	s, err := store.NewStorage(c, myLog)
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new store: %w", err)
@@ -48,12 +54,13 @@ func run() error {
 		}()
 	}
 
-	h := handlers.NewHandlers(s, c, myLog)
+	h := handlers.NewHandlers(s, c, myLog, *au)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
 	r := chi.NewRouter()
 	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
+	r.Use(au.Auth)
 	r.Post("/", h.CreateShortLink)
 	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)

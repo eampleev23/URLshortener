@@ -113,7 +113,7 @@ VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
 	return linksCouple.ShortURL, nil
 }
 
-func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int64) ([]LinksCouple, error) {
+func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	rows, err := ds.dbConn.QueryContext(ctx, "SELECT * FROM links_couples WHERE owner_id = $1", ownerID)
 	fmt.Println("ownerID", ownerID)
 	if err != nil {
