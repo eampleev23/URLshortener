@@ -35,7 +35,7 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 
 // SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
-	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL})
+	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL, OwnerID: 12})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 		err = ErrConflict
@@ -106,8 +106,8 @@ func (ds DBStore) createTable() error {
 
 // InsertURL занимается непосредственно запросом вставки строки в бд.
 func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url)
-VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
+VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
 	if err != nil {
 		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
 	}
