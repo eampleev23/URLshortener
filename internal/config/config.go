@@ -29,7 +29,7 @@ func NewConfig(l *logger.ZapLog) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	l.ZL.Info("Config set success..")
+	//l.ZL.Info("Config set success..")
 	return config, nil
 }
 

@@ -36,8 +36,8 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	enc := json.NewEncoder(w)
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	ownersURLsD, err := models.GetResponseGetOwnerURLs(ownersURLs)
 	if err != nil {
 		h.l.ZL.Info("GetResponseGetOwnerURLs error", zap.Error(err))

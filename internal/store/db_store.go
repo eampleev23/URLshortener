@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -129,6 +130,10 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 		err = rows.Scan(&v.UUID, &v.ShortURL, &v.OriginalURL, &v.OwnerID)
 		if err != nil {
 			return nil, err
+		}
+		v.ShortURL, err = url.JoinPath(ds.c.BaseShortURL, v.ShortURL)
+		if err != nil {
+			return nil, fmt.Errorf("error url.JoinPath: %w", err)
 		}
 		fmt.Println(v)
 		linksCouples = append(linksCouples, v)
