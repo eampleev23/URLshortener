@@ -26,7 +26,7 @@ func NewMemoryStore(c *config.Config, l *logger.ZapLog) (*MemoryStore, error) {
 	}, nil
 }
 
-func (ms *MemoryStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
+func (ms *MemoryStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
 	// Проверяем есть ли уже такой оригинальный урл в базе
 	for i, v := range ms.s {
 		if v.OriginalURL == originalURL {

@@ -35,8 +35,8 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 }
 
 // SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
-func (ds DBStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
-	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL, OwnerID: 12})
+func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
+	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL, OwnerID: ownerID})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 		err = ErrConflict

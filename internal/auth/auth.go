@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
 	"log"
+	"math/rand"
 	"net/http"
 	"time"
 )
@@ -49,15 +50,14 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 		if err != nil {
 			logger.ZL.Info("No cookie", zap.Error(err))
 			// Cookie не установлена, устанавливаем
-			err := au.setNewCookie(w)
+			newRandomUserId, err := au.setNewCookie(w)
 			if err != nil {
 				logger.ZL.Info("Error setting cookie:", zap.Error(err))
 			}
-			logger.ZL.Info("Success setted cookie")
+			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserId))
 			settedNewCookie = true
 			ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
 			next.ServeHTTP(w, r.WithContext(ctx))
-			//w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 		ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
@@ -65,25 +65,28 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	}
 	return http.HandlerFunc(fn)
 }
-func (au *Authorizer) setNewCookie(w http.ResponseWriter) error {
+func (au *Authorizer) setNewCookie(w http.ResponseWriter) (int, error) {
+	// Генерируем случайны ид пользователя
+	randomID := rand.Intn(100)
+	au.l.ZL.Info("Generated random ID", zap.Int("randomID", randomID))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			// Когда создан токен
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(au.TokenExp)),
 		},
 		// Собственное утверждение
-		UserID: 12,
+		UserID: randomID,
 	})
 	tokenString, err := token.SignedString([]byte(au.SecretKey))
 	if err != nil {
-		return fmt.Errorf("ошибка при генерации нового токена %w", err)
+		return randomID, fmt.Errorf("ошибка при генерации нового токена %w", err)
 	}
 	cookie := http.Cookie{
 		Name:  "token",
 		Value: tokenString,
 	}
 	http.SetCookie(w, &cookie)
-	return nil
+	return randomID, nil
 }
 
 // Claims описывает утверждения, хранящиеся в токене + добавляет кастомное UserID

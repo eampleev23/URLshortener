@@ -21,8 +21,23 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		var err error
 		var numberOfAttempts int8 = 0
 		var limitTry int8 = 10
+
+		// Проверяем была ли установлена новая кука при текущем запросе
+		setNewCookie, ok := r.Context().Value(keyAuth).(bool)
+		if !ok {
+			h.l.ZL.Info("Error getting if set new cookie")
+			return
+		}
+		var aInt int
+		if !setNewCookie {
+			h.l.ZL.Info("не устанавливалась новая, есть старая")
+			cookie, _ := r.Cookie("token")
+			bInt, _ := h.au.GetUserID(cookie.Value)
+			aInt = bInt
+		}
+
 		for shortLink == "" {
-			shortLink, err = h.s.SetShortURL(r.Context(), longLink)
+			shortLink, err = h.s.SetShortURL(r.Context(), longLink, aInt)
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {

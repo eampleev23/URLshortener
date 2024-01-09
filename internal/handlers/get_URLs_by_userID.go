@@ -2,14 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
 )
-
-var keyAuth myauth.Key = myauth.KeyAuthCtx
 
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	setNewCookie, ok := r.Context().Value(keyAuth).(bool)

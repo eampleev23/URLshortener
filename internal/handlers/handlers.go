@@ -8,6 +8,8 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+var keyAuth myauth.Key = myauth.KeyAuthCtx
+
 type Handlers struct {
 	s  store.Store
 	c  *config.Config

@@ -14,7 +14,7 @@ import (
 
 type Store interface {
 	// SetShortURL добавляет новое значение в стор.
-	SetShortURL(ctx context.Context, originalURL string) (shortURL string, err error)
+	SetShortURL(ctx context.Context, originalURL string, ownerID int) (shortURL string, err error)
 	// GetOriginalURLByShort возвращает оригинальную ссылку по короткой
 	GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error)
 	// GetShortURLByOriginal возвращает короткую ссылку по длинной если такая есть

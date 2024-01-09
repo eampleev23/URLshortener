@@ -61,8 +61,8 @@ func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
 	return fs, nil
 }
 
-func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
-	newShortURL, err = fs.ms.SetShortURL(ctx, originalURL)
+func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
+	newShortURL, err = fs.ms.SetShortURL(ctx, originalURL, ownerID)
 	if err != nil {
 		return "", fmt.Errorf("error set in memory store in file store: %w", err)
 	}
