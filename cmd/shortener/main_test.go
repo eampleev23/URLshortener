@@ -1,6 +1,7 @@
 package main
 
 import (
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,11 +24,15 @@ func TestCreateShortLink(t *testing.T) {
 		t.Log(err)
 	}
 	c, _ = config.NewConfig(l)
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
+	if err != nil {
+		t.Log(err)
+	}
 	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l)
+	h := handlers.NewHandlers(s, c, l, *au)
 
 	testCases := []struct {
 		method       string
@@ -61,7 +66,11 @@ func TestUseShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l)
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
+	if err != nil {
+		t.Log(err)
+	}
+	h := handlers.NewHandlers(s, c, l, *au)
 
 	testCases := []struct {
 		method       string
@@ -98,7 +107,11 @@ func TestJSONHandler(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l)
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
+	if err != nil {
+		t.Log(err)
+	}
+	h := handlers.NewHandlers(s, c, l, *au)
 	handler := http.HandlerFunc(h.JSONHandler)
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
