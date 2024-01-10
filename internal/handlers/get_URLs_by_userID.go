@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 )
 
@@ -19,16 +18,15 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Сюда мы попадем только если пользователь авторизован
-	h.l.ZL.Info("GetURLsByUserID here")
 	cookie, _ := r.Cookie("token")
 	userID, _ := h.au.GetUserID(cookie.Value)
-	h.l.ZL.Info("userID", zap.Int("userID", userID))
+	h.l.ZL.Info("User id перед получением из базы", zap.Int("userID", userID))
 	ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), userID)
 	if err != nil {
 		h.l.ZL.Info("Error GetURLsByOwnerID:", zap.Error(err))
 	}
 	if len(ownersURLs) == 0 {
-		log.Println("user ID ------->", userID)
+		h.l.ZL.Info("User id когда попали в условие что 0 контента", zap.Int("userID", userID))
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
