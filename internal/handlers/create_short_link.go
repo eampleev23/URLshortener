@@ -28,17 +28,15 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 			h.l.ZL.Info("Error getting if set new cookie")
 			return
 		}
-		var aInt int
-		aInt = 1
-		if !setNewCookie {
-			h.l.ZL.Info("не устанавливалась новая, есть старая")
-			cookie, _ := r.Cookie("token")
-			bInt, _ := h.au.GetUserID(cookie.Value)
-			aInt = bInt
-		}
 
 		for shortLink == "" {
-			shortLink, err = h.s.SetShortURL(r.Context(), longLink, aInt)
+			if !setNewCookie {
+				cookie, _ := r.Cookie("token")
+				userID, _ := h.au.GetUserID(cookie.Value)
+				shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
+			} else {
+				shortLink, err = h.s.SetShortURL(r.Context(), longLink, 1)
+			}
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {
