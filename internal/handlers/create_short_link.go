@@ -30,13 +30,16 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for shortLink == "" {
-			if setNewCookie {
-				cookie, _ := r.Cookie("token")
-				userID, _ := h.au.GetUserID(cookie.Value)
-				shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
-			} else {
-				shortLink, err = h.s.SetShortURL(r.Context(), longLink, 1)
-			}
+			//if !setNewCookie {
+			//	cookie, _ := r.Cookie("token")
+			//	userID, _ := h.au.GetUserID(cookie.Value)
+			//	shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
+			//} else {
+			//	shortLink, err = h.s.SetShortURL(r.Context(), longLink, 1)
+			//}
+			cookie, _ := r.Cookie("token")
+			userID, _ := h.au.GetUserID(cookie.Value)
+			shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {
