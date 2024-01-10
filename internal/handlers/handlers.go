@@ -8,7 +8,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-var keyAuth myauth.Key = myauth.KeyAuthCtx
+var keyUserIDCtx myauth.Key = myauth.KeyUserIDCtx
 
 type Handlers struct {
 	s  store.Store

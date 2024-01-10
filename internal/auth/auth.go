@@ -33,19 +33,23 @@ func Initialize(secretKey string, tokenExp time.Duration, l *logger.ZapLog) (*Au
 type Key string
 
 const (
-	KeyAuthCtx Key = "id"
+	KeyUserIDCtx Key = "user_id_ctx"
 )
 
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
+		log.Println("Получаем логгер из контекста запроса")
 		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
 		if !ok {
 			log.Printf("Error getting logger")
 			return
 		}
+		log.Println("Получили")
+		log.Println("Получаем куку")
 		_, err := r.Cookie("token")
 		if err != nil {
+			log.Println("Зашли в условие паники")
 			logger.ZL.Info("No cookie", zap.Error(err))
 			// Cookie не установлена, устанавливаем
 			newRandomUserID, err := au.setNewCookie(w)
@@ -53,11 +57,14 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 				logger.ZL.Info("Error setting cookie:", zap.Error(err))
 			}
 			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserID))
-			ctx := context.WithValue(r.Context(), KeyAuthCtx, newRandomUserID)
+			ctx := context.WithValue(r.Context(), KeyUserIDCtx, newRandomUserID)
+			logger.ZL.Info("Передали newRandomUserID", zap.Int("newRandomUserID", newRandomUserID))
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		ctx := context.WithValue(r.Context(), KeyAuthCtx, 0)
+		log.Println("Получили")
+		// если кука уже установлена, то через контекст передаем 0
+		ctx := context.WithValue(r.Context(), KeyUserIDCtx, 0)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)

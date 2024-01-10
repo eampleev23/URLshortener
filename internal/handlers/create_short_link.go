@@ -23,22 +23,20 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		var limitTry int8 = 10
 
 		// Проверяем была ли установлена новая кука при текущем запросе
-		userIDCtx, ok := r.Context().Value(keyAuth).(int)
+		userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
 		if !ok {
-			h.l.ZL.Info("Error getting if set new cookie")
+			h.l.ZL.Info("Error getting if set new cookie user id ctx")
 			return
 		}
 		h.l.ZL.Info("Значение userIDCtx!!!", zap.Int("userIDCtx", userIDCtx))
 		for shortLink == "" {
-			shortLink, err = h.s.SetShortURL(r.Context(), longLink, userIDCtx)
-			// Здесь нам в случае установки новой куки необходимо пробросить ее через контекст
-			//if !setNewCookie {
-			//	cookie, _ := r.Cookie("token")
-			//	userID, _ := h.au.GetUserID(cookie.Value)
-			//	shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
-			//} else {
-			//	shortLink, err = h.s.SetShortURL(r.Context(), longLink, 1)
-			//}
+			if userIDCtx != 0 {
+				shortLink, err = h.s.SetShortURL(r.Context(), longLink, userIDCtx)
+			} else {
+				cookie, _ := r.Cookie("token")
+				userID, _ := h.au.GetUserID(cookie.Value)
+				shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
+			}
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {
