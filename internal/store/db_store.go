@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"go.uber.org/zap"
 	"net/url"
 	"time"
 
@@ -45,6 +46,7 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 	if err != nil {
 		return "", fmt.Errorf("error InsertURL: %w", err)
 	}
+	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
 	return newShortURL, nil
 }
 
