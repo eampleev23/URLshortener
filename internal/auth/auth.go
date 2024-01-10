@@ -37,7 +37,6 @@ const (
 )
 
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
-
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
 		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
@@ -50,11 +49,11 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 		if err != nil {
 			logger.ZL.Info("No cookie", zap.Error(err))
 			// Cookie не установлена, устанавливаем
-			newRandomUserId, err := au.setNewCookie(w)
+			newRandomUserID, err := au.setNewCookie(w)
 			if err != nil {
 				logger.ZL.Info("Error setting cookie:", zap.Error(err))
 			}
-			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserId))
+			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserID))
 			settedNewCookie = true
 			ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
 			next.ServeHTTP(w, r.WithContext(ctx))
