@@ -9,6 +9,7 @@ import (
 )
 
 var keyAuth myauth.Key = myauth.KeyAuthCtx
+var keyNewUserID myauth.Key = myauth.KeyUserID
 
 type Handlers struct {
 	s  store.Store

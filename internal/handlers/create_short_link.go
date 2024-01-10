@@ -28,15 +28,28 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 			h.l.ZL.Info("Error getting if set new cookie")
 			return
 		}
+		var newUserID int
+		if setNewCookie {
+			newUserID, ok = r.Context().Value(keyNewUserID).(int)
+			if !ok {
+				h.l.ZL.Info("Error getting newUserID")
+				return
+			}
+		} else {
+			newUserID = 0
+		}
+		h.l.ZL.Info("Значение newUserID!!!", zap.Int("newUserID", newUserID))
 		h.l.ZL.Info("Значение setNewCookie", zap.Bool("setNewCookie", setNewCookie))
 		for shortLink == "" {
-			if !setNewCookie {
-				cookie, _ := r.Cookie("token")
-				userID, _ := h.au.GetUserID(cookie.Value)
-				shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
-			} else {
-				shortLink, err = h.s.SetShortURL(r.Context(), longLink, 1)
-			}
+			shortLink, err = h.s.SetShortURL(r.Context(), longLink, newUserID)
+			// Здесь нам в случае установки новой куки необходимо пробросить ее через контекст
+			//if !setNewCookie {
+			//	cookie, _ := r.Cookie("token")
+			//	userID, _ := h.au.GetUserID(cookie.Value)
+			//	shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
+			//} else {
+			//	shortLink, err = h.s.SetShortURL(r.Context(), longLink, 1)
+			//}
 			if err != nil {
 				// здесь делаем проверку на конфликт
 				if errors.Is(err, store.ErrConflict) {

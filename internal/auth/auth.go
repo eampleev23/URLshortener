@@ -34,6 +34,7 @@ type Key string
 
 const (
 	KeyAuthCtx Key = "set"
+	KeyUserID  Key = "user_id"
 )
 
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
@@ -44,7 +45,7 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 			log.Printf("Error getting logger")
 			return
 		}
-		settedNewCookie := false
+		setNewCookie := false
 		_, err := r.Cookie("token")
 		if err != nil {
 			logger.ZL.Info("No cookie", zap.Error(err))
@@ -54,12 +55,13 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 				logger.ZL.Info("Error setting cookie:", zap.Error(err))
 			}
 			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserID))
-			settedNewCookie = true
-			ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
+			setNewCookie = true
+			ctx := context.WithValue(r.Context(), KeyAuthCtx, setNewCookie)
+			ctx = context.WithValue(r.Context(), KeyUserID, newRandomUserID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		ctx := context.WithValue(r.Context(), KeyAuthCtx, settedNewCookie)
+		ctx := context.WithValue(r.Context(), KeyAuthCtx, setNewCookie)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
