@@ -30,7 +30,7 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		}
 
 		for shortLink == "" {
-			if !setNewCookie {
+			if setNewCookie {
 				cookie, _ := r.Cookie("token")
 				userID, _ := h.au.GetUserID(cookie.Value)
 				shortLink, err = h.s.SetShortURL(r.Context(), longLink, userID)
