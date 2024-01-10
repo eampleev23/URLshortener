@@ -93,6 +93,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
 		if !ok {
 			log.Printf("Error getting logger")
+			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 		// по умолчанию устанавливаем оригинальный http.ResponseWriter как тот,
