@@ -66,7 +66,7 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 }
 func (au *Authorizer) setNewCookie(w http.ResponseWriter) (int, error) {
 	// Генерируем случайны ид пользователя
-	randomID := rand.Intn(100)
+	randomID := rand.Intn(10000)
 	au.l.ZL.Info("Generated random ID", zap.Int("randomID", randomID))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
