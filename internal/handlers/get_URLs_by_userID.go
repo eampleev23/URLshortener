@@ -8,12 +8,12 @@ import (
 )
 
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
-	setNewCookie, ok := r.Context().Value(keyAuth).(bool)
+	userIDCtx, ok := r.Context().Value(keyAuth).(int)
 	if !ok {
 		h.l.ZL.Info("Error getting if set new cookie")
 		return
 	}
-	if setNewCookie {
+	if userIDCtx == 0 {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

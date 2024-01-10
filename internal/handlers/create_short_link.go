@@ -23,25 +23,14 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		var limitTry int8 = 10
 
 		// Проверяем была ли установлена новая кука при текущем запросе
-		setNewCookie, ok := r.Context().Value(keyAuth).(bool)
+		userIDCtx, ok := r.Context().Value(keyAuth).(int)
 		if !ok {
 			h.l.ZL.Info("Error getting if set new cookie")
 			return
 		}
-		var newUserID int
-		if setNewCookie {
-			newUserID, ok = r.Context().Value(keyNewUserID).(int)
-			if !ok {
-				h.l.ZL.Info("Error getting newUserID")
-				return
-			}
-		} else {
-			newUserID = 0
-		}
-		h.l.ZL.Info("Значение newUserID!!!", zap.Int("newUserID", newUserID))
-		h.l.ZL.Info("Значение setNewCookie", zap.Bool("setNewCookie", setNewCookie))
+		h.l.ZL.Info("Значение userIDCtx!!!", zap.Int("userIDCtx", userIDCtx))
 		for shortLink == "" {
-			shortLink, err = h.s.SetShortURL(r.Context(), longLink, newUserID)
+			shortLink, err = h.s.SetShortURL(r.Context(), longLink, userIDCtx)
 			// Здесь нам в случае установки новой куки необходимо пробросить ее через контекст
 			//if !setNewCookie {
 			//	cookie, _ := r.Cookie("token")
