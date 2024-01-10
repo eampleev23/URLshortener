@@ -71,10 +71,10 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
-type key string
+type Key string
 
 const (
-	keyLoggerCtx key = "logger"
+	KeyLoggerCtx Key = "logger"
 )
 
 // RequestLogger — middleware-логер для входящих HTTP-запросов.
@@ -89,7 +89,7 @@ func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 			ResponseWriter: w, // встраиваем оригинальный http.ResponseWriter
 			responseData:   responseData,
 		}
-		ctx := context.WithValue(r.Context(), string(keyLoggerCtx), zl)
+		ctx := context.WithValue(r.Context(), KeyLoggerCtx, zl)
 		if ctx == nil {
 			zl.ZL.Info("nil ctx")
 			w.WriteHeader(http.StatusInternalServerError)
