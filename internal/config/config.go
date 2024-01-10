@@ -14,9 +14,9 @@ type Config struct {
 	BaseShortURL string
 	SFilePath    string
 	DBDSN        string
-	TLimitQuery  time.Duration
-	DatagenEC    int
 	SecretKey    string
+	DatagenEC    int
+	TLimitQuery  time.Duration
 	TokenEXP     time.Duration
 }
 
@@ -29,7 +29,6 @@ func NewConfig(l *logger.ZapLog) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	//l.ZL.Info("Config set success..")
 	return config, nil
 }
 

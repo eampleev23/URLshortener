@@ -3,19 +3,20 @@ package myauth
 import (
 	"context"
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/logger"
-	"github.com/golang-jwt/jwt/v4"
-	"go.uber.org/zap"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"github.com/golang-jwt/jwt/v4"
+	"go.uber.org/zap"
 )
 
 type Authorizer struct {
+	l         *logger.ZapLog
 	SecretKey string
 	TokenExp  time.Duration
-	l         *logger.ZapLog
 }
 
 var keyLogger logger.Key = logger.KeyLoggerCtx
@@ -39,17 +40,13 @@ const (
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
-		log.Println("Получаем логгер из контекста запроса")
 		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
 		if !ok {
 			log.Printf("Error getting logger")
 			return
 		}
-		log.Println("Получили")
-		log.Println("Получаем куку")
 		_, err := r.Cookie("token")
 		if err != nil {
-			log.Println("Зашли в условие паники")
 			logger.ZL.Info("No cookie", zap.Error(err))
 			// Cookie не установлена, устанавливаем
 			newRandomUserID, err := au.setNewCookie(w)
@@ -62,7 +59,6 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
-		log.Println("Получили")
 		// если кука уже установлена, то через контекст передаем 0
 		ctx := context.WithValue(r.Context(), KeyUserIDCtx, 0)
 		next.ServeHTTP(w, r.WithContext(ctx))
@@ -70,8 +66,9 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 func (au *Authorizer) setNewCookie(w http.ResponseWriter) (int, error) {
-	// Генерируем случайны ид пользователя
-	randomID := rand.Intn(10000)
+	// Генерируем случайный ид пользователя.
+	maxID := 10000
+	randomID := rand.Intn(maxID)
 	au.l.ZL.Info("Generated random ID", zap.Int("randomID", randomID))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -93,27 +90,13 @@ func (au *Authorizer) setNewCookie(w http.ResponseWriter) (int, error) {
 	return randomID, nil
 }
 
-// Claims описывает утверждения, хранящиеся в токене + добавляет кастомное UserID
+// Claims описывает утверждения, хранящиеся в токене + добавляет кастомное UserID.
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID int
 }
 
-// isValidateCookie проверяет валидность токена
-func (au *Authorizer) isValidateCookie(tokenString string) (bool, error) {
-	// Создаем экземпляр структуры с утверждениями
-	claims := &Claims{}
-	// Парсим из строки токена tokenString в структуру claims
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(au.SecretKey), nil
-	})
-	if err != nil {
-		return false, fmt.Errorf("ошибка при парсинге токена %w", err)
-	}
-	return token.Valid, nil
-}
-
-// GetUserID возвращает ID пользователя
+// GetUserID возвращает ID пользователя.
 func (au *Authorizer) GetUserID(tokenString string) (int, error) {
 	// Создаем экземпляр структуры с утверждениями
 	claims := &Claims{}

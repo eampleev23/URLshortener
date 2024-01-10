@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"log"
 	"net/http"
+
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
 
 	"github.com/eampleev23/URLshortener/internal/compression"
 

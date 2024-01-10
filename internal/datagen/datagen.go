@@ -17,14 +17,12 @@ func GenerateData(ctx context.Context, cfg *config.Config, l *logger.ZapLog) err
 	if len(cfg.DBDSN) == 0 {
 		return fmt.Errorf("passed DSN is empty")
 	}
-	//l.ZL.Info("GenerateData...")
 	if cfg.DatagenEC <= 0 || cfg.DatagenEC > 100_000_000 {
 		return fmt.Errorf(
 			"expected employees count to be 0 <= count <= 1_000_000, got: %d",
 			cfg.DatagenEC,
 		)
 	}
-	//l.ZL.Info("GenerateData more then 0")
 	db, err := sql.Open("pgx", cfg.DBDSN)
 	if err != nil {
 		return fmt.Errorf("failed to open a connection to the DB: %w", err)

@@ -1,10 +1,11 @@
 package main
 
 import (
-	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
 
 	"github.com/go-resty/resty/v2"
 

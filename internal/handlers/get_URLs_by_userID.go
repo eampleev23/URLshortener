@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/eampleev23/URLshortener/internal/models"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
@@ -46,5 +47,4 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
 }

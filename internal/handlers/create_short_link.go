@@ -66,7 +66,6 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			h.l.ZL.Info("внизу цикла оказались")
-
 		}
 		// Устанавливаем статус 201
 		w.WriteHeader(http.StatusCreated)

@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"go.uber.org/zap"
 	"net/url"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
@@ -37,7 +38,12 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 
 // SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
-	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL, OwnerID: ownerID})
+	newShortURL, err = ds.InsertURL(
+		ctx,
+		LinksCouple{
+			ShortURL:    generatelinks.GenerateShortURL(),
+			OriginalURL: originalURL, OwnerID: ownerID,
+		})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 		err = ErrConflict
@@ -120,19 +126,23 @@ VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, li
 
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	rows, err := ds.dbConn.QueryContext(ctx, "SELECT * FROM links_couples WHERE owner_id = $1", ownerID)
-	fmt.Println("ownerID", ownerID)
 	if err != nil {
 		return nil, fmt.Errorf("error get links for owner by ownerid %w", err)
 	}
 	// обязательно закрываем перед возвратом функции
-	defer rows.Close()
+	// Отложенно закрываем соединение с бд.
+	defer func() {
+		if err := rows.Close(); err != nil {
+			ds.l.ZL.Info("error defer rows.Close() in GetURLsByOwnerID")
+		}
+	}()
 	// Готовим переменную для чтения результата
 	var linksCouples []LinksCouple
 	for rows.Next() {
 		var v LinksCouple
 		err = rows.Scan(&v.UUID, &v.ShortURL, &v.OriginalURL, &v.OwnerID)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error rows.Scan in GetURLsByOwnerID: %w", err)
 		}
 		v.ShortURL, err = url.JoinPath(ds.c.BaseShortURL, v.ShortURL)
 		if err != nil {
@@ -144,7 +154,7 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 	// проверяем на ошибки
 	err = rows.Err()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("rows.Err in GetURLsByOwnerID: %w", err)
 	}
 	return linksCouples, nil
 }
