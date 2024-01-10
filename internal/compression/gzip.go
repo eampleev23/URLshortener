@@ -94,7 +94,7 @@ const (
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
-		logger, ok := r.Context().Value(keyLoggerCtx).(*logger.ZapLog)
+		logger, ok := r.Context().Value(string(keyLoggerCtx)).(*logger.ZapLog)
 		if !ok {
 			log.Printf("Error getting logger")
 			return

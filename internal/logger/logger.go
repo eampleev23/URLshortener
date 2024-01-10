@@ -89,7 +89,7 @@ func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 			ResponseWriter: w, // встраиваем оригинальный http.ResponseWriter
 			responseData:   responseData,
 		}
-		ctx := context.WithValue(r.Context(), keyLoggerCtx, zl)
+		ctx := context.WithValue(r.Context(), string(keyLoggerCtx), zl)
 		if ctx == nil {
 			zl.ZL.Info("nil ctx")
 			w.WriteHeader(http.StatusInternalServerError)
