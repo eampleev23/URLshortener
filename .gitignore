@@ -19,10 +19,12 @@ cmd/shortener/shortener
 # Dependency directories (remove the comment below to include it)
 vendor/
 
+
 # IDEs directories
 .idea
 .vscode
 golangci-lint/
+db/data/
 
 # Local file store
 ./cmd/shortener/tmp/short-url-db.json

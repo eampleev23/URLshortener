@@ -7,6 +7,9 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/eampleev23/URLshortener/internal/logger"
+	"go.uber.org/zap"
 )
 
 // compressWriter реализует интерфейс http.ResponseWriter и позволяет прозрачно для сервера
@@ -29,7 +32,10 @@ func (c *compressWriter) Header() http.Header {
 
 func (c *compressWriter) Write(p []byte) (int, error) {
 	result, err := c.zw.Write(p)
-	return result, fmt.Errorf("failed to write by compressWriter: %w", err)
+	if err != nil {
+		return result, fmt.Errorf("failed to write by compressWriter: %w", err)
+	}
+	return result, nil
 }
 
 func (c *compressWriter) WriteHeader(statusCode int) {
@@ -79,8 +85,17 @@ func (c *compressReader) Close() error {
 	return nil
 }
 
+var keyLogger logger.Key = logger.KeyLoggerCtx
+
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
+		// Получаем логгер из контекста запроса
+		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
+		if !ok {
+			log.Printf("Error getting logger")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		// по умолчанию устанавливаем оригинальный http.ResponseWriter как тот,
 		// который будем передавать следующей функции
 		ow := w
@@ -102,7 +117,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cw.Close()
 				if err != nil {
-					log.Printf("%s", fmt.Errorf("failed by compresswriter: %w", err))
+					logger.ZL.Info("middleware failed by compresswriter", zap.Error(err))
 				}
 			}()
 		}
@@ -122,7 +137,7 @@ func GzipMiddleware(next http.Handler) http.Handler {
 			defer func() {
 				err := cr.Close()
 				if err != nil {
-					log.Printf("%s", fmt.Errorf("failed by compressreader: %w", err))
+					logger.ZL.Info("middleware failed by compressreader", zap.Error(err))
 				}
 			}()
 		}
