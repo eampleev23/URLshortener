@@ -6,18 +6,20 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/source/iofs"
+	"log"
 	"net/url"
 	"time"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 
 	"go.uber.org/zap"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/generatelinks"
 	"github.com/eampleev23/URLshortener/internal/logger"
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -185,4 +187,88 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 		return nil, fmt.Errorf("rows.Err in GetURLsByOwnerID: %w", err)
 	}
 	return linksCouples, nil
+}
+
+func updateLinksCouplesStatement(count int, req []string, ownerID int) string {
+	valueParts1 := ""
+
+	for i := 0; i < count; i++ {
+		if i == count-1 {
+			valueParts1 = valueParts1 + fmt.Sprintf("('%s', %t, %d)", req[i], true, ownerID)
+		} else {
+			valueParts1 = valueParts1 + fmt.Sprintf("('%s', %t, %d), ", req[i], true, ownerID)
+		}
+	}
+	//const stmtTmpl = `update links_couples set is_deleted=tmp.is_deleted::boolean from (values %s) as tmp (short_url, is_deleted, owner_id) where links_couples.short_url=tmp.short_url and links_couples.owner_id::int=tmp.owner_id::int;`
+	stmtTmpl := `update links_couples set is_deleted = tmp.is_deleted from (values ` + valueParts1 + `) as tmp (short_url, is_deleted, owner_id) where links_couples.short_url=tmp.short_url and links_couples.owner_id=tmp.owner_id;`
+	//valuesParts := make([]string, 0, count)
+	//numColumns := 3
+	//for i := 0; i < count; i++ {
+	//
+	//	valuesParts = append(
+	//		valuesParts,
+	//		fmt.Sprintf(
+	//			"($%d, $%d, $%d)",
+	//			i*numColumns+1, i*numColumns+2, i*numColumns+3, //nolint:gomnd // not magik
+	//		),
+	//	)
+	//
+	//}
+	//result := strings.Join(valuesParts, ",")
+	//log.Println("result=", result)
+	//return fmt.Sprintf(stmtTmpl, strings.Join(valuesParts, ","))
+	return stmtTmpl
+}
+func updateLinksCouplesFields(count int, req []string, ownerID int) []any {
+	values := make([]any, 0, 3*count) //nolint:gomnd // not magik
+	for i := 0; i < count; i++ {
+		values = append(
+			values,
+			req[i],
+			bool(true),
+			ownerID,
+		)
+	}
+	return values
+}
+
+func (ds DBStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
+	// пока просто переберем все элементы, убедимся что они пришли
+	for i, v := range req {
+		log.Println("i=", i, "v=", v)
+	}
+	log.Println("DeleteURLS got ownerID=", ownerID)
+	// пришли. Значит разбираемся с батчингом
+	// у нас есть строковый массив req, нам нужно по каждому элементу изменить статус удаления на тру если запрос
+	// пришел от собственника урла
+
+	// Запускаем транзакцию
+	tx, err := ds.dbConn.BeginTx(ctx, nil)
+	// Обрабатываем ошибку
+	if err != nil {
+		return fmt.Errorf("failed to start a transaction: %w", err)
+	}
+	// Отложенно откатываем транзакцию если err != nil
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			if !errors.Is(err, sql.ErrTxDone) {
+				ds.l.ZL.Info("Failed to rollback the transaction: ", zap.Error(err))
+			}
+		}
+	}()
+	// задаем максимальное количество запросов за один раз
+	batchSize := len(req)
+	// подготавливаем выражение (оно возвращается без подставленных значеницй)
+	stmt := updateLinksCouplesStatement(batchSize, req, ownerID)
+	log.Println("stmt=", stmt)
+	//fields := updateLinksCouplesFields(batchSize, req, ownerID)
+	//log.Println("fields=", fields)
+
+	if _, err := tx.Exec(stmt); err != nil {
+		return fmt.Errorf("failed to update a batch with: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit the transaction: %w", err)
+	}
+	return nil
 }

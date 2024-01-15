@@ -110,6 +110,7 @@ func generateLinksCouplesData(
 	}()
 	// а вот и батчинг
 	const batchSize = 10000
+	// оптс приходит со значением? каким - entrCount
 	for opts.Count-batchSize >= 0 {
 		stmt := generateLinksCouplesStatement(batchSize)
 		fields := generateLinksCouplesFields(batchSize)
@@ -147,7 +148,6 @@ VALUES %s`
 			),
 		)
 	}
-
 	return fmt.Sprintf(stmtTmpl, strings.Join(valuesParts, ","))
 }
 func generateLinksCouplesFields(count int) []any {

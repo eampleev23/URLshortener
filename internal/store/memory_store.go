@@ -85,3 +85,6 @@ func (ms *MemoryStore) Close() (err error) {
 func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	return nil, errors.New("map store doesn't use this method")
 }
+func (ms *MemoryStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
+	return errors.New("map store doesn't use this method")
+}

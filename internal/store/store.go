@@ -27,6 +27,7 @@ type Store interface {
 	Close() (err error)
 	// GetURLsByOwnerID возвращает ссылки по ID пользователя с использованием авторизации.
 	GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error)
+	DeleteURLS(ctx context.Context, ownerID int, req []string) (err error)
 }
 
 type LinksCouple struct {

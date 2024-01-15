@@ -208,3 +208,6 @@ func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 	}
 	return nil
 }
+func (fs *FileStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
+	return errors.New("file store doesn't use this method")
+}
