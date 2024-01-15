@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+
 	"github.com/eampleev23/URLshortener/internal/datagen"
 
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -27,6 +29,14 @@ type Store interface {
 	GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error)
 }
 
+type LinksCouple struct {
+	UUID        string `json:"uuid"`
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+	OwnerID     int    `json:"owner_id"`
+	DeletedFlag bool   `json:"is_deleted"`
+}
+
 // ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.
 var ErrConflict = errors.New("data conflict")
 
@@ -38,7 +48,7 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating new db store: %w", err)
 		}
-		err = s.createTable()
+		//err = s.createTable()
 		if err != nil {
 			return nil, fmt.Errorf("error create table: %w", err)
 		}
@@ -64,11 +74,4 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		l.ZL.Info("Used Memory Store..")
 		return s, nil
 	}
-}
-
-type LinksCouple struct {
-	UUID        string `json:"uuid"`
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
-	OwnerID     int    `json:"owner_id"`
 }

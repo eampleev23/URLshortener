@@ -3,8 +3,11 @@ package store
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"errors"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"net/url"
 	"time"
 
@@ -29,11 +32,36 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 	if err != nil {
 		return &DBStore{}, fmt.Errorf("%w", errors.New("sql.open failed in case to create store"))
 	}
+	if err := runMigrations(c.DBDSN); err != nil {
+		return nil, fmt.Errorf("failed to run DB migrations: %w", err)
+	}
+
 	return &DBStore{
 		dbConn: db,
 		c:      c,
 		l:      l,
 	}, nil
+}
+
+//go:embed migrations/*.sql
+var migrationsDir embed.FS
+
+func runMigrations(dsn string) error {
+	d, err := iofs.New(migrationsDir, "migrations")
+	if err != nil {
+		return fmt.Errorf("failed to return an iofs driver: %w", err)
+	}
+
+	m, err := migrate.NewWithSourceInstance("iofs", d, dsn)
+	if err != nil {
+		return fmt.Errorf("failed to get a new migrate instance: %w", err)
+	}
+	if err := m.Up(); err != nil {
+		if !errors.Is(err, migrate.ErrNoChange) {
+			return fmt.Errorf("failed to apply migrations to the DB: %w", err)
+		}
+	}
+	return nil
 }
 
 // SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
@@ -140,7 +168,7 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 	var linksCouples []LinksCouple
 	for rows.Next() {
 		var v LinksCouple
-		err = rows.Scan(&v.UUID, &v.ShortURL, &v.OriginalURL, &v.OwnerID)
+		err = rows.Scan(&v.UUID, &v.ShortURL, &v.OriginalURL, &v.OwnerID, &v.DeletedFlag)
 		if err != nil {
 			return nil, fmt.Errorf("error rows.Scan in GetURLsByOwnerID: %w", err)
 		}

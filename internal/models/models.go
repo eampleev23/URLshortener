@@ -33,7 +33,6 @@ type ResponseGetOwnerURL struct {
 }
 
 func GetResponseGetOwnerURLs(source []store.LinksCouple) (result []ResponseGetOwnerURL, err error) {
-	result = make([]ResponseGetOwnerURL, len(source)-1)
 	for _, v := range source {
 		result = append(result, ResponseGetOwnerURL{ //nolint:makezero //it works
 			ShortURL:    v.ShortURL,
