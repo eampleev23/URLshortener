@@ -68,6 +68,7 @@ func run() error {
 	r.Post("/api/shorten", h.JSONHandler)
 	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
 	r.Get("/api/user/urls", h.GetURLsByUserID)
+	r.Delete("/api/user/urls", h.DeleteURLS)
 	err = http.ListenAndServe(c.RanAddr, r)
 	if err != nil {
 		return fmt.Errorf("ошибка ListenAndServe: %w", err)
