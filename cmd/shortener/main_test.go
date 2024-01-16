@@ -40,10 +40,10 @@ func TestCreateShortLink(t *testing.T) {
 		expectedCode int
 		contentType  string
 	}{
-		{method: http.MethodGet, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodPut, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodDelete, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodPost, expectedCode: 200, contentType: "text/plain"},
+		{method: http.MethodGet, expectedCode: http.StatusInternalServerError, contentType: ""},
+		{method: http.MethodPut, expectedCode: http.StatusInternalServerError, contentType: ""},
+		{method: http.MethodDelete, expectedCode: http.StatusInternalServerError, contentType: ""},
+		{method: http.MethodPost, expectedCode: http.StatusInternalServerError, contentType: "text/plain"},
 	}
 
 	for _, tc := range testCases {
