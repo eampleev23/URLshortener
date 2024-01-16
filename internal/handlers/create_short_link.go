@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func (h *Handlers) CreateShortLink1(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		var longLink string
 		if b, err := io.ReadAll(r.Body); err == nil {
