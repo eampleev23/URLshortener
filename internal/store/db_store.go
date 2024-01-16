@@ -6,7 +6,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
@@ -71,12 +70,10 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 		ctx,
 		LinksCouple{
 			ShortURL:    generatelinks.GenerateShortURL(),
-			OriginalURL: originalURL,
-			OwnerID:     ownerID,
+			OriginalURL: originalURL, OwnerID: ownerID,
 		})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-		log.Println("errors.As")
 		err = ErrConflict
 		return "", fmt.Errorf("conflict: %w", err)
 	}
