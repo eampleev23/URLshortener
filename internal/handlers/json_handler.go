@@ -3,11 +3,10 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
-
 	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {

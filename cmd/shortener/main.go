@@ -65,7 +65,7 @@ func run() error {
 	r.Post("/", h.CreateShortURL)
 	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)
-	r.Post("/api/shorten", h.JSONHandler)
+	r.Post("/api/shorten", h.JSONHandler1)
 	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
 	r.Get("/api/user/urls", h.GetURLsByUserID)
 	r.Delete("/api/user/urls", h.DeleteURLS)
