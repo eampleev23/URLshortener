@@ -13,7 +13,7 @@ import (
 
 // CreateShortLink получает в пост запросе урл, который необходимо сократить
 // и возвращает сокращенный в виде text/plain.
-func (h *Handlers) CreateShortLink1(w http.ResponseWriter, r *http.Request) {
+func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 
 	// Получаем originalURL в виде строки
 	originalURL, err := getOriginURLFromReq(r)
