@@ -71,7 +71,8 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 		ctx,
 		LinksCouple{
 			ShortURL:    generatelinks.GenerateShortURL(),
-			OriginalURL: originalURL, OwnerID: ownerID,
+			OriginalURL: originalURL,
+			OwnerID:     ownerID,
 		})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
@@ -85,6 +86,16 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
 	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
 	return newShortURL, nil
+}
+
+// InsertURL занимается непосредственно запросом вставки строки в бд.
+func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id, is_deleted)
+VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
+	if err != nil {
+		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
+	}
+	return linksCouple.ShortURL, nil
 }
 
 func (ds DBStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
@@ -121,16 +132,6 @@ func (ds DBStore) Close() error {
 		return fmt.Errorf("failed to properly close the DB connection %w", err)
 	}
 	return nil
-}
-
-// InsertURL занимается непосредственно запросом вставки строки в бд.
-func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
-VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
-	if err != nil {
-		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
-	}
-	return linksCouple.ShortURL, nil
 }
 
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
