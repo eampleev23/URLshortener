@@ -87,7 +87,7 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 
 // InsertURL занимается непосредственно запросом вставки строки в бд.
 func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id, is_deleted)
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
 VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
 	if err != nil {
 		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
