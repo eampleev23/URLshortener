@@ -52,7 +52,7 @@ func TestCreateShortLink(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Вызовем хэндлер как обычную функцию без запуска сервера
-			h.CreateShortLink(w, r)
+			h.CreateShortURL(w, r)
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 		})
 	}
