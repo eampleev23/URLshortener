@@ -6,7 +6,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
@@ -37,7 +36,6 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 	if err := runMigrations(c.DBDSN); err != nil {
 		return nil, fmt.Errorf("failed to run DB migrations: %w", err)
 	}
-
 	return &DBStore{
 		dbConn: db,
 		c:      c,
@@ -68,36 +66,15 @@ func runMigrations(dsn string) error {
 
 // SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
-	// вызываем метод, который заносит новое значение в бд
-	log.Println("зашли в SetShortURL db")
-	newShortURL, err = ds.InsertURL(
-		ctx,
-		LinksCouple{
-			ShortURL:    generatelinks.GenerateShortURL(),
-			OriginalURL: originalURL, OwnerID: ownerID,
-		})
-	// заводим переменную для отслеживания специфической ошибки postgres
+	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL})
 	var pgErr *pgconn.PgError
-
-	// если ошибка конфликта данных (такой originalURL уже есть в базе).
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-		log.Println("зафиксировали конфликт данных")
-		// заносим в err значение глобальной ErrConflict
 		err = ErrConflict
-		// возвращаем пустую строку и ошибку
 		return "", fmt.Errorf("conflict: %w", err)
 	}
-
-	// если какая-то другая ошибка при инсерте
 	if err != nil {
-		// возвращаем пустую строку и эту ошибку и выходим из функции
 		return "", fmt.Errorf("error InsertURL: %w", err)
 	}
-	// иначе мы успешно добавили ссылку, выводим в лог
-	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
-	// также выводим в лог ид пользователя-собственника этой ссылки
-	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
-	// возвращаем урл, который внесли и нил
 	return newShortURL, nil
 }
 
@@ -139,9 +116,8 @@ func (ds DBStore) Close() error {
 
 // InsertURL занимается непосредственно запросом вставки строки в бд.
 func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	log.Println("зашли в InsertURL db")
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
-VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url)
+VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
 	if err != nil {
 		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
 	}
