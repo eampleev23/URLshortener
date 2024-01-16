@@ -6,6 +6,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"time"
 
@@ -74,6 +75,7 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 		})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		log.Println("here!!!!!!!!!")
 		err = ErrConflict
 		return "", fmt.Errorf("conflict: %w", err)
 	}
@@ -90,6 +92,7 @@ func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (short
 	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
 VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
 	if err != nil {
+		log.Println("here, but.. not enough")
 		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
 	}
 	return linksCouple.ShortURL, nil
