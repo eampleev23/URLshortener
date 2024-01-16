@@ -5,7 +5,6 @@ import (
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 )
@@ -49,11 +48,8 @@ func (h *Handlers) CreateShortLink(w http.ResponseWriter, r *http.Request) {
 		shortURL, err = h.s.SetShortURL(r.Context(), originalURL, userID)
 
 		if err != nil {
-			log.Println("SetShortURL not nil")
 			// здесь делаем проверку на конфликт
-			// почему-то в случае конфликта, перестала отрабатывать логика
 			if errors.Is(err, store.ErrConflict) {
-				log.Println("here we are error conflict")
 				// пытаемся получить ссылку для оригинального урл, который уже есть в базе
 				w.WriteHeader(http.StatusConflict)
 				w.Header().Set("content-type", "text/plain")

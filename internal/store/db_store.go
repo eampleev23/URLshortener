@@ -66,7 +66,12 @@ func runMigrations(dsn string) error {
 
 // SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
 func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
-	newShortURL, err = ds.InsertURL(ctx, LinksCouple{ShortURL: generatelinks.GenerateShortURL(), OriginalURL: originalURL})
+	newShortURL, err = ds.InsertURL(
+		ctx,
+		LinksCouple{
+			ShortURL:    generatelinks.GenerateShortURL(),
+			OriginalURL: originalURL, OwnerID: ownerID,
+		})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 		err = ErrConflict
@@ -75,6 +80,8 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 	if err != nil {
 		return "", fmt.Errorf("error InsertURL: %w", err)
 	}
+	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
+	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
 	return newShortURL, nil
 }
 
@@ -116,8 +123,8 @@ func (ds DBStore) Close() error {
 
 // InsertURL занимается непосредственно запросом вставки строки в бд.
 func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url)
-VALUES (DEFAULT, $1, $2)`, linksCouple.ShortURL, linksCouple.OriginalURL)
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
+VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
 	if err != nil {
 		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
 	}
