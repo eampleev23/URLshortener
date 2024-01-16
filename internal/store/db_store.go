@@ -6,7 +6,6 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
@@ -44,6 +43,27 @@ func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 	}, nil
 }
 
+// SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
+func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
+	newShortURL, err = ds.InsertURL(
+		ctx,
+		LinksCouple{
+			ShortURL:    generatelinks.GenerateShortURL(),
+			OriginalURL: originalURL, OwnerID: ownerID,
+		})
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		err = ErrConflict
+		return "", fmt.Errorf("conflict: %w", err)
+	}
+	if err != nil {
+		return "", fmt.Errorf("error InsertURL: %w", err)
+	}
+	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
+	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
+	return newShortURL, nil
+}
+
 //go:embed migrations/*.sql
 var migrationsDir embed.FS
 
@@ -63,39 +83,6 @@ func runMigrations(dsn string) error {
 		}
 	}
 	return nil
-}
-
-// SetShortURL вставляет в бд новую строку или возвращает специфическую ошибку в случае конфликта.
-func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
-	newShortURL, err = ds.InsertURL(
-		ctx,
-		LinksCouple{
-			ShortURL:    generatelinks.GenerateShortURL(),
-			OriginalURL: originalURL, OwnerID: ownerID,
-		})
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-		log.Println("here!!!!!!!!!")
-		err = ErrConflict
-		return "", fmt.Errorf("conflict: %w", err)
-	}
-	if err != nil {
-		return "", fmt.Errorf("error InsertURL: %w", err)
-	}
-	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
-	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
-	return newShortURL, nil
-}
-
-// InsertURL занимается непосредственно запросом вставки строки в бд.
-func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
-VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
-	if err != nil {
-		log.Println("here, but.. not enough")
-		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
-	}
-	return linksCouple.ShortURL, nil
 }
 
 func (ds DBStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
@@ -132,6 +119,16 @@ func (ds DBStore) Close() error {
 		return fmt.Errorf("failed to properly close the DB connection %w", err)
 	}
 	return nil
+}
+
+// InsertURL занимается непосредственно запросом вставки строки в бд.
+func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
+VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
+	if err != nil {
+		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
+	}
+	return linksCouple.ShortURL, nil
 }
 
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
