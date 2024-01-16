@@ -43,6 +43,8 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		w.WriteHeader(http.StatusConflict)
+		w.Header().Set("content-type", "text/plain")
 		_, err = w.Write([]byte(shortURL))
 		if err != nil {
 			h.l.ZL.Info("Ошибка в хэндлере CreateShortLink при вызове w.Write", zap.Error(err))
@@ -87,8 +89,6 @@ func returnShortURLIfConflict(
 	if errors.As(errIn, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 		// попали в условие, что нарушилась целостность данных
 		// теперь нам нужно вернуть статус конфликт и в теле ответа сокращенный урл уже существующий
-		w.WriteHeader(http.StatusConflict)
-		w.Header().Set("content-type", "text/plain")
 		shortURL, errOut = h.s.GetShortURLByOriginal(r.Context(), originalURL)
 		if errOut != nil {
 			return "", fmt.Errorf("GetShortURLByOriginal error: %w", errOut)

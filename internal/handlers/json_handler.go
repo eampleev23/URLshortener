@@ -19,13 +19,13 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defaultValue := 12
-	shortURL, err := h.s.SetShortURL(r.Context(), req.LongURL, defaultValue)
+	shortURL, err := h.s.SetShortURL(r.Context(), req.OriginalURL, defaultValue)
 	if err != nil {
 		h.l.ZL.Info("Ошибка создания новой ссылки: ", zap.Error(err))
 		// Если такая ссылка уже есть в базе, возвращаем шорт для нее
 		if errors.Is(err, store.ErrConflict) {
 			// пытаемся получить ссылку для оригинального урл, который уже есть в базе
-			shortURL, err = h.s.GetShortURLByOriginal(r.Context(), req.LongURL)
+			shortURL, err = h.s.GetShortURLByOriginal(r.Context(), req.OriginalURL)
 			if err != nil {
 				h.l.ZL.Error("ошибка получения существующей короткой ссылки при конфликте", zap.Error(err))
 			}

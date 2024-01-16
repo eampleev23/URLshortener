@@ -18,7 +18,7 @@ type BatchItemRes struct {
 
 // RequestAddShortURL описывает запрос пользователя на получение короткой ссылки.
 type RequestAddShortURL struct {
-	LongURL string `json:"url"`
+	OriginalURL string `json:"url"`
 }
 
 // ResponseAddShortURL описывает запрос пользователя на получение короткой ссылки.

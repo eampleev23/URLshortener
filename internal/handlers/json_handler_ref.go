@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/models"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
+	"net/url"
 )
 
 func (h *Handlers) JSONHandler1(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,42 @@ func (h *Handlers) JSONHandler1(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.l.ZL.Info("getModelRequest error", zap.Error(err))
 	}
-	log.Println(reqModel)
+	shortURL, err := h.s.SetShortURL(r.Context(), reqModel.OriginalURL, userID)
+	if err != nil {
+		h.l.ZL.Info("SetShortURL error", zap.Error(err))
+		shortURL, err = returnShortURLIfConflict(h, w, r, reqModel.OriginalURL, err)
+		if err != nil {
+			h.l.ZL.Info("returnShortURLIfConflict error", zap.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusConflict)
+		w.Header().Set("content-type", "application/json")
+		resp := models.ResponseAddShortURL{ShortURL: shortURL}
+		enc := json.NewEncoder(w)
+		if err := enc.Encode(resp); err != nil {
+			h.l.ZL.Info("error encoding response", zap.Error(err))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+	shortURL, err = url.JoinPath(h.c.BaseShortURL, shortURL)
+	if err != nil {
+		h.l.ZL.Info("url.JoinPath error", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	resp := models.ResponseAddShortURL{ShortURL: shortURL}
+	enc := json.NewEncoder(w)
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	err = enc.Encode(resp)
+	if err != nil {
+		h.l.ZL.Info("error encoding response", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func getModelRequest(r *http.Request) (reqModel models.RequestAddShortURL, err error) {
