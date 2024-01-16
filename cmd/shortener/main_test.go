@@ -43,7 +43,7 @@ func TestCreateShortLink(t *testing.T) {
 		{method: http.MethodGet, expectedCode: http.StatusBadRequest, contentType: ""},
 		{method: http.MethodPut, expectedCode: http.StatusBadRequest, contentType: ""},
 		{method: http.MethodDelete, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodPost, expectedCode: 200, contentType: "text/plain"},
+		{method: http.MethodPost, expectedCode: http.StatusOK, contentType: "text/plain"},
 	}
 
 	for _, tc := range testCases {
