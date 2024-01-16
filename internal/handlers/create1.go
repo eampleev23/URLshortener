@@ -5,11 +5,13 @@ import (
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
 
 func (h *Handlers) CreateShortLink1(w http.ResponseWriter, r *http.Request) {
+	log.Println("here")
 	if r.Method == http.MethodPost {
 		var longLink string
 		if b, err := io.ReadAll(r.Body); err == nil {
