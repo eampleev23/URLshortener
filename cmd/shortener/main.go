@@ -62,7 +62,7 @@ func run() error {
 	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
 	r.Use(au.Auth)
-	r.Post("/", h.CreateShortLink)
+	r.Post("/", h.CreateShortLink1)
 	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)

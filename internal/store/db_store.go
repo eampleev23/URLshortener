@@ -6,6 +6,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"time"
 
@@ -53,6 +54,7 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 		})
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		log.Println("!!!")
 		err = ErrConflict
 		return "", fmt.Errorf("conflict: %w", err)
 	}
@@ -62,6 +64,21 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
 	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
 	return newShortURL, nil
+}
+
+// InsertURL занимается непосредственно запросом вставки строки в бд.
+func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
+	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
+VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
+	//if err != nil {
+	//	return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
+	//}
+	// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		err = ErrConflict
+	}
+	return linksCouple.ShortURL, err
 }
 
 //go:embed migrations/*.sql
@@ -119,16 +136,6 @@ func (ds DBStore) Close() error {
 		return fmt.Errorf("failed to properly close the DB connection %w", err)
 	}
 	return nil
-}
-
-// InsertURL занимается непосредственно запросом вставки строки в бд.
-func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
-	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
-VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
-	if err != nil {
-		return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
-	}
-	return linksCouple.ShortURL, nil
 }
 
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
