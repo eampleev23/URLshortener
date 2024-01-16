@@ -32,8 +32,8 @@ func (h *Handlers) JSONHandler1(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusConflict)
 		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusConflict)
 		resp := models.ResponseAddShortURL{ShortURL: shortURL}
 		enc := json.NewEncoder(w)
 		if err := enc.Encode(resp); err != nil {
