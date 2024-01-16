@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"errors"
-	"github.com/eampleev23/URLshortener/internal/store"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/eampleev23/URLshortener/internal/store"
+	"go.uber.org/zap"
 )
 
 // CreateShortLink получает в пост запросе урл, который необходимо сократить и возвращает сокращенный в виде text/plain.

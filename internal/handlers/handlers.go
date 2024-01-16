@@ -2,12 +2,13 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"net/http"
 )
 
 var keyUserIDCtx myauth.Key = myauth.KeyUserIDCtx
