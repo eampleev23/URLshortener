@@ -49,10 +49,6 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating new db store: %w", err)
 		}
-		//err = s.createTable()
-		if err != nil {
-			return nil, fmt.Errorf("error create table: %w", err)
-		}
 		err = datagen.GenerateData(context.Background(), c, l)
 		if err != nil {
 			return nil, fmt.Errorf("error data generation: %w", err)
