@@ -212,5 +212,9 @@ func (fs *FileStore) DeleteURLS(ctx context.Context, ownerID int, req []string) 
 	return errors.New("file store doesn't use this method")
 }
 func (fs *FileStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
-	return LinksCouple{}, errors.New("file store doesn't use this method")
+	originalURL, err := fs.ms.GetOriginalURLByShort(ctx, shortURL)
+	if err != nil {
+		return LinksCouple{}, fmt.Errorf("error GetOriginalURLByShort in file store %w", err)
+	}
+	return LinksCouple{UUID: "1", ShortURL: shortURL, OriginalURL: originalURL, OwnerID: 1, DeletedFlag: false}, nil
 }
