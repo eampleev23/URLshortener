@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 // CreateShortLink получает в пост запросе урл, который необходимо сократить
@@ -37,7 +38,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	shortURL, err := h.s.SetShortURL(r.Context(), originalURL, userID)
 	if err != nil {
 		h.l.ZL.Info("SetShortURL error", zap.Error(err))
-		shortURL, err = returnShortURLIfConflict(h, w, r, originalURL, err)
+		shortURL, err = returnShortURLIfConflict(h, r, originalURL, err)
 		if err != nil {
 			h.l.ZL.Info("returnShortURLIfConflict error", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
@@ -78,26 +79,61 @@ func getOriginURLFromReq(r *http.Request) (originalURL string, err error) {
 	return originalURL, nil
 }
 
+// LabelError описывает ошибку с дополнительной меткой.
+type LabelError struct {
+	Label string // метка должна быть в верхнем регистре
+	Err   error
+}
+
+// Error добавляет поддержку интерфейса error для типа LabelError.
+func (le *LabelError) Error() string {
+	return fmt.Sprintf("[%s] %v", le.Label, le.Err)
+}
+
+// NewLabelError упаковывает ошибку err в тип LabelError.
+func NewLabelError(label string, err error) error {
+	return &LabelError{
+		Label: strings.ToUpper(label),
+		Err:   err,
+	}
+}
+
 func returnShortURLIfConflict(
 	h *Handlers,
-	w http.ResponseWriter,
 	r *http.Request,
 	originalURL string,
 	errIn error) (shortURL string, errOut error) {
 
+	// попробуем вернуть ошибку в виде строки и по строке понять в каком столбце конфликт
+	// логика завязана на имена индексов в бд.. поэтому она перестанет работать если их ихменить
 	var pgErr *pgconn.PgError
 	if errors.As(errIn, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-		// попали в условие, что нарушилась целостность данных
-		// теперь нам нужно вернуть статус конфликт и в теле ответа сокращенный урл уже существующий
-		shortURL, errOut = h.s.GetShortURLByOriginal(r.Context(), originalURL)
-		if errOut != nil {
-			return "", fmt.Errorf("GetShortURLByOriginal error: %w", errOut)
+
+		if strings.Contains(errIn.Error(), "links_couples_index_by_original_url_unique") {
+			// здесь логика обработки конфликта
+			myErr := NewLabelError("conflict", errIn)
+			h.l.ZL.Info(" ", zap.Error(myErr))
+			h.l.ZL.Info("This originalURL already exists", zap.String("originalURL", originalURL))
+			// попали в условие, что нарушилась целостность данных
+			// теперь нам нужно вернуть статус конфликт и в теле ответа сокращенный урл уже существующий
+			shortURL, errOut = h.s.GetShortURLByOriginal(r.Context(), originalURL)
+			if errOut != nil {
+				return "", fmt.Errorf("GetShortURLByOriginal error: %w", errOut)
+			}
+			shortURL, errOut = url.JoinPath(h.c.BaseShortURL, shortURL)
+			if errOut != nil {
+				return "", fmt.Errorf("url.JoinPath error: %w", errOut)
+			}
+			return shortURL, nil
 		}
-		shortURL, errOut = url.JoinPath(h.c.BaseShortURL, shortURL)
-		if errOut != nil {
-			return "", fmt.Errorf("url.JoinPath error: %w", errOut)
+
+		if strings.Contains(errIn.Error(), "links_couples_index_by_short_url_unique") {
+			// здесь логика обработки коллизии
+			myErr := NewLabelError("collision", errIn)
+			h.l.ZL.Info(" ", zap.Error(myErr))
+			return "", fmt.Errorf("collision: %w", myErr)
 		}
-		return shortURL, nil
 	}
+
 	return "", errors.New("no pgErr")
 }

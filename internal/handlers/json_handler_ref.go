@@ -26,7 +26,7 @@ func (h *Handlers) JSONHandler1(w http.ResponseWriter, r *http.Request) {
 	shortURL, err := h.s.SetShortURL(r.Context(), reqModel.OriginalURL, userID)
 	if err != nil {
 		h.l.ZL.Info("SetShortURL error", zap.Error(err))
-		shortURL, err = returnShortURLIfConflict(h, w, r, reqModel.OriginalURL, err)
+		shortURL, err = returnShortURLIfConflict(h, r, reqModel.OriginalURL, err)
 		if err != nil {
 			h.l.ZL.Info("returnShortURLIfConflict error", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
