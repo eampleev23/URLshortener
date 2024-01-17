@@ -88,3 +88,7 @@ func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]Lin
 func (ms *MemoryStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
 	return errors.New("map store doesn't use this method")
 }
+
+func (ms *MemoryStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
+	return LinksCouple{}, errors.New("memory store doesn't use this method")
+}

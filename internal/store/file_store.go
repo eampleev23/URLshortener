@@ -211,3 +211,6 @@ func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 func (fs *FileStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
 	return errors.New("file store doesn't use this method")
 }
+func (fs *FileStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
+	return LinksCouple{}, errors.New("file store doesn't use this method")
+}

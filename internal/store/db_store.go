@@ -221,3 +221,14 @@ func (ds DBStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (er
 	}
 	return nil
 }
+
+func (ds DBStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
+	row := ds.dbConn.QueryRowContext(ctx,
+		`SELECT * FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
+	)
+	err = row.Scan(&lc.UUID, &lc.ShortURL, &lc.OriginalURL, &lc.OwnerID, &lc.DeletedFlag) // Разбираем результат
+	if err != nil {
+		return LinksCouple{}, fmt.Errorf("faild to get links couple by row %w", err)
+	}
+	return lc, nil
+}
