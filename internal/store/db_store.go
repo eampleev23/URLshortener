@@ -70,10 +70,7 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 func (ds DBStore) InsertURL(ctx context.Context, linksCouple LinksCouple) (shortURL string, err error) {
 	_, err = ds.dbConn.ExecContext(ctx, `INSERT INTO links_couples(uuid, short_url, original_url, owner_id)
 VALUES (DEFAULT, $1, $2, $3)`, linksCouple.ShortURL, linksCouple.OriginalURL, linksCouple.OwnerID)
-	//if err != nil {
-	//	return "", fmt.Errorf("faild to insert entry in links_couples %w", err)
-	//}
-	// проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
+	// Проверяем, что ошибка сигнализирует о потенциальном нарушении целостности данных
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 		err = ErrConflict
@@ -177,29 +174,28 @@ func updateLinksCouplesStatement(count int, req []string, ownerID int) string {
 	valueParts := ""
 	for i := 0; i < count; i++ {
 		if i == count-1 {
-			valueParts = valueParts + fmt.Sprintf("('%s', %t, %d)", req[i], true, ownerID)
+			valueParts += fmt.Sprintf("('%s', %t, %d)", req[i], true, ownerID)
 		} else {
-			valueParts = valueParts + fmt.Sprintf("('%s', %t, %d), ", req[i], true, ownerID)
+			valueParts += fmt.Sprintf("('%s', %t, %d), ", req[i], true, ownerID)
 		}
 	}
-	stmtResult := `update links_couples set is_deleted
-  				  = tmp.is_deleted from (values ` + valueParts +
+	stmtResult := `update links_couples set is_deleted = tmp.is_deleted from (values ` + valueParts +
 		`) as tmp (short_url, is_deleted, owner_id) where links_couples.short_url=tmp.short_url
 					and links_couples.owner_id=tmp.owner_id;`
 	return stmtResult
 }
 
-// DeleteURLS проставляет тем урлам флаг удаления, которые пользователь решает удалить
+// DeleteURLS проставляет тем урлам флаг удаления, которые пользователь решает удалить.
 func (ds DBStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
-	// Запускаем транзакцию
+	// Запускаем транзакцию.
 	tx, err := ds.dbConn.BeginTx(ctx, nil)
 
-	// Обрабатываем ошибку
+	// Обрабатываем ошибку.
 	if err != nil {
 		return fmt.Errorf("failed to start a transaction: %w", err)
 	}
 
-	// Отложенно откатываем транзакцию если err != nil
+	// Отложенно откатываем транзакцию если err != nil.
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if !errors.Is(err, sql.ErrTxDone) {
@@ -208,10 +204,10 @@ func (ds DBStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (er
 		}
 	}()
 
-	// задаем максимальное количество запросов за один раз
+	// Задаем максимальное количество запросов за один раз.
 	batchSize := len(req)
 
-	// подготавливаем запрос
+	// Подготавливаем запрос.
 	stmt := updateLinksCouplesStatement(batchSize, req, ownerID)
 	if _, err := tx.Exec(stmt); err != nil {
 		return fmt.Errorf("failed to update a batch with: %w", err)

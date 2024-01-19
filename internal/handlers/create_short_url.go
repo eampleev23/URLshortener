@@ -3,19 +3,18 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"github.com/jackc/pgerrcode"
-	"github.com/jackc/pgx/v5/pgconn"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
+	"go.uber.org/zap"
 )
 
-// CreateShortLink получает в пост запросе урл, который необходимо сократить
-// и возвращает сокращенный в виде text/plain.
+// CreateShortURL получает в пост запросе урл, который необходимо сократить и возвращает сокращенный в виде text/plain.
 func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
-
 	// Получаем originalURL в виде строки
 	originalURL, err := getOriginURLFromReq(r)
 	if err != nil {
@@ -32,7 +31,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	h.l.ZL.Info("Got userID", zap.Int("userID", userID))
+	h.l.ZL.Info("Got ID of user", zap.Int("userID", userID)) //nolint:goconst // it's just ok
 
 	// Далее пробуем создать ссылку, но нам нужно знать есть ли конфликт данных
 	shortURL, err := h.s.SetShortURL(r.Context(), originalURL, userID)
@@ -81,8 +80,9 @@ func getOriginURLFromReq(r *http.Request) (originalURL string, err error) {
 
 // LabelError описывает ошибку с дополнительной меткой.
 type LabelError struct {
-	Label string // метка должна быть в верхнем регистре
 	Err   error
+	Label string // метка должна быть в верхнем регистре
+
 }
 
 // Error добавляет поддержку интерфейса error для типа LabelError.
@@ -103,19 +103,13 @@ func returnShortURLIfConflict(
 	r *http.Request,
 	originalURL string,
 	errIn error) (shortURL string, errOut error) {
-
-	// попробуем вернуть ошибку в виде строки и по строке понять в каком столбце конфликт
-	// логика завязана на имена индексов в бд.. поэтому она перестанет работать если их ихменить
 	var pgErr *pgconn.PgError
 	if errors.As(errIn, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-
 		if strings.Contains(errIn.Error(), "links_couples_index_by_original_url_unique") {
-			// здесь логика обработки конфликта
+			// Здесь логика обработки конфликта.
 			myErr := NewLabelError("conflict", errIn)
 			h.l.ZL.Info(" ", zap.Error(myErr))
 			h.l.ZL.Info("This originalURL already exists", zap.String("originalURL", originalURL))
-			// попали в условие, что нарушилась целостность данных
-			// теперь нам нужно вернуть статус конфликт и в теле ответа сокращенный урл уже существующий
 			shortURL, errOut = h.s.GetShortURLByOriginal(r.Context(), originalURL)
 			if errOut != nil {
 				return "", fmt.Errorf("GetShortURLByOriginal error: %w", errOut)
@@ -126,7 +120,6 @@ func returnShortURLIfConflict(
 			}
 			return shortURL, nil
 		}
-
 		if strings.Contains(errIn.Error(), "links_couples_index_by_short_url_unique") {
 			// здесь логика обработки коллизии
 			myErr := NewLabelError("collision", errIn)

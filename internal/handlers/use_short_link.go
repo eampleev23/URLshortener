@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"go.uber.org/zap"
 	"net/http"
+
+	"go.uber.org/zap"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -17,7 +18,6 @@ func (h *Handlers) UseShortLink(w http.ResponseWriter, r *http.Request) {
 		h.l.ZL.Info("GetLinksCoupleByShortURL error", zap.Error(err))
 		w.WriteHeader(http.StatusBadRequest)
 		return
-
 	}
 	w.Header().Add("Location", linksCouple.OriginalURL)
 	w.WriteHeader(http.StatusTemporaryRedirect)

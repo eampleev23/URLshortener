@@ -3,10 +3,11 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
+
 	"github.com/eampleev23/URLshortener/internal/models"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +36,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("content-type", "application/json")
 			w.WriteHeader(http.StatusConflict)
 			if err := enc.Encode(resp); err != nil {
-				h.l.ZL.Info("error encoding response", zap.Error(err))
+				h.l.ZL.Info("encoding response error", zap.Error(err))
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
