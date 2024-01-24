@@ -178,9 +178,9 @@ func updateLinksCouplesStatement(count int, req []string, ownerID int) string {
 			valueParts += fmt.Sprintf("('%s', %t, %d), ", req[i], true, ownerID)
 		}
 	}
-	stmtResult := `update links_couples set is_deleted = tmp.is_deleted from (values ` + valueParts +
-		`) as tmp (short_url, is_deleted, owner_id) where links_couples.short_url=tmp.short_url
-					and links_couples.owner_id=tmp.owner_id;`
+	stmtResult := `UPDATE links_couples SET is_deleted = tmp.is_deleted FROM (VALUES ` + valueParts +
+		`) as tmp (short_url, is_deleted, owner_id) WHERE links_couples.short_url=tmp.short_url
+					AND links_couples.owner_id=tmp.owner_id;`
 	return stmtResult
 }
 
