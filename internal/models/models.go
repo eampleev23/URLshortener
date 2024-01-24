@@ -35,7 +35,7 @@ type ResponseGetOwnerURL struct {
 func GetResponseGetOwnerURLs(source []store.LinksCouple) (result []ResponseGetOwnerURL, err error) {
 	result = make([]ResponseGetOwnerURL, 0, len(source))
 	for _, v := range source {
-		result = append(result, ResponseGetOwnerURL{ //nolint:makezero //it works
+		result = append(result, ResponseGetOwnerURL{
 			ShortURL:    v.ShortURL,
 			OriginalURL: v.OriginalURL,
 		})
