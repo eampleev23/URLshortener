@@ -91,6 +91,11 @@ func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 			responseData:   responseData,
 		}
 		ctx := context.WithValue(r.Context(), KeyLoggerCtx, zl)
+		if ctx == nil {
+			zl.ZL.Info("nil ctx")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 		next.ServeHTTP(&lw, r.WithContext(ctx))
 		duration := time.Since(start)
 		zl.ZL.Info("got incoming HTTP request",

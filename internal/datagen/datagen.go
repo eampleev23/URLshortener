@@ -118,9 +118,6 @@ func generateLinksCouplesData(
 			return fmt.Errorf("failed to insert a batch: %w", err)
 		}
 		opts.Count -= batchSize
-		// just do it.
-		l.ZL.Debug("Count: ", zap.Int("count", opts.Count))
-		l.ZL.Debug("BatchSize: ", zap.Int("batchSize", opts.Count))
 	}
 	if opts.Count > 0 {
 		stmt := generateLinksCouplesStatement(opts.Count)
