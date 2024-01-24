@@ -34,12 +34,12 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			h.l.ZL.Info("h.s.DeleteURLS error: ", zap.Error(err))
 		}
-	} else {
-		cookie, _ := r.Cookie("token")
-		userID, _ := h.au.GetUserID(cookie.Value)
-		err := h.s.DeleteURLS(r.Context(), userID, req)
-		if err != nil {
-			h.l.ZL.Info("h.s.DeleteURLS error: ", zap.Error(err))
-		}
+		return
+	}
+	cookie, _ := r.Cookie("token")
+	userID, _ := h.au.GetUserID(cookie.Value)
+	err := h.s.DeleteURLS(r.Context(), userID, req)
+	if err != nil {
+		h.l.ZL.Info("h.s.DeleteURLS error: ", zap.Error(err))
 	}
 }
