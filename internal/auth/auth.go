@@ -39,14 +39,14 @@ const (
 
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		// Получаем логгер из контекста запроса
-		logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
-		if !ok {
-			log.Printf("Error getting logger")
-			return
-		}
 		_, err := r.Cookie("token")
 		if err != nil {
+			// Получаем логгер из контекста запроса
+			logger, ok := r.Context().Value(keyLogger).(*logger.ZapLog)
+			if !ok {
+				log.Printf("Error getting logger")
+				return
+			}
 			logger.ZL.Info("No cookie", zap.Error(err))
 			// Cookie не установлена, устанавливаем
 			newRandomUserID, err := au.setNewCookie(w)
