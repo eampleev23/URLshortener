@@ -22,7 +22,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	h.l.ZL.Info("Got originalURL", zap.String("originalURL", originalURL))
+	h.l.ZL.Debug("Got originalURL", zap.String("originalURL", originalURL))
 
 	// Получаем id пользователя.
 	userID, err := h.GetUserID(r)
@@ -31,7 +31,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	h.l.ZL.Info("Got ID of user", zap.Int("userID", userID)) //nolint:goconst // it's just ok
+	h.l.ZL.Debug("Got ID of user", zap.Int("userID", userID)) //nolint:goconst // it's just ok
 
 	// Далее пробуем создать ссылку, но нам нужно знать есть ли конфликт данных
 	shortURL, err := h.s.SetShortURL(r.Context(), originalURL, userID)
@@ -108,8 +108,8 @@ func returnShortURLIfConflict(
 		if strings.Contains(errIn.Error(), "links_couples_index_by_original_url_unique") {
 			// Здесь логика обработки конфликта.
 			myErr := NewLabelError("conflict", errIn)
-			h.l.ZL.Info(" ", zap.Error(myErr))
-			h.l.ZL.Info("This originalURL already exists", zap.String("originalURL", originalURL))
+			h.l.ZL.Debug(" ", zap.Error(myErr))
+			h.l.ZL.Debug("This originalURL already exists", zap.String("originalURL", originalURL))
 			shortURL, errOut = h.s.GetShortURLByOriginal(r.Context(), originalURL)
 			if errOut != nil {
 				return "", fmt.Errorf("GetShortURLByOriginal error: %w", errOut)
@@ -123,7 +123,7 @@ func returnShortURLIfConflict(
 		if strings.Contains(errIn.Error(), "links_couples_index_by_short_url_unique") {
 			// здесь логика обработки коллизии
 			myErr := NewLabelError("collision", errIn)
-			h.l.ZL.Info(" ", zap.Error(myErr))
+			h.l.ZL.Debug(" ", zap.Error(myErr))
 			return "", fmt.Errorf("collision: %w", myErr)
 		}
 	}

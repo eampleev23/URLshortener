@@ -8,7 +8,7 @@ import (
 )
 
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
-	h.l.ZL.Info("DeleteURLS start..")
+	h.l.ZL.Debug("DeleteURLS start..")
 	// Сначала преобразуем входящие данные в массив моделей.
 	var req []string
 	// Далее создаем декодер

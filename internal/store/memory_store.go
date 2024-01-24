@@ -35,7 +35,7 @@ func (ms *MemoryStore) SetShortURL(
 	for i, v := range ms.s {
 		if v.OriginalURL == originalURL {
 			err = ErrConflict
-			ms.l.ZL.Info("original url already exists", zap.String("originalURL", originalURL))
+			ms.l.ZL.Debug("original url already exists", zap.String("originalURL", originalURL))
 			return i, fmt.Errorf("original url %v already exists: %w", originalURL, err)
 		}
 	}
@@ -48,7 +48,7 @@ func (ms *MemoryStore) SetShortURL(
 	}
 	// Произошла коллизия
 	err = ErrConflict
-	ms.l.ZL.Info("There was a collision", zap.String("newShortURL", newShortURL))
+	ms.l.ZL.Debug("There was a collision", zap.String("newShortURL", newShortURL))
 	return "", fmt.Errorf("shortURL %v already exists: %w", newShortURL, err)
 }
 func (ms *MemoryStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {

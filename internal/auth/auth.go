@@ -47,7 +47,7 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 				log.Printf("Error getting logger")
 				return
 			}
-			logger.ZL.Info("No cookie", zap.String("err", err.Error()))
+			logger.ZL.Debug("No cookie", zap.String("err", err.Error()))
 			// Cookie не установлена, устанавливаем
 			newRandomUserID, err := au.setNewCookie(w)
 			if err != nil {
@@ -69,7 +69,7 @@ func (au *Authorizer) setNewCookie(w http.ResponseWriter) (int, error) {
 	// Генерируем случайный ид пользователя.
 	maxID := 10000
 	randomID := rand.Intn(maxID)
-	au.l.ZL.Info("Generated random ID", zap.Int("randomID", randomID))
+	au.l.ZL.Debug("Generated random ID", zap.Int("randomID", randomID))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			// Когда создан токен

@@ -11,7 +11,7 @@ import (
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
 	if !ok {
-		h.l.ZL.Info("Error getting if set new cookie")
+		h.l.ZL.Debug("Error getting if set new cookie")
 		return
 	}
 	if userIDCtx != 0 {
@@ -22,14 +22,14 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		// Значит пользователь авторизован, надо получить id из куки
 		cookie, _ := r.Cookie("token")
 		userID, _ := h.au.GetUserID(cookie.Value)
-		h.l.ZL.Info("User id получили из куки (не из контекста)", zap.Int("userID", userID))
+		h.l.ZL.Debug("User id получили из куки (не из контекста)", zap.Int("userID", userID))
 
 		ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), userID)
 		if err != nil {
-			h.l.ZL.Info("Error GetURLsByOwnerID:", zap.Error(err))
+			h.l.ZL.Debug("Error GetURLsByOwnerID:", zap.Error(err))
 		}
 		if len(ownersURLs) == 0 {
-			h.l.ZL.Info("User id когда попали в условие что 0 контента", zap.Int("userID", userID))
+			h.l.ZL.Debug("User id когда попали в условие что 0 контента", zap.Int("userID", userID))
 			w.WriteHeader(http.StatusNoContent)
 			return
 		}

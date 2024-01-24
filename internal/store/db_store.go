@@ -61,8 +61,8 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 	if err != nil {
 		return "", fmt.Errorf("error InsertURL: %w", err)
 	}
-	ds.l.ZL.Info("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
-	ds.l.ZL.Info("ID пользователя", zap.Int("ownerID", ownerID))
+	ds.l.ZL.Debug("Успешно добавили новую ссылку", zap.String("newShortURL", newShortURL))
+	ds.l.ZL.Debug("ID пользователя", zap.Int("ownerID", ownerID))
 	return newShortURL, nil
 }
 

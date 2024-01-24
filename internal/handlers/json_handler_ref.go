@@ -14,11 +14,11 @@ func (h *Handlers) JSONHandler1(w http.ResponseWriter, r *http.Request) {
 	// Получаем id пользователя.
 	userID, err := h.GetUserID(r)
 	if err != nil {
-		h.l.ZL.Info("Error getting userID", zap.Error(err))
+		h.l.ZL.Debug("Error getting userID", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	h.l.ZL.Info("Got userID", zap.Int("userID", userID))
+	h.l.ZL.Debug("Got userID", zap.Int("userID", userID))
 
 	reqModel, err := getModelRequest(r)
 	if err != nil {
