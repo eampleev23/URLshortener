@@ -53,9 +53,9 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 			if err != nil {
 				logger.ZL.Info("Error setting cookie:", zap.String("err", err.Error()))
 			}
-			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserID))
+			logger.ZL.Debug("Success setted cookie", zap.Int("newRandomUserId", newRandomUserID))
 			ctx := context.WithValue(r.Context(), KeyUserIDCtx, newRandomUserID)
-			logger.ZL.Info("Передали newRandomUserID", zap.Int("newRandomUserID", newRandomUserID))
+			logger.ZL.Debug("Передали newRandomUserID", zap.Int("newRandomUserID", newRandomUserID))
 			next.ServeHTTP(w, r.WithContext(ctx))
 			return
 		}
