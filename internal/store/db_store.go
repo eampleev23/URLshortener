@@ -138,7 +138,7 @@ func (ds DBStore) Close() error {
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	rows, err := ds.dbConn.QueryContext(ctx, "SELECT * FROM links_couples WHERE owner_id = $1", ownerID)
 	if err != nil {
-		return nil, fmt.Errorf("error get links for owner by ownerid %w", err)
+		return nil, fmt.Errorf("not get links for owner by ownerid %w", err)
 	}
 	// обязательно закрываем перед возвратом функции
 	// Отложенно закрываем соединение с бд.
