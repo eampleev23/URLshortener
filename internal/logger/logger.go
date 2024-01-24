@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// ZapLog не понятно что дает, возможно проще возвращать сразу *zap.Logger
+// ZapLog не понятно что дает, возможно проще возвращать сразу *zap.Logger.
 type ZapLog struct {
 	ZL *zap.Logger
 }
