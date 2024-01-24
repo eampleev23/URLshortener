@@ -47,11 +47,11 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 				log.Printf("Error getting logger")
 				return
 			}
-			logger.ZL.Info("No cookie", zap.Error(err))
+			logger.ZL.Info("No cookie", zap.String("err", err.Error()))
 			// Cookie не установлена, устанавливаем
 			newRandomUserID, err := au.setNewCookie(w)
 			if err != nil {
-				logger.ZL.Info("Error setting cookie:", zap.Error(err))
+				logger.ZL.Info("Error setting cookie:", zap.String("err", err.Error()))
 			}
 			logger.ZL.Info("Success setted cookie", zap.Int("newRandomUserId", newRandomUserID))
 			ctx := context.WithValue(r.Context(), KeyUserIDCtx, newRandomUserID)
