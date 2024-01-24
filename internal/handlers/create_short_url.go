@@ -54,7 +54,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.l.ZL.Info("SetShortURL success", zap.String("shortURL", shortURL))
+	h.l.ZL.Debug("SetShortURL success", zap.String("shortURL", shortURL))
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("content-type", "text/plain")
 	shortURL, err = url.JoinPath(h.c.BaseShortURL, shortURL)
