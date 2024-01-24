@@ -36,9 +36,19 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	cookie, _ := r.Cookie("token")
-	userID, _ := h.au.GetUserID(cookie.Value)
-	err := h.s.DeleteURLS(r.Context(), userID, req)
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		h.l.ZL.Info("Don't set token without reason", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	userID, err := h.au.GetUserID(cookie.Value)
+	if err != nil {
+		h.l.ZL.Info("au.GetUserID(cookie.Value) error", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	err = h.s.DeleteURLS(r.Context(), userID, req)
 	if err != nil {
 		h.l.ZL.Info("h.s.DeleteURLS error: ", zap.Error(err))
 	}
