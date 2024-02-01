@@ -20,8 +20,20 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Значит пользователь авторизован, надо получить id из куки
-	cookie, _ := r.Cookie("token")
-	userID, _ := h.au.GetUserID(cookie.Value)
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		h.l.ZL.Info("Error getting cookie", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+
+	}
+	userID, err := h.au.GetUserID(cookie.Value)
+	if err != nil {
+		h.l.ZL.Info("Error getting userID from cookie", zap.Error(err))
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+
+	}
 	h.l.ZL.Debug("User id получили из куки (не из контекста)", zap.Int("userID", userID))
 
 	ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), userID)
@@ -43,7 +55,7 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := enc.Encode(ownersURLsD); err != nil {
 		h.l.ZL.Info("error encoding response in handler", zap.Error(err))
-		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
