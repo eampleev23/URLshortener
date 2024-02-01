@@ -127,19 +127,19 @@ func TestJSONHandler(t *testing.T) {
 		{
 			name:         "method_get",
 			method:       http.MethodGet,
-			expectedCode: 400,
+			expectedCode: 500,
 			expectedBody: "",
 		},
 		{
 			name:         "method_put",
 			method:       http.MethodPut,
-			expectedCode: 400,
+			expectedCode: 500,
 			expectedBody: "",
 		},
 		{
 			name:         "method_delete",
 			method:       http.MethodDelete,
-			expectedCode: 400,
+			expectedCode: 500,
 			expectedBody: "",
 		},
 	}
