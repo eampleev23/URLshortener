@@ -25,14 +25,12 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		h.l.ZL.Info("Error getting cookie", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-
 	}
 	userID, err := h.au.GetUserID(cookie.Value)
 	if err != nil {
 		h.l.ZL.Info("Error getting userID from cookie", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		return
-
 	}
 	h.l.ZL.Debug("User id получили из куки (не из контекста)", zap.Int("userID", userID))
 
