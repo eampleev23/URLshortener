@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
-	"log"
 	"net/http"
 	"time"
 )
@@ -56,10 +55,8 @@ func (h *Handlers) flushRequests() {
 		case <-ticker.C:
 			// подождём, пока придёт хотя бы одно сообщение
 			if len(deleteItems) == 0 {
-				log.Println("delete items len = ", len(deleteItems))
 				continue
 			}
-			log.Println("delete items len = ", len(deleteItems))
 			// выполним все пришедшие за 10 секунд запросы за один раз батчингом
 			err := h.s.DeleteURLS(context.TODO(), deleteItems)
 			if err != nil {

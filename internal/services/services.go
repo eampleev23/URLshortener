@@ -7,7 +7,6 @@ import (
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
-	"log"
 	"net/url"
 )
 
@@ -32,12 +31,11 @@ func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store
 	if err != nil {
 		return nil, fmt.Errorf("GetURLsByOwnerID error %w", err)
 	}
-	for _, v := range result {
-		v.ShortURL, err = url.JoinPath(serv.c.BaseShortURL, v.ShortURL)
+	for i := 0; i < len(result); i++ {
+		result[i].ShortURL, err = url.JoinPath(serv.c.BaseShortURL, result[i].ShortURL)
 		if err != nil {
 			return nil, fmt.Errorf("url.JoinPath error %w", err)
 		}
 	}
-	log.Println("result=", result)
 	return result, nil
 }
