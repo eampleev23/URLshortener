@@ -9,16 +9,16 @@ import (
 )
 
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
-	userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
-	if !ok {
-		h.l.ZL.Debug("Error getting if set new cookie")
-		return
-	}
-	if userIDCtx != 0 {
-		// Значит это первый запрос пользователя (куку установили и у нас есть ид, но статус надо отдать не авторизован).
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
+	//userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
+	//if !ok {
+	//	h.l.ZL.Debug("Error getting if set new cookie")
+	//	return
+	//}
+	//if userIDCtx != 0 {
+	//	// Значит это первый запрос пользователя (куку установили и у нас есть ид, но статус надо отдать не авторизован).
+	//	w.WriteHeader(http.StatusUnauthorized)
+	//	return
+	//}
 	//// Значит пользователь авторизован, надо получить id из куки
 	//cookie, err := r.Cookie("token")
 	//if err != nil {
@@ -34,10 +34,15 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	//}
 	//h.l.ZL.Debug("User id получили из куки (не из контекста)", zap.Int("userID", userID))
 
-	userID, err := h.GetUserID(r)
+	userID, isAuth, err := h.GetUserID(r)
 	if err != nil {
 		h.l.ZL.Info("getting userID", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if !isAuth {
+		// Значит это первый запрос пользователя (куку установили и у нас есть ид, но статус надо отдать не авторизован).
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 

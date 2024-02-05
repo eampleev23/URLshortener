@@ -26,7 +26,7 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 	// Далее передаем в модель данные для обработки.
 
-	userID, err := h.GetUserID(r)
+	userID, _, err := h.GetUserID(r)
 	if err != nil {
 		h.l.ZL.Info("getting userId", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)

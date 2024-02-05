@@ -12,7 +12,7 @@ import (
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем id пользователя.
-	userID, err := h.GetUserID(r)
+	userID, _, err := h.GetUserID(r)
 	if err != nil {
 		h.l.ZL.Debug("Error getting userID", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)

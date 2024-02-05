@@ -25,7 +25,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 	h.l.ZL.Debug("Got originalURL", zap.String("originalURL", originalURL))
 
 	// Получаем id пользователя.
-	userID, err := h.GetUserID(r)
+	userID, _, err := h.GetUserID(r)
 	if err != nil {
 		h.l.ZL.Info("Error getting userID", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)

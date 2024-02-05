@@ -33,21 +33,21 @@ func NewHandlers(s store.Store, c *config.Config, l *logger.ZapLog, au myauth.Au
 	return handlers
 }
 
-func (h *Handlers) GetUserID(r *http.Request) (userID int, err error) {
+func (h *Handlers) GetUserID(r *http.Request) (userID int, isAuth bool, err error) {
 	userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
 	if !ok {
-		return 0, fmt.Errorf("userIDCtx is not set: %w", err)
+		return 0, false, fmt.Errorf("userIDCtx is not set: %w", err)
 	}
 	if userIDCtx != 0 {
-		return userIDCtx, nil
+		return userIDCtx, false, nil
 	}
 	cookie, err := r.Cookie("token")
 	if err != nil {
-		return 0, fmt.Errorf("token not set in cookie: %w", err)
+		return 0, false, fmt.Errorf("token not set in cookie: %w", err)
 	}
 	userID, err = h.au.GetUserID(cookie.Value)
 	if err != nil {
-		return 0, fmt.Errorf("au.GetUserID error: %w", err)
+		return 0, false, fmt.Errorf("au.GetUserID error: %w", err)
 	}
-	return userID, nil
+	return userID, true, nil
 }
