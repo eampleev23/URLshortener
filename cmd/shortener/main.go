@@ -26,14 +26,14 @@ func main() {
 }
 
 func run() error {
-	myLog, err := logger.NewZapLogger("info")
-	if err != nil {
-		return fmt.Errorf("failed to initialize a new logger: %w", err)
-	}
-
-	c, err := config.NewConfig(myLog)
+	c, err := config.NewConfig()
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new config: %w", err)
+	}
+
+	myLog, err := logger.NewZapLogger(c.LogLevel)
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new logger: %w", err)
 	}
 
 	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, myLog)

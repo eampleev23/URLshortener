@@ -4,8 +4,6 @@ import (
 	"flag"
 	"os"
 	"time"
-
-	"github.com/eampleev23/URLshortener/internal/logger"
 )
 
 type Config struct {
@@ -20,7 +18,7 @@ type Config struct {
 	TokenEXP     time.Duration
 }
 
-func NewConfig(l *logger.ZapLog) (*Config, error) {
+func NewConfig() (*Config, error) {
 	config := &Config{
 		TLimitQuery: 20 * time.Second, //nolint:gomnd //nomagik
 		TokenEXP:    time.Hour * 3,    //nolint:gomnd //nomagik
@@ -36,7 +34,7 @@ func (c *Config) SetValues() error {
 	// регистрируем переменную flagRunAddr как аргумент -a со значением по умолчанию :8080
 	flag.StringVar(&c.RanAddr, "a", "localhost:8080", "address and port to run server")
 	// регистрируем уровень логирования
-	flag.StringVar(&c.LogLevel, "l", "info", "logger level")
+	flag.StringVar(&c.LogLevel, "l", "debug", "logger level")
 	// регистрируем переменную baseShortUrl как аргумент -b со значением по умолчанию http://localhost:8080
 	flag.StringVar(&c.BaseShortURL, "b", "http://localhost:8080", "base prefix for the shortURL")
 	// принимаем путь к файлу где хранить данные

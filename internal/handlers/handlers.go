@@ -2,31 +2,35 @@ package handlers
 
 import (
 	"fmt"
-	"net/http"
-
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"net/http"
 )
 
 var keyUserIDCtx myauth.Key = myauth.KeyUserIDCtx
 
 type Handlers struct {
-	s  store.Store
-	c  *config.Config
-	l  *logger.ZapLog
-	au myauth.Authorizer
+	s          store.Store
+	c          *config.Config
+	l          *logger.ZapLog
+	au         myauth.Authorizer
+	deleteChan chan store.DeleteURLItem
 }
 
 func NewHandlers(s store.Store, c *config.Config, l *logger.ZapLog, au myauth.Authorizer) *Handlers {
-	return &Handlers{
-		s:  s,
-		c:  c,
-		l:  l,
-		au: au,
+	handlers := &Handlers{
+		s:          s,
+		c:          c,
+		l:          l,
+		au:         au,
+		deleteChan: make(chan store.DeleteURLItem, 1024), // установим каналу буфер в 1024 сообщения
 	}
+	// запустим горутину с фоновым удалением урлов
+	go handlers.flushRequests()
+	return handlers
 }
 
 func (h *Handlers) GetUserID(r *http.Request) (userID int, err error) {

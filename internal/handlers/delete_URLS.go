@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
-	"net/http"
-
+	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
+	"log"
+	"net/http"
+	"time"
 )
 
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +24,6 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 	}
 	// В случае успешного парсинга в массив моделей, возвращаем статус 202 Accepted
 	w.WriteHeader(http.StatusAccepted)
-
 	// Далее передаем в модель данные для обработки.
 	userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
 	if !ok {
@@ -30,9 +32,13 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if userIDCtx != 0 {
-		err := h.s.DeleteURLS(r.Context(), userIDCtx, req)
-		if err != nil {
-			h.l.ZL.Info("h.s.DeleteURLS error: ", zap.Error(err))
+		for _, v := range req {
+			// отправим сообщение в очередь на удаление
+			h.deleteChan <- store.DeleteURLItem{
+				ShortURL:   v,
+				DeleteFlag: true,
+				OwnerID:    userIDCtx,
+			}
 		}
 		return
 	}
@@ -48,8 +54,42 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = h.s.DeleteURLS(r.Context(), userID, req)
-	if err != nil {
-		h.l.ZL.Info("h.s.DeleteURLS error: ", zap.Error(err))
+	// здеь нам нужно пробежаться в цикле и напихать запросов в канал
+	for _, v := range req {
+		// отправим сообщение в очередь на удаление
+		h.deleteChan <- store.DeleteURLItem{
+			ShortURL:   v,
+			DeleteFlag: true,
+			OwnerID:    userID,
+		}
+	}
+}
+
+func (h *Handlers) flushRequests() {
+	// будем сохранять сообщения, накопленные за последние 10 секунд
+	ticker := time.NewTicker(30 * time.Second)
+	var deleteItems []store.DeleteURLItem
+
+	for {
+		select {
+		case deleteReq := <-h.deleteChan:
+			// добавим запрос на удаление в слайс для последующего удаления
+			deleteItems = append(deleteItems, deleteReq)
+		case <-ticker.C:
+			// подождём, пока придёт хотя бы одно сообщение
+			if len(deleteItems) == 0 {
+				log.Println("delete items len = ", len(deleteItems))
+				continue
+			}
+			log.Println("delete items len = ", len(deleteItems))
+			// выполним все пришедшие за 10 секунд запросы за один раз батчингом
+			err := h.s.DeleteURLS(context.TODO(), deleteItems)
+			if err != nil {
+				// не будем стирать сообщения, попробуем отправить их чуть позже
+				continue
+			}
+			// сотрём успешно отосланные сообщения
+			deleteItems = nil
+		}
 	}
 }

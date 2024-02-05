@@ -6,6 +6,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"time"
 
@@ -167,13 +168,15 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 	return linksCouples, nil
 }
 
-func updateLinksCouplesStatement(count int, req []string, ownerID int) string {
+func updateLinksCouplesStatement(deleteItems []DeleteURLItem) string {
+
 	valueParts := ""
+	count := len(deleteItems)
 	for i := 0; i < count; i++ {
 		if i == count-1 {
-			valueParts += fmt.Sprintf("('%s', %t, %d)", req[i], true, ownerID)
+			valueParts += fmt.Sprintf("('%s', %t, %d)", deleteItems[i].ShortURL, deleteItems[i].DeleteFlag, deleteItems[i].OwnerID)
 		} else {
-			valueParts += fmt.Sprintf("('%s', %t, %d), ", req[i], true, ownerID)
+			valueParts += fmt.Sprintf("('%s', %t, %d), ", deleteItems[i].ShortURL, deleteItems[i].DeleteFlag, deleteItems[i].OwnerID)
 		}
 	}
 	stmtResult := `UPDATE links_couples SET is_deleted = tmp.is_deleted FROM (VALUES ` + valueParts +
@@ -183,7 +186,8 @@ func updateLinksCouplesStatement(count int, req []string, ownerID int) string {
 }
 
 // DeleteURLS проставляет тем урлам флаг удаления, которые пользователь решает удалить.
-func (ds DBStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (err error) {
+func (ds DBStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error) {
+	log.Println("зашли в DeleteURLS")
 	// Запускаем транзакцию.
 	tx, err := ds.dbConn.BeginTx(ctx, nil)
 
@@ -201,11 +205,8 @@ func (ds DBStore) DeleteURLS(ctx context.Context, ownerID int, req []string) (er
 		}
 	}()
 
-	// Задаем максимальное количество запросов за один раз.
-	batchSize := len(req)
-
 	// Подготавливаем запрос.
-	stmt := updateLinksCouplesStatement(batchSize, req, ownerID)
+	stmt := updateLinksCouplesStatement(deleteItems)
 	if _, err := tx.Exec(stmt); err != nil {
 		return fmt.Errorf("failed to update a batch with: %w", err)
 	}

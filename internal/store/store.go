@@ -28,7 +28,7 @@ type Store interface {
 	// GetURLsByOwnerID возвращает ссылки по ID пользователя с использованием авторизации.
 	GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error)
 	// DeleteURLS проставляет флаг удаления всем переданным shortURL у которых ownerID совпадает с id отправителя запроса
-	DeleteURLS(ctx context.Context, ownerID int, req []string) (err error)
+	DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error)
 	// GetLinksCoupleByShortURL возвращает LinksCouple со всеми полями по shortURL
 	GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error)
 }
@@ -39,6 +39,12 @@ type LinksCouple struct {
 	OriginalURL string `json:"original_url"`
 	OwnerID     int    `json:"owner_id"`
 	DeletedFlag bool   `json:"is_deleted"`
+}
+
+type DeleteURLItem struct {
+	ShortURL   string
+	DeleteFlag bool
+	OwnerID    int
 }
 
 // ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.
