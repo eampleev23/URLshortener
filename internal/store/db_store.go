@@ -52,11 +52,11 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 			ShortURL:    generatelinks.GenerateShortURL(),
 			OriginalURL: originalURL, OwnerID: ownerID,
 		})
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-		err = ErrConflict
-		return "", fmt.Errorf("conflict: %w", err)
-	}
+	//var pgErr *pgconn.PgError
+	//if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+	//	err = ErrConflict
+	//	return "", fmt.Errorf("conflict: %w", err)
+	//}
 	if err != nil {
 		return "", fmt.Errorf("error InsertURL: %w", err)
 	}

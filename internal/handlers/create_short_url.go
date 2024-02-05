@@ -127,6 +127,5 @@ func returnShortURLIfConflict(
 			return "", fmt.Errorf("collision: %w", myErr)
 		}
 	}
-
 	return "", errors.New("no pgErr")
 }
