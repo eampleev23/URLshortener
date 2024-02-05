@@ -81,10 +81,10 @@ func TestUseShortLink(t *testing.T) {
 		expectedCode int
 		expectedURL  string
 	}{
-		{method: http.MethodGet, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodPost, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodPut, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodDelete, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodGet, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodPost, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodPut, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodDelete, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
 	}
 
 	for _, tc := range testCases {
