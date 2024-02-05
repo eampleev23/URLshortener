@@ -32,35 +32,6 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	//userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
-	//if !ok {
-	//	h.l.ZL.Info("Error getting if set new cookie")
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
-	//if userIDCtx != 0 {
-	//	for _, v := range req {
-	//		// отправим сообщение в очередь на удаление
-	//		h.deleteChan <- store.DeleteURLItem{
-	//			ShortURL:   v,
-	//			DeleteFlag: true,
-	//			OwnerID:    userIDCtx,
-	//		}
-	//	}
-	//	return
-	//}
-	//cookie, err := r.Cookie("token")
-	//if err != nil {
-	//	h.l.ZL.Info("Don't set token without reason", zap.Error(err))
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
-	//userID, err := h.au.GetUserID(cookie.Value)
-	//if err != nil {
-	//	h.l.ZL.Info("au.GetUserID(cookie.Value) error", zap.Error(err))
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
 	// здеь нам нужно пробежаться в цикле и напихать запросов в канал
 	for _, v := range req {
 		// отправим сообщение в очередь на удаление
