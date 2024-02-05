@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -83,12 +82,28 @@ func (ms *MemoryStore) Close() (err error) {
 }
 
 func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
-	return nil, errors.New("map store doesn't use this method")
+	result := make([]LinksCouple, 0)
+	for _, v := range ms.s {
+		if v.OwnerID == ownerID {
+			result = append(result, v)
+		}
+	}
+	return result, nil
 }
 func (ms *MemoryStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error) {
-	return errors.New("map store doesn't use this method")
+	for _, v := range deleteItems {
+		if entry, ok := ms.s[v.ShortURL]; ok {
+			if entry.OwnerID == v.OwnerID {
+				entry.DeletedFlag = true
+			}
+		}
+	}
+	return nil
 }
 
 func (ms *MemoryStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
-	return LinksCouple{}, errors.New("memory store doesn't use this method")
+	if entry, ok := ms.s[shortURL]; ok {
+		return entry, nil
+	}
+	return LinksCouple{}, nil
 }
