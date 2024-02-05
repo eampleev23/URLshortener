@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/eampleev23/URLshortener/internal/services"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -33,7 +34,8 @@ func TestCreateShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l, *au)
+	serv := services.NewServices(s, c, l, *au)
+	h := handlers.NewHandlers(s, c, l, *au, serv)
 
 	testCases := []struct {
 		method       string
@@ -71,7 +73,8 @@ func TestUseShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l, *au)
+	serv := services.NewServices(s, c, l, *au)
+	h := handlers.NewHandlers(s, c, l, *au, serv)
 
 	testCases := []struct {
 		method       string
@@ -112,7 +115,8 @@ func TestJSONHandler(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l, *au)
+	serv := services.NewServices(s, c, l, *au)
+	h := handlers.NewHandlers(s, c, l, *au, serv)
 	handler := http.HandlerFunc(h.JSONHandler)
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
