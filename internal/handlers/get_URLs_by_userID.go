@@ -9,16 +9,16 @@ import (
 )
 
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
-	//userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
-	//if !ok {
-	//	h.l.ZL.Debug("Error getting if set new cookie")
-	//	return
-	//}
-	//if userIDCtx != 0 {
-	//	// Значит это первый запрос пользователя (куку установили и у нас есть ид, но статус надо отдать не авторизован).
-	//	w.WriteHeader(http.StatusUnauthorized)
-	//	return
-	//}
+	userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
+	if !ok {
+		h.l.ZL.Debug("Error getting if set new cookie")
+		return
+	}
+	if userIDCtx != 0 {
+		// Значит это первый запрос пользователя (куку установили и у нас есть ид, но статус надо отдать не авторизован).
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 	//// Значит пользователь авторизован, надо получить id из куки
 	//cookie, err := r.Cookie("token")
 	//if err != nil {
