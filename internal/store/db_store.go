@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/url"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -149,11 +148,11 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 		if err != nil {
 			return nil, fmt.Errorf("error rows.Scan in GetURLsByOwnerID: %w", err)
 		}
-		v.ShortURL, err = url.JoinPath(ds.c.BaseShortURL, v.ShortURL)
+		//v.ShortURL, err = url.JoinPath(ds.c.BaseShortURL, v.ShortURL)
 		if err != nil {
 			return nil, fmt.Errorf("error url.JoinPath: %w", err)
 		}
-		fmt.Println(v)
+		//fmt.Println(v)
 		linksCouples = append(linksCouples, v)
 	}
 	// проверяем на ошибки

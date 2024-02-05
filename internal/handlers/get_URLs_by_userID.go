@@ -21,7 +21,8 @@ func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), userID)
+	//ownersURLs, err := h.s.GetURLsByOwnerID(r.Context(), userID)
+	ownersURLs, err := h.serv.GetURLsByOwnerID(r.Context(), userID)
 	if err != nil {
 		h.l.ZL.Debug("Error GetURLsByOwnerID:", zap.Error(err))
 	}

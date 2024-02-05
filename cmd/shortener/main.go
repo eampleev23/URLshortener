@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/services"
 	"log"
 	"net/http"
 
@@ -55,7 +56,8 @@ func run() error {
 		}()
 	}
 
-	h := handlers.NewHandlers(s, c, myLog, *au)
+	serv := services.NewServices(s, c, myLog, *au)
+	h := handlers.NewHandlers(s, c, myLog, *au, serv)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
 	r := chi.NewRouter()
