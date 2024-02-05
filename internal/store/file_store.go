@@ -209,7 +209,11 @@ func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 	return nil
 }
 func (fs *FileStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error) {
-	return errors.New("file store doesn't use this method")
+	err = fs.ms.DeleteURLS(ctx, deleteItems)
+	if err != nil {
+		return fmt.Errorf("memory store delete URL %w", err)
+	}
+	return nil
 }
 func (fs *FileStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
 	originalURL, err := fs.ms.GetOriginalURLByShort(ctx, shortURL)
