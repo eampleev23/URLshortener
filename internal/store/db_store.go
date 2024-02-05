@@ -52,11 +52,6 @@ func (ds DBStore) SetShortURL(ctx context.Context, originalURL string, ownerID i
 			ShortURL:    generatelinks.GenerateShortURL(),
 			OriginalURL: originalURL, OwnerID: ownerID,
 		})
-	//var pgErr *pgconn.PgError
-	//if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-	//	err = ErrConflict
-	//	return "", fmt.Errorf("conflict: %w", err)
-	//}
 	if err != nil {
 		return "", fmt.Errorf("error InsertURL: %w", err)
 	}
@@ -135,7 +130,7 @@ func (ds DBStore) Close() error {
 }
 
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
-	rows, err := ds.dbConn.QueryContext(ctx, "SELECT * FROM links_couples WHERE owner_id = $1", ownerID)
+	rows, err := ds.dbConn.QueryContext(ctx, "SELECT uuid, short_url, original_url, owner_id, is_deleted FROM links_couples WHERE owner_id = $1", ownerID)
 	if err != nil {
 		return nil, fmt.Errorf("not get links for owner by ownerid %w", err)
 	}
