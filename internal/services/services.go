@@ -7,6 +7,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
+	"log"
 	"net/url"
 )
 
@@ -37,5 +38,6 @@ func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store
 			return nil, fmt.Errorf("url.JoinPath error %w", err)
 		}
 	}
+	log.Println("result=", result)
 	return result, nil
 }
