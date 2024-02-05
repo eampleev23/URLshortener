@@ -24,7 +24,7 @@ func TestCreateShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	c, _ = config.NewConfig(l)
+	c, _ = config.NewConfig()
 	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
 	if err != nil {
 		t.Log(err)
