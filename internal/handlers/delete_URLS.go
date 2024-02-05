@@ -67,7 +67,7 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) flushRequests() {
 	// будем сохранять сообщения, накопленные за последние 10 секунд
-	ticker := time.NewTicker(30 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	var deleteItems []store.DeleteURLItem
 
 	for {
