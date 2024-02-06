@@ -148,9 +148,6 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 		if err != nil {
 			return nil, fmt.Errorf("error rows.Scan in GetURLsByOwnerID: %w", err)
 		}
-		if err != nil {
-			return []LinksCouple{}, fmt.Errorf("error url.JoinPath: %w", err)
-		}
 		linksCouples = append(linksCouples, v)
 	}
 	// проверяем на ошибки
