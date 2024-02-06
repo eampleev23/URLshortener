@@ -159,12 +159,14 @@ func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCou
 }
 
 func updateLinksCouplesStatement(deleteItems []DeleteURLItem) string {
-
 	valueParts := ""
 	count := len(deleteItems)
 	for i := 0; i < count; i++ {
 		if i == count-1 {
-			valueParts += fmt.Sprintf("('%s', %t, %d)", deleteItems[i].ShortURL, deleteItems[i].DeleteFlag, deleteItems[i].OwnerID)
+			valueParts += fmt.Sprintf("('%s', %t, %d)",
+				deleteItems[i].ShortURL,
+				deleteItems[i].DeleteFlag,
+				deleteItems[i].OwnerID)
 		} else {
 			valueParts += fmt.Sprintf("('%s', %t, %d), ", deleteItems[i].ShortURL, deleteItems[i].DeleteFlag, deleteItems[i].OwnerID)
 		}
