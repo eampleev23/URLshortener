@@ -3,11 +3,12 @@ package services
 import (
 	"context"
 	"fmt"
+	"net/url"
+
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/store"
-	"net/url"
 )
 
 type Services struct {

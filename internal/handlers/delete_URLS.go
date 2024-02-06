@@ -3,10 +3,11 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"github.com/eampleev23/URLshortener/internal/store"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
+
+	"github.com/eampleev23/URLshortener/internal/store"
+	"go.uber.org/zap"
 )
 
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +45,7 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handlers) flushRequests() {
 	// будем сохранять сообщения, накопленные за последние 10 секунд
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(5 * time.Second) //nolint:gomnd //no magik
 	var deleteItems []store.DeleteURLItem
 
 	for {

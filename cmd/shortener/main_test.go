@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/eampleev23/URLshortener/internal/services"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/eampleev23/URLshortener/internal/services"
 
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 

@@ -31,7 +31,7 @@ func (h *Handlers) CreateShortURL(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	h.l.ZL.Debug("Got ID of user", zap.Int("userID", userID)) //nolint:goconst // it's just ok
+	h.l.ZL.Debug("Got ID of user", zap.Int("userID", userID))
 
 	// Далее пробуем создать ссылку, но нам нужно знать есть ли конфликт данных
 	shortURL, err := h.s.SetShortURL(r.Context(), originalURL, userID)
