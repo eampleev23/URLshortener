@@ -168,7 +168,10 @@ func updateLinksCouplesStatement(deleteItems []DeleteURLItem) string {
 				deleteItems[i].DeleteFlag,
 				deleteItems[i].OwnerID)
 		} else {
-			valueParts += fmt.Sprintf("('%s', %t, %d), ", deleteItems[i].ShortURL, deleteItems[i].DeleteFlag, deleteItems[i].OwnerID)
+			valueParts += fmt.Sprintf("('%s', %t, %d), ",
+				deleteItems[i].ShortURL,
+				deleteItems[i].DeleteFlag,
+				deleteItems[i].OwnerID)
 		}
 	}
 	stmtResult := `UPDATE links_couples SET is_deleted = tmp.is_deleted FROM (VALUES ` + valueParts +
@@ -210,7 +213,8 @@ func (ds DBStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (
 
 func (ds DBStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
 	row := ds.dbConn.QueryRowContext(ctx,
-		`SELECT uuid, short_url, original_url, owner_id, is_deleted FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
+		`SELECT uuid, short_url, original_url, owner_id, is_deleted 
+FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
 	)
 	err = row.Scan(&lc.UUID, &lc.ShortURL, &lc.OriginalURL, &lc.OwnerID, &lc.DeletedFlag) // Разбираем результат
 	if err != nil {
