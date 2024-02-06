@@ -95,6 +95,7 @@ func (ms *MemoryStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLIt
 		if entry, ok := ms.s[v.ShortURL]; ok {
 			if entry.OwnerID == v.OwnerID {
 				entry.DeletedFlag = true
+				ms.s[v.ShortURL] = entry
 			}
 		}
 	}
