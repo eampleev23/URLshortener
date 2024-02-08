@@ -63,13 +63,15 @@ func (serv *Services) FlushRequests() {
 				continue
 			}
 			// выполним все пришедшие за 10 секунд запросы за один раз батчингом
-			err := serv.s.DeleteURLS(context.TODO(), deleteItems)
+			ctx, cancel := context.WithTimeout(context.Background(), serv.c.TLimitQuery)
+			err := serv.s.DeleteURLS(ctx, deleteItems)
 			if err != nil {
 				// не будем стирать сообщения, попробуем отправить их чуть позже
 				continue
 			}
 			// сотрём успешно отосланные сообщения
 			deleteItems = nil
+			cancel()
 		}
 	}
 }
