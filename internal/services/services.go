@@ -49,7 +49,7 @@ func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store
 
 func (serv *Services) FlushRequests() {
 	// будем сохранять сообщения, накопленные за последние 10 секунд
-	ticker := time.NewTicker(5 * time.Second) //nolint:gomnd //no magik
+	ticker := time.NewTicker(serv.c.TimeDeleteURLs)
 	var deleteItems []store.DeleteURLItem
 
 	for {

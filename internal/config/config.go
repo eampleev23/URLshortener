@@ -7,21 +7,23 @@ import (
 )
 
 type Config struct {
-	RanAddr      string
-	LogLevel     string
-	BaseShortURL string
-	SFilePath    string
-	DBDSN        string
-	SecretKey    string
-	DatagenEC    int
-	TLimitQuery  time.Duration
-	TokenEXP     time.Duration
+	RanAddr        string
+	LogLevel       string
+	BaseShortURL   string
+	SFilePath      string
+	DBDSN          string
+	SecretKey      string
+	DatagenEC      int
+	TLimitQuery    time.Duration
+	TokenEXP       time.Duration
+	TimeDeleteURLs time.Duration
 }
 
 func NewConfig() (*Config, error) {
 	config := &Config{
-		TLimitQuery: 20 * time.Second, //nolint:gomnd //nomagik
-		TokenEXP:    time.Hour * 3,    //nolint:gomnd //nomagik
+		TLimitQuery:    20 * time.Second, //nolint:gomnd //nomagik
+		TokenEXP:       time.Hour * 3,    //nolint:gomnd //nomagik
+		TimeDeleteURLs: time.Second * 5,  //nolint:gomnd //nomagik
 	}
 	err := config.SetValues()
 	if err != nil {
