@@ -2,9 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
-	"net/http"
 )
 
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
