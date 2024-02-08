@@ -35,8 +35,6 @@ func NewHandlers(
 		au:   au,
 		serv: serv,
 	}
-	// запустим горутину с фоновым удалением урлов
-	go handlers.flushRequests()
 	return handlers
 }
 

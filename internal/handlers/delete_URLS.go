@@ -1,13 +1,10 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
-	"net/http"
-	"time"
-
 	"github.com/eampleev23/URLshortener/internal/store"
 	"go.uber.org/zap"
+	"net/http"
 )
 
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
@@ -39,33 +36,6 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 			ShortURL:   v,
 			DeleteFlag: true,
 			OwnerID:    userID,
-		}
-	}
-}
-
-func (h *Handlers) flushRequests() {
-	// будем сохранять сообщения, накопленные за последние 10 секунд
-	ticker := time.NewTicker(5 * time.Second) //nolint:gomnd //no magik
-	var deleteItems []store.DeleteURLItem
-
-	for {
-		select {
-		case deleteReq := <-h.serv.DeleteChan:
-			// добавим запрос на удаление в слайс для последующего удаления
-			deleteItems = append(deleteItems, deleteReq)
-		case <-ticker.C:
-			// подождём, пока придёт хотя бы одно сообщение
-			if len(deleteItems) == 0 {
-				continue
-			}
-			// выполним все пришедшие за 10 секунд запросы за один раз батчингом
-			err := h.s.DeleteURLS(context.TODO(), deleteItems)
-			if err != nil {
-				// не будем стирать сообщения, попробуем отправить их чуть позже
-				continue
-			}
-			// сотрём успешно отосланные сообщения
-			deleteItems = nil
 		}
 	}
 }
