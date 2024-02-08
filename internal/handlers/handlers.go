@@ -15,12 +15,11 @@ import (
 var keyUserIDCtx myauth.Key = myauth.KeyUserIDCtx
 
 type Handlers struct {
-	deleteChan chan store.DeleteURLItem
-	serv       *services.Services
-	s          store.Store
-	c          *config.Config
-	l          *logger.ZapLog
-	au         myauth.Authorizer
+	serv *services.Services
+	s    store.Store
+	c    *config.Config
+	l    *logger.ZapLog
+	au   myauth.Authorizer
 }
 
 func NewHandlers(
@@ -30,12 +29,11 @@ func NewHandlers(
 	au myauth.Authorizer,
 	serv *services.Services) *Handlers {
 	handlers := &Handlers{
-		s:          s,
-		c:          c,
-		l:          l,
-		au:         au,
-		serv:       serv,
-		deleteChan: make(chan store.DeleteURLItem, 1024), //nolint:gomnd //установим каналу буфер в 1024 сообщения
+		s:    s,
+		c:    c,
+		l:    l,
+		au:   au,
+		serv: serv,
 	}
 	// запустим горутину с фоновым удалением урлов
 	go handlers.flushRequests()

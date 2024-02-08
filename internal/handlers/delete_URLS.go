@@ -35,7 +35,7 @@ func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 	// здеь нам нужно пробежаться в цикле и напихать запросов в канал
 	for _, v := range req {
 		// отправим сообщение в очередь на удаление
-		h.deleteChan <- store.DeleteURLItem{
+		h.serv.DeleteChan <- store.DeleteURLItem{
 			ShortURL:   v,
 			DeleteFlag: true,
 			OwnerID:    userID,
@@ -50,7 +50,7 @@ func (h *Handlers) flushRequests() {
 
 	for {
 		select {
-		case deleteReq := <-h.deleteChan:
+		case deleteReq := <-h.serv.DeleteChan:
 			// добавим запрос на удаление в слайс для последующего удаления
 			deleteItems = append(deleteItems, deleteReq)
 		case <-ticker.C:

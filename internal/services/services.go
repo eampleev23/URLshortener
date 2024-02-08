@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"time"
 
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -12,19 +13,24 @@ import (
 )
 
 type Services struct {
-	s  store.Store
-	c  *config.Config
-	l  *logger.ZapLog
-	au myauth.Authorizer
+	DeleteChan chan store.DeleteURLItem
+	s          store.Store
+	c          *config.Config
+	l          *logger.ZapLog
+	au         myauth.Authorizer
 }
 
 func NewServices(s store.Store, c *config.Config, l *logger.ZapLog, au myauth.Authorizer) *Services {
-	return &Services{
-		s:  s,
-		c:  c,
-		l:  l,
-		au: au,
+	services := &Services{
+		DeleteChan: make(chan store.DeleteURLItem, 1024), //nolint:gomnd //установим каналу буфер в 1024 сообщения
+		s:          s,
+		c:          c,
+		l:          l,
+		au:         au,
 	}
+	// запустим горутину с фоновым удалением урлов
+	go services.FlushRequests()
+	return services
 }
 
 func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store.LinksCouple, error) {
@@ -39,4 +45,31 @@ func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store
 		}
 	}
 	return result, nil
+}
+
+func (serv *Services) FlushRequests() {
+	// будем сохранять сообщения, накопленные за последние 10 секунд
+	ticker := time.NewTicker(5 * time.Second) //nolint:gomnd //no magik
+	var deleteItems []store.DeleteURLItem
+
+	for {
+		select {
+		case deleteReq := <-serv.DeleteChan:
+			// добавим запрос на удаление в слайс для последующего удаления
+			deleteItems = append(deleteItems, deleteReq)
+		case <-ticker.C:
+			// подождём, пока придёт хотя бы одно сообщение
+			if len(deleteItems) == 0 {
+				continue
+			}
+			// выполним все пришедшие за 10 секунд запросы за один раз батчингом
+			err := serv.s.DeleteURLS(context.TODO(), deleteItems)
+			if err != nil {
+				// не будем стирать сообщения, попробуем отправить их чуть позже
+				continue
+			}
+			// сотрём успешно отосланные сообщения
+			deleteItems = nil
+		}
+	}
 }
