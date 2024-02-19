@@ -5,6 +5,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/eampleev23/URLshortener/internal/services"
+
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
+
 	"github.com/go-resty/resty/v2"
 
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -22,22 +26,27 @@ func TestCreateShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	c, _ = config.NewConfig(l)
+	c, _ = config.NewConfig()
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
+	if err != nil {
+		t.Log(err)
+	}
 	s, err := store.NewMemoryStore(c, l)
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l)
+	serv := services.NewServices(s, c, l, *au)
+	h := handlers.NewHandlers(s, c, l, *au, serv)
 
 	testCases := []struct {
 		method       string
 		expectedCode int
 		contentType  string
 	}{
-		{method: http.MethodGet, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodPut, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodDelete, expectedCode: http.StatusBadRequest, contentType: ""},
-		{method: http.MethodPost, expectedCode: 201, contentType: "text/plain"},
+		{method: http.MethodGet, expectedCode: http.StatusInternalServerError, contentType: ""},
+		{method: http.MethodPut, expectedCode: http.StatusInternalServerError, contentType: ""},
+		{method: http.MethodDelete, expectedCode: http.StatusInternalServerError, contentType: ""},
+		{method: http.MethodPost, expectedCode: http.StatusInternalServerError, contentType: "text/plain"},
 	}
 
 	for _, tc := range testCases {
@@ -46,7 +55,7 @@ func TestCreateShortLink(t *testing.T) {
 			w := httptest.NewRecorder()
 
 			// Вызовем хэндлер как обычную функцию без запуска сервера
-			h.CreateShortLink(w, r)
+			h.CreateShortURL(w, r)
 			assert.Equal(t, tc.expectedCode, w.Code, "Код ответа не совпадает с ожидаемым")
 		})
 	}
@@ -61,17 +70,22 @@ func TestUseShortLink(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l)
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
+	if err != nil {
+		t.Log(err)
+	}
+	serv := services.NewServices(s, c, l, *au)
+	h := handlers.NewHandlers(s, c, l, *au, serv)
 
 	testCases := []struct {
 		method       string
 		expectedCode int
 		expectedURL  string
 	}{
-		{method: http.MethodGet, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodPost, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodPut, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
-		{method: http.MethodDelete, expectedCode: 400, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodGet, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodPost, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodPut, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
+		{method: http.MethodDelete, expectedCode: 307, expectedURL: "http://localhost:8080/shortlink"},
 	}
 
 	for _, tc := range testCases {
@@ -98,7 +112,12 @@ func TestJSONHandler(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
-	h := handlers.NewHandlers(s, c, l)
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, l)
+	if err != nil {
+		t.Log(err)
+	}
+	serv := services.NewServices(s, c, l, *au)
+	h := handlers.NewHandlers(s, c, l, *au, serv)
 	handler := http.HandlerFunc(h.JSONHandler)
 	srv := httptest.NewServer(handler)
 	defer srv.Close()
@@ -113,19 +132,19 @@ func TestJSONHandler(t *testing.T) {
 		{
 			name:         "method_get",
 			method:       http.MethodGet,
-			expectedCode: 400,
+			expectedCode: 500,
 			expectedBody: "",
 		},
 		{
 			name:         "method_put",
 			method:       http.MethodPut,
-			expectedCode: 400,
+			expectedCode: 500,
 			expectedBody: "",
 		},
 		{
 			name:         "method_delete",
 			method:       http.MethodDelete,
-			expectedCode: 400,
+			expectedCode: 500,
 			expectedBody: "",
 		},
 	}

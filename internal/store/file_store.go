@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -60,8 +61,8 @@ func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
 	return fs, nil
 }
 
-func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string) (newShortURL string, err error) {
-	newShortURL, err = fs.ms.SetShortURL(ctx, originalURL)
+func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
+	newShortURL, err = fs.ms.SetShortURL(ctx, originalURL, ownerID)
 	if err != nil {
 		return "", fmt.Errorf("error set in memory store in file store: %w", err)
 	}
@@ -85,6 +86,9 @@ func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL stri
 		return "", fmt.Errorf("error GetShortURLByOriginal in file store %w", err)
 	}
 	return shortURL, nil
+}
+func (fs *FileStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
+	return nil, errors.New("file store doesn't use this method")
 }
 
 // PingDB проверяет подключение к базе данных.
@@ -203,4 +207,18 @@ func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 		}
 	}
 	return nil
+}
+func (fs *FileStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error) {
+	err = fs.ms.DeleteURLS(ctx, deleteItems)
+	if err != nil {
+		return fmt.Errorf("memory store delete URL %w", err)
+	}
+	return nil
+}
+func (fs *FileStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
+	originalURL, err := fs.ms.GetOriginalURLByShort(ctx, shortURL)
+	if err != nil {
+		return LinksCouple{}, fmt.Errorf("error GetOriginalURLByShort in file store %w", err)
+	}
+	return LinksCouple{UUID: "1", ShortURL: shortURL, OriginalURL: originalURL, OwnerID: 1, DeletedFlag: false}, nil
 }

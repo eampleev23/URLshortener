@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+
 	"github.com/eampleev23/URLshortener/internal/datagen"
 
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -14,7 +16,7 @@ import (
 
 type Store interface {
 	// SetShortURL добавляет новое значение в стор.
-	SetShortURL(ctx context.Context, originalURL string) (shortURL string, err error)
+	SetShortURL(ctx context.Context, originalURL string, ownerID int) (shortURL string, err error)
 	// GetOriginalURLByShort возвращает оригинальную ссылку по короткой
 	GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error)
 	// GetShortURLByOriginal возвращает короткую ссылку по длинной если такая есть
@@ -23,6 +25,26 @@ type Store interface {
 	PingDB(ctx context.Context, tiimeLimit time.Duration) (err error)
 	// Close закрывает соединение с базой данных
 	Close() (err error)
+	// GetURLsByOwnerID возвращает ссылки по ID пользователя с использованием авторизации.
+	GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error)
+	// DeleteURLS проставляет флаг удаления всем переданным shortURL у которых ownerID совпадает с id отправителя запроса
+	DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error)
+	// GetLinksCoupleByShortURL возвращает LinksCouple со всеми полями по shortURL
+	GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error)
+}
+
+type LinksCouple struct {
+	UUID        string `json:"uuid"`
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+	OwnerID     int    `json:"owner_id"`
+	DeletedFlag bool   `json:"is_deleted"`
+}
+
+type DeleteURLItem struct {
+	ShortURL   string
+	DeleteFlag bool
+	OwnerID    int
 }
 
 // ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.
@@ -36,35 +58,26 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error creating new db store: %w", err)
 		}
-		err = s.createTable()
-		if err != nil {
-			return nil, fmt.Errorf("error create table: %w", err)
-		}
 		err = datagen.GenerateData(context.Background(), c, l)
 		if err != nil {
 			return nil, fmt.Errorf("error data generation: %w", err)
 		}
+		l.ZL.Info("Use DB store..")
 		return s, nil
 
 	case len(c.SFilePath) != 0:
-		l.ZL.Info("Using File Store..")
 		s, err := NewFileStore(c, l)
 		if err != nil {
 			return nil, fmt.Errorf("error creating new file store: %w", err)
 		}
+		l.ZL.Info("Use File Store..")
 		return s, nil
 	default:
-		l.ZL.Info("Using Memory Store..")
 		s, err := NewMemoryStore(c, l)
 		if err != nil {
 			return nil, fmt.Errorf("error create memory store: %w", err)
 		}
+		l.ZL.Info("Used Memory Store..")
 		return s, nil
 	}
-}
-
-type LinksCouple struct {
-	UUID        string `json:"uuid"`
-	ShortURL    string `json:"short_url"`
-	OriginalURL string `json:"original_url"`
 }

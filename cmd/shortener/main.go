@@ -5,6 +5,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/eampleev23/URLshortener/internal/services"
+
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
+
 	"github.com/eampleev23/URLshortener/internal/compression"
 
 	"github.com/eampleev23/URLshortener/internal/config"
@@ -24,14 +28,19 @@ func main() {
 }
 
 func run() error {
-	myLog, err := logger.NewZapLogger("info")
+	c, err := config.NewConfig()
+	if err != nil {
+		return fmt.Errorf("failed to initialize a new config: %w", err)
+	}
+
+	myLog, err := logger.NewZapLogger(c.LogLevel)
 	if err != nil {
 		return fmt.Errorf("failed to initialize a new logger: %w", err)
 	}
 
-	c, err := config.NewConfig(myLog)
+	au, err := myauth.Initialize(c.SecretKey, c.TokenEXP, myLog)
 	if err != nil {
-		return fmt.Errorf("failed to initialize a new config: %w", err)
+		return fmt.Errorf("failed to initialize a new authorizer: %w", err)
 	}
 
 	s, err := store.NewStorage(c, myLog)
@@ -43,23 +52,26 @@ func run() error {
 		// Отложенно закрываем соединение с бд.
 		defer func() {
 			if err := s.Close(); err != nil {
-				myLog.ZL.Info("new store failed to properly close the DB connection")
+				myLog.ZL.Info("store failed to properly close the DB connection")
 			}
 		}()
 	}
 
-	h := handlers.NewHandlers(s, c, myLog)
+	serv := services.NewServices(s, c, myLog, *au)
+	h := handlers.NewHandlers(s, c, myLog, *au, serv)
 
 	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
 	r := chi.NewRouter()
 	r.Use(myLog.RequestLogger)
 	r.Use(compression.GzipMiddleware)
-	r.Post("/", h.CreateShortLink)
+	r.Use(au.Auth)
+	r.Post("/", h.CreateShortURL)
 	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)
 	r.Post("/api/shorten", h.JSONHandler)
 	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
-
+	r.Get("/api/user/urls", h.GetURLsByUserID)
+	r.Delete("/api/user/urls", h.DeleteURLS)
 	err = http.ListenAndServe(c.RanAddr, r)
 	if err != nil {
 		return fmt.Errorf("ошибка ListenAndServe: %w", err)

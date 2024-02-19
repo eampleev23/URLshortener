@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/eampleev23/URLshortener/internal/store"
+)
+
 // BatchItemReq описывает один элемент в запросе пользователя на получение партии коротких ссылок.
 type BatchItemReq struct {
 	CorrelationID string `json:"correlation_id"`
@@ -14,10 +18,28 @@ type BatchItemRes struct {
 
 // RequestAddShortURL описывает запрос пользователя на получение короткой ссылки.
 type RequestAddShortURL struct {
-	LongURL string `json:"url"`
+	OriginalURL string `json:"url"`
 }
 
 // ResponseAddShortURL описывает запрос пользователя на получение короткой ссылки.
 type ResponseAddShortURL struct {
 	ShortURL string `json:"result"`
+}
+
+// ResponseGetOwnerURL описывает элемент ответа пользователю на получение всех его ссылок.
+type ResponseGetOwnerURL struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
+
+func GetResponseGetOwnerURLs(source []store.LinksCouple) (result []ResponseGetOwnerURL, err error) {
+	result = make([]ResponseGetOwnerURL, 0, len(source))
+	for _, v := range source {
+		result = append(result, ResponseGetOwnerURL{
+			ShortURL:    v.ShortURL,
+			OriginalURL: v.OriginalURL,
+		})
+	}
+
+	return result, nil
 }

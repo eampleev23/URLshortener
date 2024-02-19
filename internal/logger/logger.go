@@ -3,6 +3,7 @@ package logger
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// ZapLog не понятно что дает, возможно проще возвращать сразу *zap.Logger.
 type ZapLog struct {
 	ZL *zap.Logger
 }
@@ -23,6 +25,7 @@ func NewZapLogger(level string) (*ZapLog, error) {
 
 // Initialize инициализирует синглтон логера с необходимым уровнем логирования.
 func Initialize(level string, zapObj *ZapLog) (*ZapLog, error) {
+	log.Println("level log:", level)
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -97,10 +100,10 @@ func (zl *ZapLog) RequestLogger(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(&lw, r.WithContext(ctx))
 		duration := time.Since(start)
-		zl.ZL.Info("got incoming HTTP request",
+		zl.ZL.Debug("got incoming HTTP request",
 			zap.String("path", r.URL.Path),
 			zap.String("method", r.Method),
-			zap.String("content-type", r.Header.Get("content-type")),
+			zap.String("header", r.Header.Get("content-type")),
 			zap.String("duration", shortDur(duration)),
 			zap.Int("status", responseData.status),
 			zap.Int("size", responseData.size),
