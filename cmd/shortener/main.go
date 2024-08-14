@@ -20,7 +20,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// Init commit iter16.
 func main() {
 	err := run()
 	if err != nil {
