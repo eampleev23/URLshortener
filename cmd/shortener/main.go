@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 
 	"github.com/eampleev23/URLshortener/internal/services"
 
@@ -20,7 +21,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// iter16 test
 func main() {
 	err := run()
 	if err != nil {

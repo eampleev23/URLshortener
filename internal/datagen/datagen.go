@@ -1,3 +1,11 @@
+// Вы познакомились с основными правилами документирования исходного кода.
+// Ниже будут отображаться заголовок и ссылки.
+//
+// # Смотрите также
+//
+// https://pkg.go.dev/
+//
+// https://elliotchance.medium.com/godoc-tips-tricks-cda6571549b
 package datagen
 
 import (
