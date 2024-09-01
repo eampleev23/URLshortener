@@ -29,6 +29,10 @@ func main() {
 	}
 }
 
+/*
+iter17 - Отформатируйте свой проект с помощью gofmt или goimports. Убедитесь, что все файлы проекта прошли форматирование.
+*/
+
 func run() error {
 	c, err := config.NewConfig()
 	if err != nil {
