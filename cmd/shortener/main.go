@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/eampleev23/URLshortener/internal/compression"
-	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+
+	"github.com/eampleev23/URLshortener/internal/compression"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/eampleev23/URLshortener/internal/services"
 

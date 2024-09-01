@@ -11,7 +11,8 @@ import (
 )
 
 /*
-Добавьте в код сервера новый эндпоинт POST /api/shorten, который будет принимать в теле запроса JSON-объект {"url":"<some_url>"} и возвращать в ответ объект {"result":"<short_url>"}.
+Добавьте в код сервера новый эндпоинт POST /api/shorten, который будет принимать в теле запроса JSON-объект
+{"url":"<some_url>"} и возвращать в ответ объект {"result":"<short_url>"}.
 Запрос может иметь такой вид:
 POST http://localhost:8080/api/shorten HTTP/1.1
 Host: localhost:8080
@@ -25,7 +26,7 @@ Content-Type: application/json
 Content-Length: 30
 {
  "result": "http://localhost:8080/EwHXdJfB"
-}
+}.
 */
 
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {

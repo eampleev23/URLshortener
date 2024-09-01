@@ -9,7 +9,7 @@ import (
 )
 
 /*
-["g4i4u"] - это батчингом делается
+["g4i4u"] - это батчингом делается.
 */
 
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
