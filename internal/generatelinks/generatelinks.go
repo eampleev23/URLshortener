@@ -9,7 +9,7 @@ func GenerateShortURL() string {
 	// заводим слайс рун возможных для сгенерированной короткой ссылки
 	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 	lenLetterRunes := len(letterRunes)
-	// делаем из 2 символов
+	// задаем количество символов в сгенерированной ссылке
 	numberOfSimbols := 5
 	b := make([]rune, numberOfSimbols)
 

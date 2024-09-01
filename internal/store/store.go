@@ -64,7 +64,6 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		}
 		l.ZL.Info("Use DB store..")
 		return s, nil
-
 	case len(c.SFilePath) != 0:
 		s, err := NewFileStore(c, l)
 		if err != nil {
@@ -77,7 +76,7 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error create memory store: %w", err)
 		}
-		l.ZL.Info("Used Memory Store..")
+		l.ZL.Info("Use Memory Store..")
 		return s, nil
 	}
 }

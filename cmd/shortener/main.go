@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -9,8 +10,6 @@ import (
 	"github.com/eampleev23/URLshortener/internal/services"
 
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
-
-	"github.com/eampleev23/URLshortener/internal/compression"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -64,8 +63,9 @@ func run() error {
 	myLog.ZL.Info("Running server", zap.String("address", c.RanAddr))
 	r := chi.NewRouter()
 	r.Use(myLog.RequestLogger)
-	r.Use(compression.GzipMiddleware)
+	//r.Use(compression.GzipMiddleware)
 	r.Use(au.Auth)
+	r.Mount("/debug", middleware.Profiler())
 	r.Post("/", h.CreateShortURL)
 	r.Get("/ping", h.PingDBHandler)
 	r.Get("/{id}", h.UseShortLink)

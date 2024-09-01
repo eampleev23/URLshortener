@@ -8,6 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
+/*
+["g4i4u"] - это батчингом делается
+*/
+
 func (h *Handlers) DeleteURLS(w http.ResponseWriter, r *http.Request) {
 	h.l.ZL.Debug("DeleteURLS start..")
 	// Сначала преобразуем входящие данные в массив моделей.
