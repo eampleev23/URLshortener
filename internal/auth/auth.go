@@ -1,7 +1,3 @@
-// Модуль retrier повторяет операцию до тех пор, пока она не завершится успешно.
-// Задержка между повторами ограничивается сверху и снизу и вычисляется по формуле:
-//
-//	delay = delay * multiplier.
 package myauth
 
 import (
@@ -17,6 +13,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Authorizer - синглтон авторизатора.
 type Authorizer struct {
 	l         *logger.ZapLog
 	SecretKey string
