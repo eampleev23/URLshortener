@@ -22,12 +22,14 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+// DBStore - класс хранилища.
 type DBStore struct {
 	dbConn *sql.DB
 	c      *config.Config
 	l      *logger.ZapLog
 }
 
+// NewDBStore - конструктор дб стора.
 func NewDBStore(c *config.Config, l *logger.ZapLog) (*DBStore, error) {
 	db, err := sql.Open("pgx", c.DBDSN)
 	if err != nil {
@@ -92,6 +94,7 @@ func runMigrations(dsn string) error {
 	return nil
 }
 
+// GetOriginalURLByShort - получить оригинальную ссылку по короткой.
 func (ds DBStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
 	row := ds.dbConn.QueryRowContext(ctx,
 		`SELECT original_url FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
@@ -102,6 +105,8 @@ func (ds DBStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (o
 	}
 	return originalURL, nil
 }
+
+// GetShortURLByOriginal - получить короткую ссылку по оригинальной.
 func (ds DBStore) GetShortURLByOriginal(ctx context.Context, originalURL string) (shortURL string, err error) {
 	row := ds.dbConn.QueryRowContext(ctx,
 		`SELECT short_url FROM links_couples WHERE original_url = $1 LIMIT 1`, originalURL,
@@ -112,6 +117,8 @@ func (ds DBStore) GetShortURLByOriginal(ctx context.Context, originalURL string)
 	}
 	return shortURL, nil
 }
+
+// PingDB - пингануть бд.
 func (ds DBStore) PingDB(ctx context.Context, timeLimit time.Duration) error {
 	ctx, cancel := context.WithTimeout(ctx, timeLimit)
 	defer cancel()
@@ -121,6 +128,8 @@ func (ds DBStore) PingDB(ctx context.Context, timeLimit time.Duration) error {
 	}
 	return nil
 }
+
+// Close - закрыть соединение с бд.
 func (ds DBStore) Close() error {
 	if err := ds.dbConn.Close(); err != nil {
 		return fmt.Errorf("failed to properly close the DB connection %w", err)
@@ -128,6 +137,7 @@ func (ds DBStore) Close() error {
 	return nil
 }
 
+// GetURLsByOwnerID - получить урлы пользователя по его ид.
 func (ds DBStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	rows, err := ds.dbConn.QueryContext(ctx, "SELECT uuid, short_url, original_url, owner_id, is_deleted"+
 		" FROM links_couples WHERE owner_id = $1", ownerID)
@@ -211,6 +221,7 @@ func (ds DBStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (
 	return nil
 }
 
+// GetLinksCoupleByShortURL - получить всю строку по короткой ссылке.
 func (ds DBStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
 	row := ds.dbConn.QueryRowContext(ctx,
 		`SELECT uuid, short_url, original_url, owner_id, is_deleted 
