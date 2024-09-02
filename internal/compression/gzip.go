@@ -26,10 +26,12 @@ func newCompressWriter(w http.ResponseWriter) *compressWriter {
 	}
 }
 
+// Header - метод писателя-сжимателя, возвращающий заголовок запроса.
 func (c *compressWriter) Header() http.Header {
 	return c.w.Header()
 }
 
+// Write - метод писателя-сжимателя, записывающий ответ.
 func (c *compressWriter) Write(p []byte) (int, error) {
 	result, err := c.zw.Write(p)
 	if err != nil {
@@ -38,6 +40,7 @@ func (c *compressWriter) Write(p []byte) (int, error) {
 	return result, nil
 }
 
+// WriteHeader записывает статус код ответа.
 func (c *compressWriter) WriteHeader(statusCode int) {
 	if statusCode < http.StatusMultipleChoices {
 		c.w.Header().Set("Content-Encoding", "gzip")
@@ -61,6 +64,7 @@ type compressReader struct {
 	zr *gzip.Reader
 }
 
+// newCompressReader - конструктор писателя-сжимателя
 func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	zr, err := gzip.NewReader(r)
 	if err != nil {
@@ -73,11 +77,13 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	}, nil
 }
 
+// Read - метод чтение
 func (c compressReader) Read(p []byte) (n int, err error) {
 	result, err := c.zr.Read(p)
 	return result, err //nolint:wrapcheck // устаревший способ обработки ошибки внутри Read
 }
 
+// Close - метод закрытия
 func (c *compressReader) Close() error {
 	if err := c.r.Close(); err != nil {
 		return fmt.Errorf("failed to close a *compressReader: %w", err)
@@ -85,8 +91,10 @@ func (c *compressReader) Close() error {
 	return nil
 }
 
+// keyLogger - название ключа для передачи через контекст
 var keyLogger logger.Key = logger.KeyLoggerCtx
 
+// GzipMiddleware - миддлвар, который указываем в роутинге для сжатия
 func GzipMiddleware(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		// Получаем логгер из контекста запроса
