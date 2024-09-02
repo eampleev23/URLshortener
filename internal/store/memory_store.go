@@ -11,12 +11,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// MemoryStore - реализация стора на оперативке.
 type MemoryStore struct {
 	s map[string]LinksCouple
 	c *config.Config
 	l *logger.ZapLog
 }
 
+// NewMemoryStore - конструктор.
 func NewMemoryStore(c *config.Config, l *logger.ZapLog) (*MemoryStore, error) {
 	return &MemoryStore{
 		s: make(map[string]LinksCouple),
@@ -25,6 +27,7 @@ func NewMemoryStore(c *config.Config, l *logger.ZapLog) (*MemoryStore, error) {
 	}, nil
 }
 
+// SetShortURL - установить короткую ссылку новую.
 func (ms *MemoryStore) SetShortURL(
 	ctx context.Context,
 	originalURL string,
@@ -50,12 +53,16 @@ func (ms *MemoryStore) SetShortURL(
 	ms.l.ZL.Debug("There was a collision", zap.String("newShortURL", newShortURL))
 	return "", fmt.Errorf("shortURL %v already exists: %w", newShortURL, err)
 }
+
+// GetOriginalURLByShort - ну вы поняли.
 func (ms *MemoryStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
 	if _, ok := ms.s[shortURL]; ok {
 		return ms.s[shortURL].OriginalURL, nil
 	}
 	return "", fmt.Errorf("no shortURL like this %v: %w", shortURL, err)
 }
+
+// GetShortURLByOriginal - ну вы поняли.
 func (ms *MemoryStore) GetShortURLByOriginal(ctx context.Context, originalURL string) (shortURL string, err error) {
 	is := false
 	shortURL = ""
@@ -81,6 +88,7 @@ func (ms *MemoryStore) Close() (err error) {
 	return nil
 }
 
+// GetURLsByOwnerID - ну вы поняли.
 func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	result := make([]LinksCouple, 0)
 	for _, v := range ms.s {
@@ -90,6 +98,8 @@ func (ms *MemoryStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]Lin
 	}
 	return result, nil
 }
+
+// DeleteURLS - ну вы поняли.
 func (ms *MemoryStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error) {
 	for _, v := range deleteItems {
 		if entry, ok := ms.s[v.ShortURL]; ok {
@@ -102,6 +112,7 @@ func (ms *MemoryStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLIt
 	return nil
 }
 
+// GetLinksCoupleByShortURL - ну очевидно жеж.
 func (ms *MemoryStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
 	if entry, ok := ms.s[shortURL]; ok {
 		return entry, nil
