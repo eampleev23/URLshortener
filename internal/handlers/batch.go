@@ -23,6 +23,7 @@ import (
 найду) Также работает только если передавать один урл, с группой сбоит.. Можно разобраться при необходимости.
 */
 
+// JSONHandlerBatch - хэгдлер, который пачками генерирует новые короткие ссылки.
 func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json") //nolint:goconst // не понятно зачем константа
 	var req []models.BatchItemReq

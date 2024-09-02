@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Config - класс, хранящий все необходимые для конфигурации приложения поля
+// Config - класс, хранящий все необходимые для конфигурации приложения поля.
 type Config struct {
 	RanAddr        string
 	LogLevel       string
@@ -20,7 +20,7 @@ type Config struct {
 	TimeDeleteURLs time.Duration
 }
 
-// NewConfig - конструктор конфига
+// NewConfig - конструктор конфига.
 func NewConfig() (*Config, error) {
 	config := &Config{
 		TLimitQuery:    20 * time.Second, //nolint:gomnd //nomagik
@@ -34,7 +34,7 @@ func NewConfig() (*Config, error) {
 	return config, nil
 }
 
-// SetValues - метод установки значений конфига из флагов или из переменных окружения
+// SetValues - метод установки значений конфига из флагов или из переменных окружения.
 func (c *Config) SetValues() error {
 	// регистрируем переменную flagRunAddr как аргумент -a со значением по умолчанию :8080
 	flag.StringVar(&c.RanAddr, "a", "localhost:8080", "address and port to run server")
