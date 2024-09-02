@@ -32,6 +32,8 @@ func Initialize(secretKey string, tokenExp time.Duration, l *logger.ZapLog) (*Au
 	return au, nil
 }
 
+// Key - тип для передачи значения id пользователя через контекст (что не рекомендуемо, но необходимо для автоматической авторизации
+// при первом запросе неавторизованного пользователя(насолько я помню).
 type Key string
 
 const (
