@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// PingDBHandler - хэндлер для пинга базы данных.
 func (h *Handlers) PingDBHandler(w http.ResponseWriter, r *http.Request) {
 	err := h.s.PingDB(r.Context(), h.c.TLimitQuery)
 	if err != nil {

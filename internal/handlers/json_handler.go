@@ -29,6 +29,7 @@ Content-Length: 30
 }.
 */
 
+// JSONHandler - хэндлер для генерации короткой ссылки через json.
 func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 	// Получаем id пользователя.
 	userID, _, err := h.GetUserID(r)

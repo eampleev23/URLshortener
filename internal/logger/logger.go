@@ -16,6 +16,7 @@ type ZapLog struct {
 	ZL *zap.Logger
 }
 
+// NewZapLogger - конструктор логгера
 func NewZapLogger(level string) (*ZapLog, error) {
 	lg := &ZapLog{ZL: zap.NewNop()}
 	var err error
@@ -58,6 +59,7 @@ type (
 	}
 )
 
+// Write - запись.
 func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
@@ -68,14 +70,17 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	return size, nil
 }
 
+// WriteHeader - запись заголовка.
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	// записываем код статуса, используя оригинальный http.ResponseWriter
 	r.ResponseWriter.WriteHeader(statusCode)
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
+// Key - ключ для использования в контексте запроса.
 type Key string
 
+// KeyLoggerCtx - ключ.
 const (
 	KeyLoggerCtx Key = "logger"
 )

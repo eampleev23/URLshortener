@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// GetURLsByUserID - хэндлер для получения всех ссылок определенного пользователя
 func (h *Handlers) GetURLsByUserID(w http.ResponseWriter, r *http.Request) {
 	userID, isAuth, err := h.GetUserID(r)
 	if err != nil {
