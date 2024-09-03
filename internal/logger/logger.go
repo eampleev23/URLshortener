@@ -3,7 +3,6 @@ package logger
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -26,7 +25,6 @@ func NewZapLogger(level string) (*ZapLog, error) {
 
 // Initialize инициализирует синглтон логера с необходимым уровнем логирования.
 func Initialize(level string, zapObj *ZapLog) (*ZapLog, error) {
-	log.Println("level log:", level)
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {

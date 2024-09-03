@@ -1,6 +1,11 @@
 package generatelinks
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+	"time"
+)
 
 // Для запуска замеров необходимо запустить команду "go test -bench ." в текущей директории.
 // Результаты для моей среды при генерации 5-символьной короткой ссылки:
@@ -11,4 +16,33 @@ func BenchmarkGenerateShortURL(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		GenerateShortURL()
 	}
+}
+
+// ExampleGenerateShortURL - пример использования функции генерации короткой ссылки
+// и одновременно тест проверки допустимого времени генерации
+func ExampleGenerateShortURL() {
+	start := time.Now()
+	// запускаем функцию
+	_ = GenerateShortURL()
+	// измеряем время генерации
+	duration := time.Since(start)
+	if duration > time.Millisecond {
+		fmt.Printf("Duration GenerateShortURL > time.Second, the value is %s (OMG!!!)\n", duration)
+	} else {
+		fmt.Println("Ok")
+	}
+	// Output:
+	// Ok
+}
+
+// Вспомогательная функция для перевода time.Duration в строку при выводе в лог.
+func shortDur(d time.Duration) string {
+	s := d.String()
+	if strings.HasSuffix(s, "m0s") {
+		s = s[:len(s)-2]
+	}
+	if strings.HasSuffix(s, "h0m") {
+		s = s[:len(s)-2]
+	}
+	return s
 }
