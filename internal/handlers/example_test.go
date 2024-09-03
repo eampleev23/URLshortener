@@ -2,19 +2,20 @@ package handlers
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"time"
+
 	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/logger"
 	"github.com/eampleev23/URLshortener/internal/services"
 	"github.com/eampleev23/URLshortener/internal/store"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"time"
 )
 
 // ExampleHandlers_CreateShortURL - пример использования хэндлера для создания короткой ссылки
-// и одновременно тест проверки допустимого времени генерации
+// и одновременно тест проверки допустимого времени генерации.
 func ExampleHandlers_CreateShortURL() {
 	l, err := logger.NewZapLogger("info")
 	if err != nil {

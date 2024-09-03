@@ -2,7 +2,6 @@ package generatelinks
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 )
@@ -19,7 +18,7 @@ func BenchmarkGenerateShortURL(b *testing.B) {
 }
 
 // ExampleGenerateShortURL - пример использования функции генерации короткой ссылки
-// и одновременно тест проверки допустимого времени генерации
+// и одновременно тест проверки допустимого времени генерации.
 func ExampleGenerateShortURL() {
 	start := time.Now()
 	// запускаем функцию
@@ -33,16 +32,4 @@ func ExampleGenerateShortURL() {
 	}
 	// Output:
 	// Ok
-}
-
-// Вспомогательная функция для перевода time.Duration в строку при выводе в лог.
-func shortDur(d time.Duration) string {
-	s := d.String()
-	if strings.HasSuffix(s, "m0s") {
-		s = s[:len(s)-2]
-	}
-	if strings.HasSuffix(s, "h0m") {
-		s = s[:len(s)-2]
-	}
-	return s
 }

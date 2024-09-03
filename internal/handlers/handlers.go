@@ -14,7 +14,7 @@ import (
 
 var keyUserIDCtx myauth.Key = myauth.KeyUserIDCtx
 
-// Handlers - класс хэндлеров
+// Handlers - класс хэндлеров.
 type Handlers struct {
 	serv *services.Services
 	s    store.Store
@@ -23,7 +23,7 @@ type Handlers struct {
 	au   myauth.Authorizer
 }
 
-// NewHandlers - конструктор
+// NewHandlers - конструктор.
 func NewHandlers(
 	s store.Store,
 	c *config.Config,
@@ -40,7 +40,7 @@ func NewHandlers(
 	return handlers
 }
 
-// GetUserID - метод хэндлеров для получения ид текущего пользователя
+// GetUserID - метод хэндлеров для получения ид текущего пользователя.
 func (h *Handlers) GetUserID(r *http.Request) (userID int, isAuth bool, err error) {
 	userIDCtx, ok := r.Context().Value(keyUserIDCtx).(int)
 	if !ok {

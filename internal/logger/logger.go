@@ -15,7 +15,7 @@ type ZapLog struct {
 	ZL *zap.Logger
 }
 
-// NewZapLogger - конструктор логгера
+// NewZapLogger - конструктор логгера.
 func NewZapLogger(level string) (*ZapLog, error) {
 	lg := &ZapLog{ZL: zap.NewNop()}
 	var err error
