@@ -1,5 +1,6 @@
 package main
 
+// Init commit iter19.
 import (
 	"fmt"
 	"log"
