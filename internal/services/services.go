@@ -1,3 +1,4 @@
+// Package services - сервисы.
 package services
 
 import (

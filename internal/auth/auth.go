@@ -1,3 +1,4 @@
+// Package myauth - пакет для авторизации в сервисе.
 package myauth
 
 import (

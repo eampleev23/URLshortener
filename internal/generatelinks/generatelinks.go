@@ -1,3 +1,4 @@
+// Package generatelinks - пакет, занимающийся генерацией коротких ссылок.
 package generatelinks
 
 import (

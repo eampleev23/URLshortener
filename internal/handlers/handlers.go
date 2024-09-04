@@ -1,3 +1,4 @@
+// Package handlers - эндпоинты сервиса.
 package handlers
 
 import (

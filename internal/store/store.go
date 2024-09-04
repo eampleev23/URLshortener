@@ -1,3 +1,4 @@
+// Package store - хранилища данных.
 package store
 
 import (

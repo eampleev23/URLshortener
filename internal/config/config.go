@@ -1,3 +1,4 @@
+// Package config - конфигурация приложения.
 package config
 
 import (

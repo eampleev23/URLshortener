@@ -1,3 +1,4 @@
+// Package models - структуры данных, используемые в приложении.
 package models
 
 import (

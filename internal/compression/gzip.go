@@ -1,3 +1,4 @@
+// Package compression - все что касается сжатия запросов.
 package compression
 
 import (
