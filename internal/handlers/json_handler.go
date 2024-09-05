@@ -57,7 +57,7 @@ func (h *Handlers) JSONHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusConflict)
 		resp := models.ResponseAddShortURL{ShortURL: shortURL}
 		enc := json.NewEncoder(w)
-		if err := enc.Encode(resp); err != nil {
+		if err = enc.Encode(resp); err != nil {
 			h.l.ZL.Info("error encoding response", zap.Error(err))
 			w.WriteHeader(http.StatusInternalServerError)
 			return
