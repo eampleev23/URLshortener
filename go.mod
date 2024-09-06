@@ -1,8 +1,8 @@
 module github.com/eampleev23/URLshortener
 
-go 1.21
+go 1.21.0
 
-toolchain go1.22.5
+toolchain go1.21.0
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.26.3
