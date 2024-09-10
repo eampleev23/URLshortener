@@ -15,6 +15,7 @@
 # Binaries
 cmd/shortener/main
 cmd/shortener/shortener
+statictest
 
 # Dependency directories (remove the comment below to include it)
 vendor/
