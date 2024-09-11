@@ -1,3 +1,4 @@
+// Package datagen - используется для генерации фейковых данных в бд при запуске приложения при необходимости.
 package datagen
 
 import (
@@ -13,6 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// GenerateData - генерирует фейковые данные при запуске приложения.
 func GenerateData(ctx context.Context, cfg *config.Config, l *logger.ZapLog) error {
 	if len(cfg.DBDSN) == 0 {
 		return fmt.Errorf("passed DSN is empty")

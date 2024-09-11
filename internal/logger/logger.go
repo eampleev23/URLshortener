@@ -1,9 +1,9 @@
+// Package logger - логирование запросов.
 package logger
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -16,6 +16,7 @@ type ZapLog struct {
 	ZL *zap.Logger
 }
 
+// NewZapLogger - конструктор логгера.
 func NewZapLogger(level string) (*ZapLog, error) {
 	lg := &ZapLog{ZL: zap.NewNop()}
 	var err error
@@ -25,7 +26,6 @@ func NewZapLogger(level string) (*ZapLog, error) {
 
 // Initialize инициализирует синглтон логера с необходимым уровнем логирования.
 func Initialize(level string, zapObj *ZapLog) (*ZapLog, error) {
-	log.Println("level log:", level)
 	// Преобразуем текстовый уровень логирования в zap.AtomicLevel
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -58,6 +58,7 @@ type (
 	}
 )
 
+// Write - запись.
 func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	// записываем ответ, используя оригинальный http.ResponseWriter
 	size, err := r.ResponseWriter.Write(b)
@@ -68,14 +69,17 @@ func (r *loggingResponseWriter) Write(b []byte) (int, error) {
 	return size, nil
 }
 
+// WriteHeader - запись заголовка.
 func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	// записываем код статуса, используя оригинальный http.ResponseWriter
 	r.ResponseWriter.WriteHeader(statusCode)
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
+// Key - ключ для использования в контексте запроса.
 type Key string
 
+// KeyLoggerCtx - ключ.
 const (
 	KeyLoggerCtx Key = "logger"
 )

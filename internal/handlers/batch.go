@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -9,6 +10,20 @@ import (
 	"go.uber.org/zap"
 )
 
+/*
+Пример запроса:
+[
+    {
+        "correlation_id": "test",
+        "original_url": "testqwedqwe.com"
+    }
+]
+
+// Сейчас работает не через батчинг, но батчинг реализовывал в другом инкременте (возможно в проекте, при необходимости
+найду) Также работает только если передавать один урл, с группой сбоит.. Можно разобраться при необходимости.
+*/
+
+// JSONHandlerBatch - хэгдлер, который пачками генерирует новые короткие ссылки.
 func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json") //nolint:goconst // не понятно зачем константа
 	var req []models.BatchItemReq
@@ -25,6 +40,7 @@ func (h *Handlers) JSONHandlerBatch(w http.ResponseWriter, r *http.Request) {
 	res := make([]models.BatchItemRes, 0)
 	for i := range req {
 		defaultValueOwnerID := 12
+		log.Println("req[i].OriginalURL=", req[i].OriginalURL)
 		shortURL, err := h.s.SetShortURL(r.Context(), req[i].OriginalURL, defaultValueOwnerID)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)

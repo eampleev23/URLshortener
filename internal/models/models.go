@@ -1,3 +1,4 @@
+// Package models - структуры данных, используемые в приложении.
 package models
 
 import (
@@ -32,6 +33,7 @@ type ResponseGetOwnerURL struct {
 	OriginalURL string `json:"original_url"`
 }
 
+// GetResponseGetOwnerURLs - конвертирует в необходимый формат урля пользователя.
 func GetResponseGetOwnerURLs(source []store.LinksCouple) (result []ResponseGetOwnerURL, err error) {
 	result = make([]ResponseGetOwnerURL, 0, len(source))
 	for _, v := range source {

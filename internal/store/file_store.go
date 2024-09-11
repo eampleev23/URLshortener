@@ -15,22 +15,28 @@ import (
 	"github.com/eampleev23/URLshortener/internal/logger"
 )
 
+// FileStore - хранилище в файле.
 type FileStore struct {
 	Producer *Producer
 	Consumer *Consumer
 	ms       *MemoryStore
 }
+
+// Producer - писатель данных.
 type Producer struct {
 	file *os.File
 	// добавляем Writer в Producer
 	writer *bufio.Writer
 }
+
+// Consumer - читатель данных.
 type Consumer struct {
 	file *os.File
 	// заменяем Reader на Scanner
 	scanner *bufio.Scanner
 }
 
+// NewFileStore - конструктор.
 func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
 	var perm os.FileMode = 0600
 	file, err := os.OpenFile(c.SFilePath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, perm)
@@ -61,6 +67,7 @@ func NewFileStore(c *config.Config, l *logger.ZapLog) (*FileStore, error) {
 	return fs, nil
 }
 
+// SetShortURL - хорош.
 func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string, ownerID int) (newShortURL string, err error) {
 	newShortURL, err = fs.ms.SetShortURL(ctx, originalURL, ownerID)
 	if err != nil {
@@ -73,6 +80,8 @@ func (fs *FileStore) SetShortURL(ctx context.Context, originalURL string, ownerI
 	}
 	return newShortURL, nil
 }
+
+// GetOriginalURLByShort - хорош.
 func (fs *FileStore) GetOriginalURLByShort(ctx context.Context, shortURL string) (originalURL string, err error) {
 	originalURL, err = fs.ms.GetOriginalURLByShort(ctx, shortURL)
 	if err != nil {
@@ -80,6 +89,8 @@ func (fs *FileStore) GetOriginalURLByShort(ctx context.Context, shortURL string)
 	}
 	return originalURL, nil
 }
+
+// GetShortURLByOriginal - хм.
 func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL string) (shortURL string, err error) {
 	shortURL, err = fs.ms.GetShortURLByOriginal(ctx, originalURL)
 	if err != nil {
@@ -87,6 +98,8 @@ func (fs *FileStore) GetShortURLByOriginal(ctx context.Context, originalURL stri
 	}
 	return shortURL, nil
 }
+
+// GetURLsByOwnerID - хм.
 func (fs *FileStore) GetURLsByOwnerID(ctx context.Context, ownerID int) ([]LinksCouple, error) {
 	return nil, errors.New("file store doesn't use this method")
 }
@@ -101,6 +114,7 @@ func (fs *FileStore) Close() (err error) {
 	return nil
 }
 
+// WriteLinksCouple - хм.
 func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	data, err := json.Marshal(&linksCouple)
 	if err != nil {
@@ -121,6 +135,8 @@ func (p *Producer) WriteLinksCouple(linksCouple *LinksCouple) error {
 	}
 	return nil
 }
+
+// NewConsumer - конструктор читателя.
 func NewConsumer(filename string) (*Consumer, error) {
 	var perm os.FileMode = 0600
 	file, err := os.OpenFile(filename, os.O_RDONLY|os.O_CREATE, perm)
@@ -134,6 +150,8 @@ func NewConsumer(filename string) (*Consumer, error) {
 		scanner: bufio.NewScanner(file),
 	}, nil
 }
+
+// ReadLinksCouple - прочитать строку.
 func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 	// одиночное сканирование до следующей строки
 	if !c.scanner.Scan() {
@@ -150,6 +168,8 @@ func (c *Consumer) ReadLinksCouple() (*LinksCouple, error) {
 
 	return &linksCouple, nil
 }
+
+// Close - закрыть поток.
 func (c *Consumer) Close() error {
 	err := c.file.Close()
 	if err != nil {
@@ -178,6 +198,8 @@ func LineCounter(r io.Reader) (int, error) {
 		}
 	}
 }
+
+// ReadStoreFromFile - прочитать.
 func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 	var perm os.FileMode = 0600
 	// открываем файл чтобы посчитать количество строк
@@ -208,6 +230,8 @@ func (fs *FileStore) ReadStoreFromFile(c *config.Config) error {
 	}
 	return nil
 }
+
+// DeleteURLS - удалить.
 func (fs *FileStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error) {
 	err = fs.ms.DeleteURLS(ctx, deleteItems)
 	if err != nil {
@@ -215,6 +239,8 @@ func (fs *FileStore) DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem
 	}
 	return nil
 }
+
+// GetLinksCoupleByShortURL - получить строку по короткой ссылке.
 func (fs *FileStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error) {
 	originalURL, err := fs.ms.GetOriginalURLByShort(ctx, shortURL)
 	if err != nil {

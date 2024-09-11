@@ -1,3 +1,4 @@
+// Package store - хранилища данных.
 package store
 
 import (
@@ -14,6 +15,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/logger"
 )
 
+// Store - интерфейс для хранилища данных.
 type Store interface {
 	// SetShortURL добавляет новое значение в стор.
 	SetShortURL(ctx context.Context, originalURL string, ownerID int) (shortURL string, err error)
@@ -33,6 +35,7 @@ type Store interface {
 	GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error)
 }
 
+// LinksCouple - структура для хранения ссылок в бд.
 type LinksCouple struct {
 	UUID        string `json:"uuid"`
 	ShortURL    string `json:"short_url"`
@@ -41,6 +44,7 @@ type LinksCouple struct {
 	DeletedFlag bool   `json:"is_deleted"`
 }
 
+// DeleteURLItem - структура, используемая при проставлении флага удаления ссылкам.
 type DeleteURLItem struct {
 	ShortURL   string
 	DeleteFlag bool
@@ -50,6 +54,7 @@ type DeleteURLItem struct {
 // ErrConflict ошибка, которую используем для сигнала о нарушении целостности данных.
 var ErrConflict = errors.New("data conflict")
 
+// NewStorage - конструктор стора.
 func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 	switch {
 	case len(c.DBDSN) != 0:
@@ -64,7 +69,6 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		}
 		l.ZL.Info("Use DB store..")
 		return s, nil
-
 	case len(c.SFilePath) != 0:
 		s, err := NewFileStore(c, l)
 		if err != nil {
@@ -77,7 +81,7 @@ func NewStorage(c *config.Config, l *logger.ZapLog) (Store, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error create memory store: %w", err)
 		}
-		l.ZL.Info("Used Memory Store..")
+		l.ZL.Info("Use Memory Store..")
 		return s, nil
 	}
 }

@@ -1,3 +1,4 @@
+// Package myauth - пакет для авторизации в сервисе.
 package myauth
 
 import (
@@ -13,6 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Authorizer - синглтон авторизатора.
 type Authorizer struct {
 	l         *logger.ZapLog
 	SecretKey string
@@ -31,12 +33,15 @@ func Initialize(secretKey string, tokenExp time.Duration, l *logger.ZapLog) (*Au
 	return au, nil
 }
 
+// Key - тип для передачи значения id пользователя через контекст (что не рекомендуемо,
+// но необходимо для автоматической авторизации
+// при первом запросе неавторизованного пользователя(насолько я помню).
 type Key string
 
-const (
-	KeyUserIDCtx Key = "user_id_ctx"
-)
+// KeyUserIDCtx определяем название ключа через константу для того чтобы исключить конфликта данных.
+const KeyUserIDCtx Key = "user_id_ctx"
 
+// Auth - метод авторизатора, подключаемый в роутинге как миддлвар.
 func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		_, err := r.Cookie("token")
@@ -65,6 +70,8 @@ func (au *Authorizer) Auth(next http.Handler) http.Handler {
 	}
 	return http.HandlerFunc(fn)
 }
+
+// setNewCookie - метод авторизатора, который устанавливает новую куку неавторизованному пользователю.
 func (au *Authorizer) setNewCookie(w http.ResponseWriter) (int, error) {
 	// Генерируем случайный ид пользователя.
 	maxID := 10000

@@ -1,3 +1,4 @@
+// Package services - сервисы.
 package services
 
 import (
@@ -12,6 +13,7 @@ import (
 	"github.com/eampleev23/URLshortener/internal/store"
 )
 
+// Services - класс сервисов.
 type Services struct {
 	DeleteChan chan store.DeleteURLItem
 	s          store.Store
@@ -20,6 +22,7 @@ type Services struct {
 	au         myauth.Authorizer
 }
 
+// NewServices - конструтор класса сервисов.
 func NewServices(s store.Store, c *config.Config, l *logger.ZapLog, au myauth.Authorizer) *Services {
 	services := &Services{
 		DeleteChan: make(chan store.DeleteURLItem, 1024), //nolint:gomnd //установим каналу буфер в 1024 сообщения
@@ -33,6 +36,7 @@ func NewServices(s store.Store, c *config.Config, l *logger.ZapLog, au myauth.Au
 	return services
 }
 
+// GetURLsByOwnerID - ну вы поняли.
 func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store.LinksCouple, error) {
 	result, err := serv.s.GetURLsByOwnerID(ctx, userID)
 	if err != nil {
@@ -47,6 +51,7 @@ func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store
 	return result, nil
 }
 
+// FlushRequests - выполнить накопленные запросы на удаление.
 func (serv *Services) FlushRequests() {
 	// будем сохранять сообщения, накопленные за последние 10 секунд
 	ticker := time.NewTicker(serv.c.TimeDeleteURLs)
