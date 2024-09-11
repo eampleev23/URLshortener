@@ -16,6 +16,7 @@ type Config struct {
 	DBDSN          string
 	SecretKey      string
 	DatagenEC      int
+	UseHTTPS       bool
 	TLimitQuery    time.Duration
 	TokenEXP       time.Duration
 	TimeDeleteURLs time.Duration
@@ -51,6 +52,8 @@ func (c *Config) SetValues() error {
 	flag.IntVar(&c.DatagenEC, "dg", 1, "entries count for data generation in case to use it")
 	// принимаем секретный ключ сервера для авторизации
 	flag.StringVar(&c.SecretKey, "s", "e4853f5c4810101e88f1898db21c15d3", "server's secret key for authorization")
+	// принимаем секретный ключ сервера для авторизации
+	flag.BoolVar(&c.UseHTTPS, "tls", false, "use https")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
@@ -74,6 +77,9 @@ func (c *Config) SetValues() error {
 	}
 	if envSecretKey := os.Getenv("SECRET_KEY"); envSecretKey != "" {
 		c.SecretKey = envSecretKey
+	}
+	if envUseHTTPS := os.Getenv("ENABLE_HTTPS"); envUseHTTPS == "true" {
+		c.UseHTTPS = true
 	}
 	return nil
 }

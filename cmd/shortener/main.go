@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -90,6 +91,30 @@ func run() error {
 	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
 	r.Get("/api/user/urls", h.GetURLsByUserID)
 	r.Delete("/api/user/urls", h.DeleteURLS)
+
+	if c.UseHTTPS {
+		// конструируем менеджер TLS-сертификатов
+		manager := &autocert.Manager{
+			// директория для хранения сертификатов
+			Cache: autocert.DirCache("cache-dir"),
+			// функция, принимающая Terms of Service издателя сертификатов
+			Prompt: autocert.AcceptTOS,
+			// перечень доменов, для которых будут поддерживаться сертификаты
+			HostPolicy: autocert.HostWhitelist("shortener.ru", "www.shortener.ru"),
+		}
+		// конструируем сервер с поддержкой TLS
+		server := &http.Server{
+			Addr:    c.RanAddr,
+			Handler: r,
+			// для TLS-конфигурации используем менеджер сертификатов
+			TLSConfig: manager.TLSConfig(),
+		}
+		err = server.ListenAndServeTLS("", "")
+		if err != nil {
+			return fmt.Errorf("ошибка ListenAndServe: %w", err)
+		}
+		return nil
+	}
 	err = http.ListenAndServe(c.RanAddr, r)
 	if err != nil {
 		return fmt.Errorf("ошибка ListenAndServe: %w", err)
