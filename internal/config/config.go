@@ -2,24 +2,28 @@
 package config
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
+	"io"
 	"os"
 	"time"
 )
 
 // Config - класс, хранящий все необходимые для конфигурации приложения поля.
 type Config struct {
-	RanAddr        string
-	LogLevel       string
-	BaseShortURL   string
-	SFilePath      string
-	DBDSN          string
-	SecretKey      string
-	DatagenEC      int
-	UseHTTPS       bool
-	TLimitQuery    time.Duration
-	TokenEXP       time.Duration
-	TimeDeleteURLs time.Duration
+	RanAddr        string        `json:"server_address"`
+	LogLevel       string        `json:"-"`
+	BaseShortURL   string        `json:"base_url"`
+	SFilePath      string        `json:"file_storage_path"`
+	DBDSN          string        `json:"database_dsn"`
+	SecretKey      string        `json:"-"`
+	DatagenEC      int           `json:"-"`
+	UseHTTPS       bool          `json:"enable_https"`
+	FileConfigPath string        `json:"-"`
+	TLimitQuery    time.Duration `json:"-"`
+	TokenEXP       time.Duration `json:"-"`
+	TimeDeleteURLs time.Duration `json:"-"`
 }
 
 // NewConfig - конструктор конфига.
@@ -54,8 +58,22 @@ func (c *Config) SetValues() error {
 	flag.StringVar(&c.SecretKey, "s", "e4853f5c4810101e88f1898db21c15d3", "server's secret key for authorization")
 	// принимаем секретный ключ сервера для авторизации
 	flag.BoolVar(&c.UseHTTPS, "tls", false, "use https")
+	// принимаем секретный ключ сервера для авторизации
+	flag.StringVar(&c.FileConfigPath, "c", "", "file config path")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
+
+	if c.FileConfigPath != "" {
+		// Open config json file
+		confJsonFile, err := os.Open(c.FileConfigPath)
+		if err != nil {
+			return fmt.Errorf("fail openning config json file: %w", err)
+		}
+		defer confJsonFile.Close()
+		// read our opened jsonFile as a byte array.
+		byteValue, _ := io.ReadAll(confJsonFile)
+		json.Unmarshal(byteValue, &c)
+	}
 
 	if envRunAddr := os.Getenv("SERVER_ADDRESS"); envRunAddr != "" {
 		c.RanAddr = envRunAddr
@@ -80,6 +98,9 @@ func (c *Config) SetValues() error {
 	}
 	if envUseHTTPS := os.Getenv("ENABLE_HTTPS"); envUseHTTPS == "true" {
 		c.UseHTTPS = true
+	}
+	if envConfigPath := os.Getenv("CONFIG"); envConfigPath != "" {
+		c.FileConfigPath = envConfigPath
 	}
 	return nil
 }
