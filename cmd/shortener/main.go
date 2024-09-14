@@ -3,18 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
+	myauth "github.com/eampleev23/URLshortener/internal/auth"
 	"github.com/eampleev23/URLshortener/internal/compression"
+	"github.com/eampleev23/URLshortener/internal/services"
 	"github.com/go-chi/chi/v5/middleware"
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
-	"os"
 	"os/signal"
-
-	"github.com/eampleev23/URLshortener/internal/services"
-
-	myauth "github.com/eampleev23/URLshortener/internal/auth"
+	"syscall"
 
 	"github.com/eampleev23/URLshortener/internal/config"
 	"github.com/eampleev23/URLshortener/internal/handlers"
@@ -100,6 +98,7 @@ func run() error {
 		Handler: r,
 	}
 
+	// Если используем HTTPS.
 	if c.UseHTTPS {
 		// конструируем менеджер TLS-сертификатов
 		manager := &autocert.Manager{
@@ -111,50 +110,26 @@ func run() error {
 			HostPolicy: autocert.HostWhitelist("shortener.ru", "www.shortener.ru"),
 		}
 		server.TLSConfig = manager.TLSConfig()
-		err = server.ListenAndServeTLS("", "")
+	}
+
+	// Реализуем gracefully shutdown ниже.
+	// Получаем контекст, в котором планируем слушать 3 сигнала и также получаем стоп-функцию.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	// Отложенно вызывем стоп-функцию чтобы не забыть.
+	defer stop()
+	// Запускаем сервер в горутине.
+	go func(srv *http.Server) error {
+		err := srv.ListenAndServe()
 		if err != nil {
-			return fmt.Errorf("ошибка ListenAndServe: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
+	}(server)
+	// Ждем завершающий сигнал.
+	<-ctx.Done()
+	// Возвращаем возможные ошибки.
+	if ctx.Err() != nil {
+		return fmt.Errorf("gracefully shotdowned: %w", ctx.Err())
 	}
-
-	// Заводим канал для получения сигнала о gracefull shotdown сервиса
-	allConnsClosed := make(chan struct{})
-
-	// Заводим канал для перенаправления прерываний
-	// поскольку нужно отловить всего одно прерывание,
-	// ёмкости 1 для канала будет достаточно
-	sigint := make(chan os.Signal, 1)
-
-	// Регистрируем перенаправление прерываний
-	signal.Notify(sigint, os.Interrupt)
-
-	// запускаем горутину обработки пойманных прерываний
-	go func() {
-		// читаем из канала прерываний
-		// поскольку нужно прочитать только одно прерывание,
-		// можно обойтись без цикла
-		<-sigint
-		// получили сигнал os.Interrupt, запускаем процедуру graceful shutdown
-		if err := server.Shutdown(context.Background()); err != nil {
-			// Ошибки закрытия listener.
-			myLog.ZL.Error("HTTP server Shutdown", zap.Error(err))
-		}
-		// Сообщаем основному потоку, что все сетевые соединения обработаны и закрыты.
-		close(allConnsClosed)
-	}()
-
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		// Ошибки старта или остановки Listener.
-		//myLog.ZL.Error("HTTP server ListenAndServe", zap.Error(err))
-		return fmt.Errorf("HTTP server ListenAndServe: %w", err)
-	}
-	// Ждём завершения процедуры graceful shutdown.
-	<-allConnsClosed
-	// получили оповещение о завершении
-	// здесь можно освобождать ресурсы перед выходом,
-	// например закрыть соединение с базой данных,
-	// закрыть открытые файлы
-	fmt.Println("\nServer Shutdown gracefully")
 	return nil
 }
