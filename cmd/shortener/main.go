@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
+	"github.com/eampleev23/URLshortener/internal/compression"
+	"github.com/go-chi/chi/v5/middleware"
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
-
-	"github.com/eampleev23/URLshortener/internal/compression"
-	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/eampleev23/URLshortener/internal/services"
 
@@ -115,7 +114,36 @@ func run() error {
 		}
 		return nil
 	}
-	err = http.ListenAndServe(c.RanAddr, r)
+	// конструируем сервер
+	server := &http.Server{
+		Addr:    c.RanAddr,
+		Handler: r,
+	}
+
+	// через этот канал сообщим основному потоку, что соединения закрыты
+	//allConnsClosed := make(chan struct{})
+
+	// канал для перенаправления прерываний
+	// поскольку нужно отловить всего одно прерывание,
+	// ёмкости 1 для канала будет достаточно
+	//sigint := make(chan os.Signal, 1)
+
+	// регистрируем перенаправление прерываний
+	//signal.Notify(sigint, os.Interrupt)
+
+	// запускаем горутину обработки пойманных прерываний
+	//go func() {
+	//	// читаем из канала прерываний
+	//	// поскольку нужно прочитать только одно прерывание,
+	//	// можно обойтись без цикла
+	//	<-sigint
+	//	// получили сигнал os.Interrupt, запускаем процедуру graceful shutdown
+	//	if err := server.Shutdown(context.Background()); err != nil {
+	//	}
+	//}()
+
+	//err = http.ListenAndServe(c.RanAddr, r)
+	err = server.ListenAndServe()
 	if err != nil {
 		return fmt.Errorf("ошибка ListenAndServe: %w", err)
 	}
