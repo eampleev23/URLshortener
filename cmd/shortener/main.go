@@ -20,7 +20,6 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
-	"syscall"
 )
 
 var (
@@ -37,7 +36,7 @@ func main() {
 }
 
 /*
-Iter 23.
+Iter23
 */
 
 func run() error {
@@ -98,7 +97,6 @@ func run() error {
 		Handler: r,
 	}
 
-	// Если используем HTTPS.
 	if c.UseHTTPS {
 		// конструируем менеджер TLS-сертификатов
 		manager := &autocert.Manager{
@@ -110,16 +108,25 @@ func run() error {
 			HostPolicy: autocert.HostWhitelist("shortener.ru", "www.shortener.ru"),
 		}
 		server.TLSConfig = manager.TLSConfig()
+		err = server.ListenAndServeTLS("", "")
+		if err != nil {
+			return fmt.Errorf("ошибка ListenAndServe: %w", err)
+		}
+		return nil
 	}
 
 	// Заводим канал для получения сигнала о gracefull shotdown сервиса
 	allConnsClosed := make(chan struct{})
+
 	// Заводим канал для перенаправления прерываний
 	// поскольку нужно отловить всего одно прерывание,
 	// ёмкости 1 для канала будет достаточно
-	sigint := make(chan os.Signal, 3)
+	sigint := make(chan os.Signal, 1)
+
 	// Регистрируем перенаправление прерываний
-	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(sigint, os.Interrupt)
+
+	// запускаем горутину обработки пойманных прерываний
 	go func() {
 		// читаем из канала прерываний
 		// поскольку нужно прочитать только одно прерывание,
@@ -134,6 +141,11 @@ func run() error {
 		close(allConnsClosed)
 	}()
 
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		// Ошибки старта или остановки Listener.
+		//myLog.ZL.Error("HTTP server ListenAndServe", zap.Error(err))
+		return fmt.Errorf("HTTP server ListenAndServe: %w", err)
+	}
 	// Ждём завершения процедуры graceful shutdown.
 	<-allConnsClosed
 	// получили оповещение о завершении
@@ -141,11 +153,5 @@ func run() error {
 	// например закрыть соединение с базой данных,
 	// закрыть открытые файлы
 	fmt.Println("\nServer Shutdown gracefully")
-
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
-		// Ошибки старта или остановки Listener.
-		//myLog.ZL.Error("HTTP server ListenAndServe", zap.Error(err))
-		return fmt.Errorf("HTTP server ListenAndServe: %w", err)
-	}
 	return nil
 }
