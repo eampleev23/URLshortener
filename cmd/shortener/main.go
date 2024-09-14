@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/eampleev23/URLshortener/internal/compression"
 	"github.com/go-chi/chi/v5/middleware"
@@ -8,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
+	"os/signal"
 
 	"github.com/eampleev23/URLshortener/internal/services"
 
@@ -115,32 +118,43 @@ func run() error {
 		return nil
 	}
 
-	// через этот канал сообщим основному потоку, что соединения закрыты
-	//allConnsClosed := make(chan struct{})
+	// Заводим канал для получения сигнала о gracefull shotdown сервиса
+	allConnsClosed := make(chan struct{})
 
-	// канал для перенаправления прерываний
+	// Заводим канал для перенаправления прерываний
 	// поскольку нужно отловить всего одно прерывание,
 	// ёмкости 1 для канала будет достаточно
-	//sigint := make(chan os.Signal, 1)
+	sigint := make(chan os.Signal, 1)
 
-	// регистрируем перенаправление прерываний
-	//signal.Notify(sigint, os.Interrupt)
+	// Регистрируем перенаправление прерываний
+	signal.Notify(sigint, os.Interrupt)
 
 	// запускаем горутину обработки пойманных прерываний
-	//go func() {
-	//	// читаем из канала прерываний
-	//	// поскольку нужно прочитать только одно прерывание,
-	//	// можно обойтись без цикла
-	//	<-sigint
-	//	// получили сигнал os.Interrupt, запускаем процедуру graceful shutdown
-	//	if err := server.Shutdown(context.Background()); err != nil {
-	//	}
-	//}()
+	go func() {
+		// читаем из канала прерываний
+		// поскольку нужно прочитать только одно прерывание,
+		// можно обойтись без цикла
+		<-sigint
+		// получили сигнал os.Interrupt, запускаем процедуру graceful shutdown
+		if err := server.Shutdown(context.Background()); err != nil {
+			// Ошибки закрытия listener.
+			myLog.ZL.Error("HTTP server Shutdown", zap.Error(err))
+		}
+		// Сообщаем основному потоку, что все сетевые соединения обработаны и закрыты.
+		close(allConnsClosed)
+	}()
 
-	//err = http.ListenAndServe(c.RanAddr, r)
-	err = server.ListenAndServe()
-	if err != nil {
-		return fmt.Errorf("ошибка ListenAndServe: %w", err)
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		// Ошибки старта или остановки Listener.
+		//myLog.ZL.Error("HTTP server ListenAndServe", zap.Error(err))
+		return fmt.Errorf("HTTP server ListenAndServe: %w", err)
 	}
+	// Ждём завершения процедуры graceful shutdown.
+	<-allConnsClosed
+	// получили оповещение о завершении
+	// здесь можно освобождать ресурсы перед выходом,
+	// например закрыть соединение с базой данных,
+	// закрыть открытые файлы
+	fmt.Println("\nServer Shutdown gracefully")
 	return nil
 }
