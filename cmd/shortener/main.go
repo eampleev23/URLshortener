@@ -20,6 +20,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 var (
@@ -124,7 +125,7 @@ func run() error {
 	sigint := make(chan os.Signal, 1)
 
 	// Регистрируем перенаправление прерываний
-	signal.Notify(sigint, os.Interrupt)
+	signal.Notify(sigint, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 
 	// запускаем горутину обработки пойманных прерываний
 	go func() {
