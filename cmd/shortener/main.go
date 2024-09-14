@@ -91,6 +91,12 @@ func run() error {
 	r.Get("/api/user/urls", h.GetURLsByUserID)
 	r.Delete("/api/user/urls", h.DeleteURLS)
 
+	// конструируем сервер
+	server := &http.Server{
+		Addr:    c.RanAddr,
+		Handler: r,
+	}
+
 	if c.UseHTTPS {
 		// конструируем менеджер TLS-сертификатов
 		manager := &autocert.Manager{
@@ -101,23 +107,12 @@ func run() error {
 			// перечень доменов, для которых будут поддерживаться сертификаты
 			HostPolicy: autocert.HostWhitelist("shortener.ru", "www.shortener.ru"),
 		}
-		// конструируем сервер с поддержкой TLS
-		server := &http.Server{
-			Addr:    c.RanAddr,
-			Handler: r,
-			// для TLS-конфигурации используем менеджер сертификатов
-			TLSConfig: manager.TLSConfig(),
-		}
+		server.TLSConfig = manager.TLSConfig()
 		err = server.ListenAndServeTLS("", "")
 		if err != nil {
 			return fmt.Errorf("ошибка ListenAndServe: %w", err)
 		}
 		return nil
-	}
-	// конструируем сервер
-	server := &http.Server{
-		Addr:    c.RanAddr,
-		Handler: r,
 	}
 
 	// через этот канал сообщим основному потоку, что соединения закрыты
