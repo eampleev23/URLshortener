@@ -70,15 +70,6 @@ func run() error {
 		return fmt.Errorf("failed to initialize a new store: %w", err)
 	}
 
-	if len(c.DBDSN) != 0 {
-		// Отложенно закрываем соединение с бд.
-		defer func() {
-			if err := s.Close(); err != nil {
-				myLog.ZL.Info("store failed to properly close the DB connection")
-			}
-		}()
-	}
-
 	serv := services.NewServices(s, c, myLog, *au)
 	h := handlers.NewHandlers(s, c, myLog, *au, serv)
 
@@ -157,6 +148,14 @@ func run() error {
 	// здесь можно освобождать ресурсы перед выходом,
 	// например закрыть соединение с базой данных,
 	// закрыть открытые файлы
-	fmt.Println("\nServer Shutdown gracefully")
+
+	// Закрываем соединение с бд (было выше через defer, переделал по прерыванию)
+	if len(c.DBDSN) != 0 {
+		if err := s.Close(); err != nil {
+			myLog.ZL.Info("store failed to properly close the DB connection")
+		}
+	}
+
+	myLog.ZL.Info("Server Shutdown gracefully")
 	return nil
 }
