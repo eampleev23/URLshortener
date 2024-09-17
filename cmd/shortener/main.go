@@ -29,6 +29,10 @@ var (
 	buildCommit  string = "N/A"
 )
 
+const (
+	domainName string = "shortener.ru"
+)
+
 func main() {
 	err := run()
 	if err != nil {
@@ -106,7 +110,7 @@ func run() error {
 			// функция, принимающая Terms of Service издателя сертификатов
 			Prompt: autocert.AcceptTOS,
 			// перечень доменов, для которых будут поддерживаться сертификаты
-			HostPolicy: autocert.HostWhitelist("shortener.ru", "www.shortener.ru"),
+			HostPolicy: autocert.HostWhitelist(domainName, "www."+domainName),
 		}
 		server.TLSConfig = manager.TLSConfig()
 		err = server.ListenAndServeTLS("", "")
