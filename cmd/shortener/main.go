@@ -111,6 +111,19 @@ func run() error {
 		return nil
 	}
 
+	err = gracefullyShutdown(server, myLog, c, s)
+	if err != nil {
+		return fmt.Errorf("gracefully shutdown: %w", err)
+	}
+	myLog.ZL.Info("Server Shutdown gracefully")
+	return nil
+}
+
+func gracefullyShutdown(
+	server *http.Server,
+	myLog *logger.ZapLog,
+	c *config.Config,
+	s store.Store) error {
 	// Заводим канал для получения сигнала о gracefull shotdown сервиса
 	allConnsClosed := make(chan struct{})
 
@@ -155,7 +168,5 @@ func run() error {
 			myLog.ZL.Info("store failed to properly close the DB connection")
 		}
 	}
-
-	myLog.ZL.Info("Server Shutdown gracefully")
 	return nil
 }
