@@ -40,6 +40,7 @@ func main() {
 	}
 }
 
+/*Iter24 - Ограничение доступа к хэндлерам + поддержка gRPC*/
 func run() error {
 
 	fmt.Printf("Build version: %s\n", buildVersion)
@@ -81,6 +82,7 @@ func run() error {
 	r.Post("/api/shorten", h.JSONHandler)
 	r.Post("/api/shorten/batch", h.JSONHandlerBatch)
 	r.Get("/api/user/urls", h.GetURLsByUserID)
+	r.Get("/api/internal/stats", h.GetGlobalStats)
 	r.Delete("/api/user/urls", h.DeleteURLS)
 
 	// конструируем сервер
