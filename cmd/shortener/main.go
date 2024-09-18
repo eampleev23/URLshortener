@@ -40,10 +40,6 @@ func main() {
 	}
 }
 
-/*
-Iter24
-*/
-
 func run() error {
 
 	fmt.Printf("Build version: %s\n", buildVersion)
