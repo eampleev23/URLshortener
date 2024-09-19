@@ -40,7 +40,7 @@ func main() {
 	}
 }
 
-/*Iter24 - Ограничение доступа к хэндлерам + поддержка gRPC*/
+/*Iter25 -Поддержка gRPC*/
 func run() error {
 
 	fmt.Printf("Build version: %s\n", buildVersion)
