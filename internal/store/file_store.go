@@ -248,3 +248,21 @@ func (fs *FileStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL stri
 	}
 	return LinksCouple{UUID: "1", ShortURL: shortURL, OriginalURL: originalURL, OwnerID: 1, DeletedFlag: false}, nil
 }
+
+// GetURLsCount - делает запрос суммы сохраненных урлов в сервисе.
+func (fs *FileStore) GetURLsCount(ctx context.Context) (count int64, err error) {
+	count, err = fs.ms.GetURLsCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("error GetURLsCount in file store %w", err)
+	}
+	return count, nil
+}
+
+// GetUsersCount - делает запрос общего количества пользователей в сервисе.
+func (fs *FileStore) GetUsersCount(ctx context.Context) (count int64, err error) {
+	count, err = fs.ms.GetUsersCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("error GetUsersCount in file store %w", err)
+	}
+	return count, nil
+}

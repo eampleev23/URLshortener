@@ -62,7 +62,7 @@ func (c *Config) SetValues() error {
 	// принимаем секретный ключ сервера для авторизации
 	flag.StringVar(&c.FileConfigPath, "c", "", "file config path")
 	// доверенная подсеть для запросов статистики
-	flag.StringVar(&c.TrustedSubnet, "t", "", "trusted subnet")
+	flag.StringVar(&c.TrustedSubnet, "t", "172.17.0.0/16", "trusted subnet")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 

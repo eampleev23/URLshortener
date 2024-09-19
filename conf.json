@@ -4,5 +4,5 @@
   "file_storage_path": "/path/to/file.db",
   "database_dsn": "",
   "enable_https": true,
-  "trusted_subnet": ""
+  "trusted_subnet": "172.17.0.0/16"
 }

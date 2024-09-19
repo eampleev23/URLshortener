@@ -33,6 +33,10 @@ type Store interface {
 	DeleteURLS(ctx context.Context, deleteItems []DeleteURLItem) (err error)
 	// GetLinksCoupleByShortURL возвращает LinksCouple со всеми полями по shortURL
 	GetLinksCoupleByShortURL(ctx context.Context, shortURL string) (lc LinksCouple, err error)
+	// GetURLsCount возвращает сумму всех сохраненных урлов
+	GetURLsCount(ctx context.Context) (count int64, err error)
+	// GetUsersCount возвращает текущее количество пользователей сервиса
+	GetUsersCount(ctx context.Context) (count int64, err error)
 }
 
 // LinksCouple - структура для хранения ссылок в бд.
