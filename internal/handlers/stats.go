@@ -9,6 +9,7 @@ import (
 	"net/netip"
 )
 
+// GetGlobalStats - хэндлер для получения общей статистики внутри доверенной сети.
 func (h *Handlers) GetGlobalStats(w http.ResponseWriter, r *http.Request) {
 	h.l.ZL.Info("GetGlobalStats called")
 	// получаем айпишник от resolveIP
