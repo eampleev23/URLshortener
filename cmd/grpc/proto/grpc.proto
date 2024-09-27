@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package grpc;
+
+option go_package = "grpc/proto";
+
+message OriginalURL{
+  string original_url = 1;
+}
+
+message addShortURLRequest{
+  OriginalURL original_url = 1;
+  int32 owner_id = 2;
+}
+
+message addShortURLResponse{
+  string short_url = 1;
+}
+
+service Shortener {
+  rpc AddShortURL(addShortURLRequest) returns (addShortURLResponse);
+}
