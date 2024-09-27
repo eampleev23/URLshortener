@@ -29,7 +29,6 @@ func (s *ShortenerServer) AddShortURL(ctx context.Context, in *pb.AddShortURLReq
 		// то возвращаем ранее сохраненный сокращенныйц вариант
 		response.ShortUrl = fmt.Sprintf("%s", s.URLs[in.OriginalUrl.OriginalUrl])
 	} else {
-		//s.URLs[in.OriginalUrl.OriginalUrl] = "заглушка сокращенной ссылки"
 		s.URLs[in.OriginalUrl.OriginalUrl] = GenerateShortURL()
 		response.ShortUrl = fmt.Sprintf("%s", s.URLs[in.OriginalUrl.OriginalUrl])
 	}
