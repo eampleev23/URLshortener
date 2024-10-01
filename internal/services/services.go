@@ -51,6 +51,24 @@ func (serv *Services) GetURLsByOwnerID(ctx context.Context, userID int) ([]store
 	return result, nil
 }
 
+// GetURLsSavedCount - возвращает количество пользователей.
+func (serv *Services) GetURLsSavedCount(ctx context.Context) (int64, error) {
+	result, err := serv.s.GetURLsCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("GetURLsSavedCount error %w", err)
+	}
+	return result, nil
+}
+
+// GetUsersCount - возвращает количество пользователей.
+func (serv *Services) GetUsersCount(ctx context.Context) (int64, error) {
+	result, err := serv.s.GetUsersCount(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("GetUsersCount error %w", err)
+	}
+	return result, nil
+}
+
 // FlushRequests - выполнить накопленные запросы на удаление.
 func (serv *Services) FlushRequests() {
 	// будем сохранять сообщения, накопленные за последние 10 секунд

@@ -33,6 +33,12 @@ type ResponseGetOwnerURL struct {
 	OriginalURL string `json:"original_url"`
 }
 
+// ResponseGlobalStats описывает элемент ответа пользователю на получение всех его ссылок.
+type ResponseGlobalStats struct {
+	URLs  int64 `json:"urls"`
+	Users int64 `json:"users"`
+}
+
 // GetResponseGetOwnerURLs - конвертирует в необходимый формат урля пользователя.
 func GetResponseGetOwnerURLs(source []store.LinksCouple) (result []ResponseGetOwnerURL, err error) {
 	result = make([]ResponseGetOwnerURL, 0, len(source))

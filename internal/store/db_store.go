@@ -233,3 +233,31 @@ FROM links_couples WHERE short_url = $1 LIMIT 1`, shortURL,
 	}
 	return lc, nil
 }
+
+// GetURLsCount - делает запрос суммы сохраненных урлов в сервисе.
+func (ds DBStore) GetURLsCount(ctx context.Context) (count int64, err error) {
+	ds.l.ZL.Debug("DBStore / GetURLsCount has started..")
+	row := ds.dbConn.QueryRowContext(ctx,
+		`SELECT count(*) FROM links_couples;`)
+	err = row.Scan(&count) // Разбираем результат
+	if err != nil {
+		return count, fmt.Errorf("faild to get count of entries %w", err)
+	}
+	ds.l.ZL.Debug("DBStore / GetURLsCount / Got count of the entries", zap.Int64("count", count))
+	return count, nil
+}
+
+// GetUsersCount - делает запрос общего количества пользователей в сервисе.
+func (ds DBStore) GetUsersCount(ctx context.Context) (count int64, err error) {
+	ds.l.ZL.Debug("DBStore / GetUsersCount has started..")
+	row := ds.dbConn.QueryRowContext(ctx,
+		`SELECT COUNT(*) AS frequency
+	FROM links_couples
+	GROUP BY owner_id;`)
+	err = row.Scan(&count) // Разбираем результат
+	if err != nil {
+		return count, fmt.Errorf("faild to get count of uniq users %w", err)
+	}
+	ds.l.ZL.Debug("DBStore / GetUsersCount / Got count of users", zap.Int64("count", count))
+	return count, nil
+}

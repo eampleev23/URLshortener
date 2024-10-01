@@ -119,3 +119,23 @@ func (ms *MemoryStore) GetLinksCoupleByShortURL(ctx context.Context, shortURL st
 	}
 	return LinksCouple{}, nil
 }
+
+// GetURLsCount - делает запрос суммы сохраненных урлов в сервисе.
+func (ms MemoryStore) GetURLsCount(ctx context.Context) (count int64, err error) {
+	intV := len(ms.s)
+	return int64(intV), nil
+}
+
+// GetUsersCount - делает запрос общего количества пользователей в сервисе.
+func (ms *MemoryStore) GetUsersCount(ctx context.Context) (count int64, err error) {
+	usersUniq := make(map[int]int)
+	for _, v := range ms.s {
+		if _, ok := usersUniq[v.OwnerID]; !ok {
+			// значит такой пользователь уже есть
+			continue
+		}
+		usersUniq[v.OwnerID] = 1
+	}
+	intVal := len(usersUniq)
+	return int64(intVal), nil
+}

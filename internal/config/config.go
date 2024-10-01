@@ -24,6 +24,7 @@ type Config struct {
 	TLimitQuery    time.Duration `json:"-"`
 	TokenEXP       time.Duration `json:"-"`
 	TimeDeleteURLs time.Duration `json:"-"`
+	TrustedSubnet  string        `json:"trusted_subnet"`
 }
 
 // NewConfig - конструктор конфига.
@@ -60,6 +61,8 @@ func (c *Config) SetValues() error {
 	flag.BoolVar(&c.UseHTTPS, "tls", false, "use https")
 	// принимаем секретный ключ сервера для авторизации
 	flag.StringVar(&c.FileConfigPath, "c", "", "file config path")
+	// доверенная подсеть для запросов статистики
+	flag.StringVar(&c.TrustedSubnet, "t", "172.17.0.0/16", "trusted subnet")
 	// парсим переданные серверу аргументы в зарегестрированные переменные
 	flag.Parse()
 
@@ -101,6 +104,9 @@ func (c *Config) SetValues() error {
 	}
 	if envConfigPath := os.Getenv("CONFIG"); envConfigPath != "" {
 		c.FileConfigPath = envConfigPath
+	}
+	if envTrustedSubnet := os.Getenv("TRUSTED_SUBNET"); envTrustedSubnet != "" {
+		c.TrustedSubnet = envTrustedSubnet
 	}
 	return nil
 }
